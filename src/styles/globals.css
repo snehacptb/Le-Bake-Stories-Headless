@@ -1,0 +1,470 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 84% 4.9%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 224.3 76.3% 94.1%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer utilities {
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+  
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+  
+  .line-clamp-4 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #374151;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #6b7280;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Focus styles */
+.focus-visible {
+  @apply outline-none ring-2 ring-ring ring-offset-2;
+}
+
+/* Animation utilities */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.animate-fadeInDown {
+  animation: fadeInDown 0.6s ease-out;
+}
+
+.animate-slideInLeft {
+  animation: slideInLeft 0.6s ease-out;
+}
+
+.animate-slideInRight {
+  animation: slideInRight 0.6s ease-out;
+}
+
+.animate-scaleIn {
+  animation: scaleIn 0.4s ease-out;
+}
+
+/* Loading states */
+.loading-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+.dark .loading-shimmer {
+  background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .border {
+    @apply border-2;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Custom component styles */
+.themes-container {
+  @apply container mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+.themes-section {
+  @apply py-12 md:py-16 lg:py-20;
+}
+
+.themes-heading {
+  @apply font-heading font-bold text-3xl md:text-4xl lg:text-5xl text-gray-900 mb-6;
+}
+
+.themes-subheading {
+  @apply text-lg md:text-xl text-gray-600 mb-8 leading-relaxed;
+}
+
+.themes-card {
+  @apply bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200;
+}
+
+.themes-button-primary {
+  @apply bg-themes-blue-600 hover:bg-themes-blue-700 text-white font-medium px-6 py-3 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-themes-blue-500 focus:ring-offset-2;
+}
+
+.themes-button-secondary {
+  @apply bg-white hover:bg-gray-50 text-themes-blue-600 font-medium px-6 py-3 rounded-md border border-themes-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-themes-blue-500 focus:ring-offset-2;
+}
+
+/* WordPress content styles */
+.wp-content {
+  @apply prose prose-lg max-w-none;
+}
+
+.wp-content h1 {
+  @apply text-3xl md:text-4xl font-bold text-gray-900 mb-6;
+}
+
+.wp-content h2 {
+  @apply text-2xl md:text-3xl font-semibold text-gray-900 mb-4 mt-8;
+}
+
+.wp-content h3 {
+  @apply text-xl md:text-2xl font-semibold text-gray-900 mb-3 mt-6;
+}
+
+.wp-content p {
+  @apply text-gray-700 leading-relaxed mb-4;
+}
+
+.wp-content a {
+  @apply text-themes-blue-600 hover:text-themes-blue-700 underline;
+}
+
+.wp-content img {
+  @apply rounded-lg shadow-sm;
+}
+
+.wp-content blockquote {
+  @apply border-l-4 border-themes-blue-600 pl-6 italic text-gray-600 my-6;
+}
+
+.wp-content ul,
+.wp-content ol {
+  @apply mb-4 pl-6;
+}
+
+.wp-content li {
+  @apply mb-2;
+}
+
+/* WooCommerce specific styles */
+.wc-price {
+  @apply font-semibold text-themes-blue-600;
+}
+
+.wc-price-sale {
+  @apply text-red-600;
+}
+
+.wc-price-regular {
+  @apply text-gray-500 line-through;
+}
+
+.wc-stock-status {
+  @apply text-sm font-medium;
+}
+
+.wc-stock-instock {
+  @apply text-green-600;
+}
+
+.wc-stock-outofstock {
+  @apply text-red-600;
+}
+
+.wc-stock-onbackorder {
+  @apply text-yellow-600;
+}
+
+/* Blog content prose styles using Tailwind Typography */
+.prose {
+  @apply prose-gray max-w-none;
+}
+
+.prose img {
+  @apply rounded-lg;
+}
+
+.prose blockquote {
+  @apply border-l-4 border-blue-600 bg-gray-50;
+}
+
+.prose a {
+  @apply text-blue-600 hover:text-blue-700;
+}
+
+.prose code {
+  @apply bg-gray-100 px-2 py-1 rounded text-sm;
+}
+
+.prose pre {
+  @apply bg-gray-900 text-gray-100;
+}
+
+.prose pre code {
+  @apply bg-transparent p-0;
+}
+
+/* WordPress content styling */
+.wordpress-content {
+  @apply prose prose-lg prose-blue max-w-none;
+}
+
+.wordpress-content h1 {
+  @apply text-3xl md:text-4xl font-bold text-gray-900 mb-6 mt-8 first:mt-0;
+}
+
+.wordpress-content h2 {
+  @apply text-2xl md:text-3xl font-semibold text-gray-900 mb-4 mt-8;
+}
+
+.wordpress-content h3 {
+  @apply text-xl md:text-2xl font-semibold text-gray-900 mb-3 mt-6;
+}
+
+.wordpress-content h4 {
+  @apply text-lg md:text-xl font-semibold text-gray-900 mb-3 mt-4;
+}
+
+.wordpress-content p {
+  @apply text-gray-700 leading-relaxed mb-4;
+}
+
+.wordpress-content a {
+  @apply text-blue-600 hover:text-blue-700 underline decoration-2 underline-offset-2;
+}
+
+.wordpress-content img {
+  @apply rounded-lg shadow-sm max-w-full h-auto;
+}
+
+.wordpress-content blockquote {
+  @apply border-l-4 border-blue-600 pl-6 italic text-gray-600 my-6 bg-blue-50 py-4 rounded-r-lg;
+}
+
+.wordpress-content ul,
+.wordpress-content ol {
+  @apply mb-4 pl-6 space-y-2;
+}
+
+.wordpress-content li {
+  @apply text-gray-700;
+}
+
+.wordpress-content ul li {
+  @apply list-disc;
+}
+
+.wordpress-content ol li {
+  @apply list-decimal;
+}
+
+.wordpress-content table {
+  @apply w-full border-collapse border border-gray-300 my-6;
+}
+
+.wordpress-content th,
+.wordpress-content td {
+  @apply border border-gray-300 px-4 py-2;
+}
+
+.wordpress-content th {
+  @apply bg-gray-100 font-semibold text-gray-900;
+}
+
+.wordpress-content td {
+  @apply text-gray-700;
+}
+
+.wordpress-content code {
+  @apply bg-gray-100 px-2 py-1 rounded text-sm font-mono;
+}
+
+.wordpress-content pre {
+  @apply bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto my-4;
+}
+
+.wordpress-content pre code {
+  @apply bg-transparent p-0;
+}
+
+/* Line clamp utilities - using Tailwind's built-in line-clamp */

@@ -1,0 +1,26 @@
+{
+  "name": "techbrein/headless-image-optimizer",
+  "description": "WordPress plugin for image optimization with AWS S3 and CloudFront CDN integration",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0-or-later",
+  "authors": [
+    {
+      "name": "TechBrein",
+      "email": "info@techbrein.com"
+    }
+  ],
+  "require": {
+    "php": ">=7.4",
+    "aws/aws-sdk-php": "^3.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "TechBrein\\ImageOptimizer\\": "includes/"
+    }
+  },
+  "scripts": {
+    "install-sdk": [
+      "composer require aws/aws-sdk-php"
+    ]
+  }
+}

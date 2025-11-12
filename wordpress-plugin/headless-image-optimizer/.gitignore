@@ -1,0 +1,42 @@
+# Composer
+/vendor/
+composer.lock
+
+# WordPress
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Logs
+*.log
+error_log
+debug.log
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Node modules (if using any build tools)
+node_modules/
+package-lock.json
+
+# Build files
+/dist/
+/build/
+
+# Environment files (never commit credentials)
+.env
+.env.local
+.env.production
+
+# Backup files
+*.bak
+*.backup

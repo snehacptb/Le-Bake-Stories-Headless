@@ -1,0 +1,93 @@
+/* Hero Banners Admin Styles */
+
+.banner-meta-box .form-table th {
+    width: 200px;
+    padding: 20px 10px 20px 0;
+    font-weight: 600;
+}
+
+.banner-meta-box .form-table td {
+    padding: 20px 10px;
+}
+
+.banner-meta-box h3 {
+    margin: 20px 0 0;
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
+    font-size: 16px;
+}
+
+.banner-meta-box .description {
+    font-style: italic;
+    color: #666;
+    margin-top: 5px;
+}
+
+.banner-settings-box {
+    padding: 10px 0;
+}
+
+.banner-settings-box p {
+    margin-bottom: 15px;
+}
+
+.banner-info {
+    margin-top: 20px;
+    padding: 12px;
+    background: #f0f0f1;
+    border-left: 4px solid #2271b1;
+    border-radius: 3px;
+}
+
+.banner-info h4 {
+    margin-top: 0;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.banner-info .description {
+    margin: 0;
+    font-size: 13px;
+}
+
+/* Status badges in column */
+.status-active {
+    display: inline-block;
+    padding: 3px 8px;
+    background: #d4edda;
+    color: #155724;
+    font-weight: 600;
+    border-radius: 3px;
+    font-size: 12px;
+}
+
+.status-inactive {
+    display: inline-block;
+    padding: 3px 8px;
+    background: #f8d7da;
+    color: #721c24;
+    font-weight: 600;
+    border-radius: 3px;
+    font-size: 12px;
+}
+
+/* Thumbnail in column */
+.column-image img {
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* Order column */
+.column-order strong {
+    font-size: 16px;
+    color: #2271b1;
+}
+
+/* Admin notice styles */
+.notice code {
+    background: #f0f0f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'Monaco', 'Courier New', monospace;
+    font-size: 13px;
+}
