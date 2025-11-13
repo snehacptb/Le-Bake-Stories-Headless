@@ -192,7 +192,7 @@ class ImageCacheService {
     }
 
     // Skip external URLs that are not from WordPress
-    if (!originalUrl.includes('headless.webpro.web.tbdev.in') && 
+    if (!originalUrl.includes('https://manila.esdemo.in') && 
         !originalUrl.includes('headless-wp.local') &&
         !originalUrl.includes('localhost')) {
       return originalUrl

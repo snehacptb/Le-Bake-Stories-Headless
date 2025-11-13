@@ -42,7 +42,7 @@ class WordPressAPI {
 
   constructor() {
     // Use your actual WordPress URL
-    let wordpressUrl = process.env.WORDPRESS_API_URL || process.env.NEXT_PUBLIC_WORDPRESS_API_URL || 'headless.webpro.web.tbdev.in/wp-json/wp/v2'
+    let wordpressUrl = process.env.WORDPRESS_API_URL || process.env.NEXT_PUBLIC_WORDPRESS_API_URL || 'https://manila.esdemo.in/wp-json/wp/v2'
     // Ensure protocol if missing
     if (wordpressUrl && !/^https?:\/\//i.test(wordpressUrl)) {
       wordpressUrl = `http://${wordpressUrl}`
@@ -93,7 +93,7 @@ class WordPressAPI {
     // Fallback to API URL and strip the REST path to get the site root
     let apiUrl = process.env.WORDPRESS_API_URL 
       || process.env.NEXT_PUBLIC_WORDPRESS_API_URL 
-      || 'headless.webpro.web.tbdev.in/wp-json/wp/v2'
+      || 'https://manila.esdemo.in/wp-json/wp/v2'
 
     // Remove trailing / if any, then remove the wp-json REST segment to yield the site base
     if (apiUrl && !/^https?:\/\//i.test(apiUrl)) {

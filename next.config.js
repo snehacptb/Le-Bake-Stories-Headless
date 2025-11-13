@@ -12,11 +12,11 @@ const nextConfig = {
       },
       {
         protocol: 'http',
-        hostname: 'headless.webpro.web.tbdev.in',
+        hostname: 'https://manila.esdemo.in',
       },
       {
         protocol: 'https',
-        hostname: 'headless.webpro.web.tbdev.in',
+        hostname: 'https://manila.esdemo.in',
       },
       {
         protocol: 'https',
