@@ -199,47 +199,56 @@ export function SingleProductPage({ product, relatedProducts = [] }: SingleProdu
 
   return (
     <div className="min-h-screen bg-white">
-      {/* WoodMart Style Breadcrumb */}
-      <div className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-200">
-        <div className="container mx-auto px-4 py-6">
-          <nav className="flex items-center space-x-3 text-sm">
-            <Link href="/" className="text-gray-600 hover:text-orange-600 transition-colors font-medium">
+      {/* Breadcrumb */}
+      <div className="bg-white border-b border-gray-100">
+        <div className="container mx-auto px-4 py-4">
+          <nav className="flex items-center space-x-2 text-sm text-gray-600">
+            <Link href="/" className="hover:text-gray-900 transition-colors">
               Home
             </Link>
             <span className="text-gray-400">/</span>
-            <Link href="/shop" className="text-gray-600 hover:text-orange-600 transition-colors font-medium">
+            <Link href="/shop" className="hover:text-gray-900 transition-colors">
               Shop
             </Link>
             {product.categories && product.categories.length > 0 && (
               <>
                 <span className="text-gray-400">/</span>
-                <Link 
+                <Link
                   href={`/shop?category=${product.categories[0].slug}`}
-                  className="text-gray-600 hover:text-orange-600 transition-colors font-medium"
+                  className="hover:text-gray-900 transition-colors"
                 >
                   {product.categories[0].name}
                 </Link>
               </>
             )}
             <span className="text-gray-400">/</span>
-            <span className="text-gray-900 font-semibold">{product.name}</span>
+            <span className="text-gray-900">{product.name}</span>
           </nav>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8 lg:py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 mb-16">
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
           {/* Product Images */}
           <div className="space-y-4">
-            {/* Main Image - WoodMart Style */}
-            <div className="relative aspect-square bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl overflow-hidden group shadow-lg hover:shadow-xl transition-all duration-300">
+            {/* Main Image */}
+            <div className="relative aspect-square bg-white overflow-hidden">
+              {/* HOT Badge */}
+              {product.on_sale && (
+                <div className="absolute top-4 left-4 z-10">
+                  <span className="bg-red-600 text-white text-xs font-bold px-3 py-1 uppercase">
+                    HOT
+                  </span>
+                </div>
+              )}
+
               {primaryImage && (
                 <Image
                   src={primaryImage.src}
                   alt={primaryImage.alt || product.name}
                   fill
                   sizes="(max-width: 768px) 100vw, 50vw"
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  className="object-contain"
                   priority
                 />
               )}
@@ -328,57 +337,29 @@ export function SingleProductPage({ product, relatedProducts = [] }: SingleProdu
             )}
           </div>
 
-          {/* Product Details - WoodMart Style */}
-          <div className="space-y-8">
-            {/* Product Title and Rating */}
-            <div className="border-b border-gray-200 pb-6">
-              {product.categories && product.categories.length > 0 && (
-                <div className="flex items-center space-x-2 mb-3">
-                  <Badge variant="secondary" className="bg-orange-100 text-orange-800 border-orange-200 font-medium">
-                    {product.categories[0].name}
-                  </Badge>
-                </div>
-              )}
-              <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4 leading-tight">{product.name}</h1>
-              
-              {/* Rating */}
-              {parseFloat(product.average_rating) > 0 && (
-                <div className="flex items-center space-x-4 mb-6">
-                  <div className="flex items-center space-x-1">
-                    {renderStars(parseFloat(product.average_rating))}
-                  </div>
-                  <span className="text-lg text-gray-600 font-medium">
-                    {product.average_rating ? `${product.average_rating}/5` : 'No rating'}
-                  </span>
-                  <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-                    ({product.rating_count || 0} reviews)
-                  </span>
-                </div>
-              )}
-            </div>
+          {/* Product Details */}
+          <div className="space-y-6">
+            {/* Product Title */}
+            <div>
+              <h1 className="text-4xl font-bold text-gray-900 mb-4">{product.name}</h1>
 
-            {/* WoodMart Style Price */}
-            <div className="bg-gradient-to-r from-gray-50 to-white p-6 rounded-2xl border border-gray-200">
-              <div className="flex items-center space-x-4 mb-2">
+              {/* Price */}
+              <div className="mb-6">
                 {currentProduct.on_sale && currentProduct.sale_price ? (
-                  <>
-                    <span className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-orange-600 to-orange-700 bg-clip-text text-transparent">
+                  <div className="flex items-center gap-3">
+                    <span className="text-3xl font-bold text-gray-900">
                       {formatPrice(currentProduct.sale_price)}
                     </span>
-                    <span className="text-2xl text-gray-500 line-through">
+                    <span className="text-xl text-gray-500 line-through">
                       {formatPrice(currentProduct.regular_price)}
                     </span>
-                    <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white font-bold px-4 py-2 rounded-full shadow-lg">
-                      Save {currentDiscountPercentage}%
-                    </Badge>
-                  </>
+                  </div>
                 ) : (
-                  <span className="text-4xl lg:text-5xl font-bold text-gray-900">
+                  <span className="text-3xl font-bold text-gray-900">
                     {formatPrice(currentProduct.price)}
                   </span>
                 )}
               </div>
-              <p className="text-sm text-gray-500">Price includes all taxes</p>
             </div>
 
             {/* Short Description */}
@@ -416,101 +397,128 @@ export function SingleProductPage({ product, relatedProducts = [] }: SingleProdu
               selectedAttributes={selectedAttributes}
             />
 
-            {/* WoodMart Style Quantity and Add to Cart */}
-            <div className="space-y-6">
-              <div className="flex items-center space-x-6">
-                <div className="flex items-center border-2 border-gray-200 rounded-xl overflow-hidden">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-14 w-14 hover:bg-gray-100 transition-colors"
+            {/* Quantity and Add to Cart */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                {/* Quantity Selector */}
+                <div className="flex items-center border border-gray-300 rounded-full">
+                  <button
+                    className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 text-gray-600 rounded-l-full"
                     onClick={() => handleQuantityChange(quantity - 1)}
                     disabled={quantity <= 1}
                   >
-                    <Minus className="h-5 w-5" />
-                  </Button>
-                  <span className="px-6 py-4 min-w-[80px] text-center font-bold text-lg bg-gray-50">
-                    {quantity}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-14 w-14 hover:bg-gray-100 transition-colors"
+                    -
+                  </button>
+                  <input
+                    type="text"
+                    value={quantity}
+                    readOnly
+                    className="w-12 h-10 text-center border-0 focus:outline-none text-gray-900"
+                  />
+                  <button
+                    className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 text-gray-600 rounded-r-full"
                     onClick={() => handleQuantityChange(quantity + 1)}
                     disabled={currentProduct.manage_stock && currentProduct.stock_quantity ? quantity >= currentProduct.stock_quantity : false}
                   >
-                    <Plus className="h-5 w-5" />
-                  </Button>
+                    +
+                  </button>
                 </div>
 
+                {/* Add to Basket Button */}
                 <Button
-                  className="flex-1 h-14 text-lg font-semibold bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                  className="h-10 px-6 text-sm font-semibold bg-orange-500 hover:bg-orange-600 text-white rounded-full uppercase tracking-wide transition-colors"
                   onClick={handleAddToCart}
                   disabled={isOutOfStock || isAddingToCart || loadingStates.addingToCart}
                 >
-                  <ShoppingCart className="h-5 w-5 mr-3" />
-                  {isAddingToCart || loadingStates.addingToCart 
-                    ? 'Adding...' 
-                    : isOutOfStock 
-                      ? 'Out of Stock' 
-                      : 'Add to Cart'
+                  {isAddingToCart || loadingStates.addingToCart
+                    ? 'Adding...'
+                    : isOutOfStock
+                      ? 'Out of Stock'
+                      : 'Add to Basket'
                   }
                 </Button>
               </div>
 
-              {/* WoodMart Style Action Buttons */}
-              <div className="grid grid-cols-2 gap-4">
-                <Button
-                  variant="outline"
-                  className="h-12 border-2 border-gray-200 hover:border-red-300 hover:bg-red-50 transition-all duration-300 rounded-xl"
+              {/* Action Links */}
+              <div className="flex items-center gap-4 text-sm">
+                <button
+                  className="text-gray-700 hover:text-gray-900 flex items-center gap-2"
                   onClick={handleWishlistToggle}
                 >
                   <Heart className={cn(
-                    "h-5 w-5 mr-2",
-                    isWishlisted ? "fill-red-500 text-red-500" : ""
+                    "h-4 w-4",
+                    isWishlisted ? "fill-red-500 text-red-500" : "text-gray-600"
                   )} />
-                  {isWishlisted ? 'Wishlisted' : 'Add to Wishlist'}
-                </Button>
-                <Button
-                  variant="outline"
-                  className="h-12 border-2 border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-300 rounded-xl"
-                  onClick={handleShare}
-                >
-                  <Share2 className="h-5 w-5 mr-2" />
-                  Share Product
-                </Button>
+                  <span>{isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}</span>
+                </button>
               </div>
             </div>
 
-            {/* WoodMart Style Product Features */}
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-2xl border border-blue-100">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                <div className="flex items-center space-x-3 text-blue-800">
-                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                    <Truck className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <div className="font-semibold">Free Shipping</div>
-                    <div className="text-sm text-blue-600">On orders over $50</div>
-                  </div>
+            {/* Category */}
+            {product.categories && product.categories.length > 0 && (
+              <div className="border-t border-gray-200 pt-4 mt-4">
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-gray-700">Category:</span>
+                  <Link
+                    href={`/shop?category=${product.categories[0].slug}`}
+                    className="text-gray-900 hover:text-orange-500 transition-colors"
+                  >
+                    {product.categories[0].name}
+                  </Link>
                 </div>
-                <div className="flex items-center space-x-3 text-green-800">
-                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                    <Shield className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <div className="font-semibold">Secure Payment</div>
-                    <div className="text-sm text-green-600">SSL encrypted</div>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3 text-purple-800">
-                  <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                    <RotateCcw className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <div className="font-semibold">Easy Returns</div>
-                    <div className="text-sm text-purple-600">30-day policy</div>
-                  </div>
+              </div>
+            )}
+
+            {/* Share */}
+            <div className="border-t border-gray-200 pt-4">
+              <div className="flex items-center gap-3 text-sm">
+                <span className="text-gray-700">Share:</span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleShare}
+                    className="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-blue-600 transition-colors"
+                    aria-label="Share on Facebook"
+                  >
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                  </button>
+                  <button
+                    onClick={handleShare}
+                    className="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-blue-400 transition-colors"
+                    aria-label="Share on Twitter"
+                  >
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                    </svg>
+                  </button>
+                  <button
+                    onClick={handleShare}
+                    className="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-red-600 transition-colors"
+                    aria-label="Share on Pinterest"
+                  >
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z"/>
+                    </svg>
+                  </button>
+                  <button
+                    onClick={handleShare}
+                    className="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-blue-700 transition-colors"
+                    aria-label="Share on LinkedIn"
+                  >
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                    </svg>
+                  </button>
+                  <button
+                    onClick={handleShare}
+                    className="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-blue-500 transition-colors"
+                    aria-label="Share on Telegram"
+                  >
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                    </svg>
+                  </button>
                 </div>
               </div>
             </div>

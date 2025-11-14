@@ -1123,17 +1123,7 @@ export function CheckoutPage({ className }: CheckoutPageProps) {
   const hasShippingStateOptions = Object.keys(shippingStates).length > 0
 
   return (
-    <div className={cn('container mx-auto px-4 py-8', className)}>
-      {/* WoodMart Style Page Header */}
-      <div className="mb-12">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-600 to-orange-700 bg-clip-text text-transparent mb-4">Secure Checkout</h1>
-          <div className="flex items-center justify-center text-sm text-gray-600 bg-green-50 px-6 py-3 rounded-xl border border-green-200 max-w-md mx-auto">
-            <Lock className="h-5 w-5 mr-3 text-green-600" />
-            <span className="font-medium">256-bit SSL Secure Encryption</span>
-          </div>
-        </div>
-      </div>
+    <div className={cn('container mx-auto px-4 py-8 bg-gray-50', className)}>
 
       {/* Cart Error Message */}
       {cartError && (
@@ -1159,101 +1149,116 @@ export function CheckoutPage({ className }: CheckoutPageProps) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Checkout Form */}
           <div className="lg:col-span-2 space-y-8">
-            {/* WoodMart Style Billing Address */}
-            <div className="bg-white rounded-2xl border border-gray-200 p-8 shadow-lg">
-              <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-xl border border-blue-200 mb-6">
-                <h3 className="text-2xl font-bold text-blue-900 flex items-center">
-                  <MapPin className="h-6 w-6 mr-3 text-blue-600" />
-                  Billing Address
-                </h3>
-                <p className="text-blue-700 text-sm mt-2">Enter your billing information for payment processing</p>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Billing Address */}
+            <div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-6 uppercase tracking-wide">
+                Billing details
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <Label htmlFor="billing_first_name">First Name *</Label>
+                  <Label htmlFor="billing_first_name" className="text-sm text-gray-700 mb-2 block">
+                    First name <span className="text-red-500">*</span>
+                  </Label>
                   <Input
                     id="billing_first_name"
                     value={form.billing.first_name}
                     onChange={(e) => handleInputChange('billing', 'first_name', e.target.value)}
                     required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-transparent"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="billing_last_name">Last Name *</Label>
+                  <Label htmlFor="billing_last_name" className="text-sm text-gray-700 mb-2 block">
+                    Last name <span className="text-red-500">*</span>
+                  </Label>
                   <Input
                     id="billing_last_name"
                     value={form.billing.last_name}
                     onChange={(e) => handleInputChange('billing', 'last_name', e.target.value)}
                     required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-transparent"
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <Label htmlFor="billing_email">Email Address *</Label>
-                  <Input
-                    id="billing_email"
-                    type="email"
-                    value={form.billing.email}
-                    onChange={(e) => handleInputChange('billing', 'email', e.target.value)}
-                    required
-                    placeholder="your@email.com"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="billing_phone">Phone Number</Label>
-                  <Input
-                    id="billing_phone"
-                    type="tel"
-                    value={form.billing.phone || ''}
-                    onChange={(e) => handleInputChange('billing', 'phone', e.target.value)}
-                    placeholder="+1 (555) 123-4567"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="billing_company">Company Name</Label>
+                  <Label htmlFor="billing_company" className="text-sm text-gray-700 mb-2 block">
+                    Company name (optional)
+                  </Label>
                   <Input
                     id="billing_company"
                     value={form.billing.company}
                     onChange={(e) => handleInputChange('billing', 'company', e.target.value)}
-                    placeholder="Optional"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-transparent"
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <Label htmlFor="billing_address_1">Street Address *</Label>
+                  <Label htmlFor="billing_country" className="text-sm text-gray-700 mb-2 block">
+                    Country/Region <span className="text-red-500">*</span>
+                  </Label>
+                  <select
+                    id="billing_country"
+                    value={form.billing.country}
+                    onChange={(e) => handleInputChange('billing', 'country', e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-transparent bg-white appearance-none"
+                    required
+                    disabled={loadingStates.countries}
+                    style={{backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3E%3Cpath stroke=\'%236b7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3E%3C/svg%3E")', backgroundPosition: 'right 1rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em'}}
+                  >
+                    <option value="">
+                      {loadingStates.countries ? 'Loading countries...' : 'Select Country'}
+                    </option>
+                    {Object.entries(countries).map(([code, name]) => (
+                      <option key={code} value={code}>
+                        {typeof name === 'string' ? name : typeof name === 'object' && name !== null ? (name as any).name || code : code}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="md:col-span-2">
+                  <Label htmlFor="billing_address_1" className="text-sm text-gray-700 mb-2 block">
+                    Street address <span className="text-red-500">*</span>
+                  </Label>
                   <Input
                     id="billing_address_1"
                     value={form.billing.address_1}
                     onChange={(e) => handleInputChange('billing', 'address_1', e.target.value)}
+                    placeholder="House number and street name"
                     required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-transparent mb-3"
                   />
-                </div>
-                <div className="md:col-span-2">
-                  <Label htmlFor="billing_address_2">Apartment, suite, etc.</Label>
                   <Input
                     id="billing_address_2"
                     value={form.billing.address_2}
                     onChange={(e) => handleInputChange('billing', 'address_2', e.target.value)}
+                    placeholder="Apartment, suite, unit, etc. (optional)"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-transparent"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="billing_city">City *</Label>
+                <div className="md:col-span-2">
+                  <Label htmlFor="billing_city" className="text-sm text-gray-700 mb-2 block">
+                    Town / City <span className="text-red-500">*</span>
+                  </Label>
                   <Input
                     id="billing_city"
                     value={form.billing.city}
                     onChange={(e) => handleInputChange('billing', 'city', e.target.value)}
                     required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-transparent"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="billing_state">State / Province *</Label>
+                <div className="md:col-span-2">
+                  <Label htmlFor="billing_state" className="text-sm text-gray-700 mb-2 block">
+                    State <span className="text-red-500">*</span>
+                  </Label>
                   {Object.keys(billingStates).length > 0 ? (
                     <select
                       id="billing_state"
                       value={form.billing.state}
                       onChange={(e) => handleInputChange('billing', 'state', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-themes-pink-500"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-transparent bg-white appearance-none"
                       required
                       disabled={loadingStates.billingStates}
+                      style={{backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3E%3Cpath stroke=\'%236b7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3E%3C/svg%3E")', backgroundPosition: 'right 1rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em'}}
                     >
                       <option value="">{loadingStates.billingStates ? 'Loading states...' : 'Select State'}</option>
                       {Object.entries(billingStates).map(([code, name]) => (
@@ -1267,61 +1272,52 @@ export function CheckoutPage({ className }: CheckoutPageProps) {
                       onChange={(e) => handleInputChange('billing', 'state', e.target.value)}
                       required
                       placeholder="Enter your state or province"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-transparent"
                     />
                   )}
                 </div>
-                <div>
-                  <Label htmlFor="billing_postcode">ZIP Code *</Label>
+                <div className="md:col-span-2">
+                  <Label htmlFor="billing_phone" className="text-sm text-gray-700 mb-2 block">
+                    Phone <span className="text-red-500">*</span>
+                  </Label>
                   <Input
-                    id="billing_postcode"
-                    value={form.billing.postcode}
-                    onChange={(e) => handleInputChange('billing', 'postcode', e.target.value)}
-                    required
+                    id="billing_phone"
+                    type="tel"
+                    value={form.billing.phone || ''}
+                    onChange={(e) => handleInputChange('billing', 'phone', e.target.value)}
+                    placeholder=""
+                    className="w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-transparent"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="billing_country">Country *</Label>
-                  <select
-                    id="billing_country"
-                    value={form.billing.country}
-                    onChange={(e) => handleInputChange('billing', 'country', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-themes-pink-500"
+                <div className="md:col-span-2">
+                  <Label htmlFor="billing_email" className="text-sm text-gray-700 mb-2 block">
+                    Email address <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="billing_email"
+                    type="email"
+                    value={form.billing.email}
+                    onChange={(e) => handleInputChange('billing', 'email', e.target.value)}
                     required
-                    disabled={loadingStates.countries}
-                  >
-                    <option value="">
-                      {loadingStates.countries ? 'Loading countries...' : 'Select Country'}
-                    </option>
-                    {Object.entries(countries).map(([code, name]) => (
-                      <option key={code} value={code}>
-                        {typeof name === 'string' ? name : typeof name === 'object' && name !== null ? (name as any).name || code : code}
-                      </option>
-                    ))}
-                  </select>
+                    placeholder=""
+                    className="w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-transparent"
+                  />
                 </div>
               </div>
             </div>
 
-            {/* WoodMart Style Shipping Address */}
-            <div className="bg-white rounded-2xl border border-gray-200 p-8 shadow-lg">
-              <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-4 rounded-xl border border-purple-200 mb-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-2xl font-bold text-purple-900 flex items-center">
-                      <MapPin className="h-6 w-6 mr-3 text-purple-600" />
-                      Shipping Address
-                    </h3>
-                    <p className="text-purple-700 text-sm mt-2">Where should we deliver your order?</p>
-                  </div>
-                  <div className="flex items-center space-x-3 bg-white px-4 py-2 rounded-xl border border-purple-200">
-                    <Checkbox
-                      id="sameAsShipping"
-                      checked={form.sameAsShipping}
-                      onCheckedChange={(checked) => handleFormChange('sameAsShipping', checked)}
-                    />
-                    <Label htmlFor="sameAsShipping" className="font-medium text-purple-800">Same as billing address</Label>
-                  </div>
-                </div>
+            {/* Shipping Address */}
+            <div>
+              <div className="flex items-center gap-3 mb-4">
+                <Checkbox
+                  id="sameAsShipping"
+                  checked={!form.sameAsShipping}
+                  onCheckedChange={(checked) => handleFormChange('sameAsShipping', !checked)}
+                  className="w-5 h-5"
+                />
+                <Label htmlFor="sameAsShipping" className="text-base font-semibold text-gray-900 cursor-pointer">
+                  Ship to a different address?
+                </Label>
               </div>
 
               {!form.sameAsShipping && (
@@ -1437,135 +1433,125 @@ export function CheckoutPage({ className }: CheckoutPageProps) {
               )}
             </div>
 
-            {/* WoodMart Style Order Notes */}
-            <div className="bg-white rounded-2xl border border-gray-200 p-8 shadow-lg">
-              <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-xl border border-green-200 mb-6">
-                <h3 className="text-2xl font-bold text-green-900 mb-2">Order Notes</h3>
-                <p className="text-green-700 text-sm">Add special instructions for your order (optional)</p>
-              </div>
-              <Label htmlFor="customerNote" className="text-lg font-medium text-gray-900">Notes about your order</Label>
+            {/* Order Notes */}
+            <div>
+              <Label htmlFor="customerNote" className="text-sm text-gray-700 mb-2 block">
+                Order notes (optional)
+              </Label>
               <textarea
                 id="customerNote"
                 value={form.customerNote}
                 onChange={(e) => handleFormChange('customerNote', e.target.value)}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 mt-3 bg-gray-50 hover:bg-white transition-colors duration-200"
+                className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-transparent"
                 rows={4}
-                placeholder="Special delivery instructions, gift message, etc..."
+                placeholder="Notes about your order, e.g. special notes for delivery."
               />
             </div>
           </div>
 
-          {/* WoodMart Style Order Summary */}
+          {/* Order Summary */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl border border-gray-200 p-8 sticky top-4 shadow-lg">
-              <div className="text-center mb-6">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Order Summary</h3>
-                <div className="h-1 w-16 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full mx-auto"></div>
-              </div>
+            <div className="bg-white border border-gray-200 p-8 sticky top-4">
+              <h3 className="text-2xl font-bold text-gray-900 mb-6 uppercase tracking-wide">
+                Your order
+              </h3>
 
-              {/* Order Items */}
-              <div className="space-y-4 mb-6">
-                {items.map((item) => (
-                  <div key={item.key} className="flex items-center gap-3">
-                    <div className="relative w-12 h-12 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                      {item.image && (
-                        <Image
-                          src={item.image}
-                          alt={item.name}
-                          fill
-                          sizes="48px"
-                          className="object-cover"
-                        />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {item.name}
-                      </p>
-                      <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
-                    </div>
-                    <p className="text-sm font-medium text-gray-900">
-                      ${(item.price * item.quantity).toFixed(2)}
-                    </p>
-                  </div>
-                ))}
-              </div>
-
-              {/* Coupon Section */}
+              {/* Order Table */}
               <div className="mb-6">
-                <CouponInput compact showValidation={false} />
-              </div>
+                {/* Table Header */}
+                <div className="flex justify-between pb-4 border-b-2 border-gray-900">
+                  <span className="text-sm font-bold text-gray-900 uppercase">Product</span>
+                  <span className="text-sm font-bold text-gray-900 uppercase">Subtotal</span>
+                </div>
 
-              <Separator className="mb-4" />
-
-              {/* WoodMart Style Order Totals */}
-              <div className="space-y-4 mb-8">
-                <div className="flex justify-between items-center py-3 border-b border-gray-100">
-                  <span className="text-gray-600 font-medium">Subtotal</span>
-                  <span className="text-lg font-bold text-gray-900">${subtotal.toFixed(2)}</span>
-                </div>
-                
-                {discountTotal > 0 && (
-                  <div className="flex justify-between items-center py-3 border-b border-gray-100">
-                    <span className="text-gray-600 font-medium">Discount</span>
-                    <span className="text-lg font-bold text-green-600">-${discountTotal.toFixed(2)}</span>
-                  </div>
-                )}
-                
-                <div className="flex justify-between items-center py-3 border-b border-gray-100">
-                  <span className="text-gray-600 font-medium">Shipping</span>
-                  <span className="text-lg font-bold text-gray-900">
-                    {shippingTotal === 0 ? (
-                      <span className="text-green-600">Free</span>
-                    ) : (
-                      `$${shippingTotal.toFixed(2)}`
-                    )}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center py-3 border-b border-gray-100">
-                  <span className="text-gray-600 font-medium">Tax</span>
-                  <span className="text-lg font-bold text-gray-900">${taxTotal.toFixed(2)}</span>
-                </div>
-                
-                <div className="bg-gradient-to-r from-orange-50 to-orange-100 p-4 rounded-xl border border-orange-200 mt-6">
-                  <div className="flex justify-between items-center">
-                    <span className="text-xl font-bold text-orange-900">Total</span>
-                    <span className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-orange-700 bg-clip-text text-transparent">
-                      ${finalTotal.toFixed(2)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* WoodMart Style Payment Methods */}
-              <div className="mb-8">
-                <div className="bg-gradient-to-r from-indigo-50 to-indigo-100 p-4 rounded-xl border border-indigo-200 mb-4">
-                  <h4 className="text-lg font-bold text-indigo-900 flex items-center">
-                    <CreditCard className="h-5 w-5 mr-3 text-indigo-600" />
-                    Payment Method
-                  </h4>
-                  <p className="text-indigo-700 text-sm mt-1">Choose your preferred payment option</p>
-                </div>
-                <div className="space-y-3">
-                  {paymentMethods.map((method) => (
-                    <label key={method.id} className={cn(
-                      "flex items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-orange-300 hover:bg-orange-50 transition-all duration-200",
-                      form.paymentMethod === method.id && "border-orange-500 bg-orange-50",
-                      (loading || showStripeForm) && "opacity-50 cursor-not-allowed"
-                    )}>
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value={method.id}
-                        checked={form.paymentMethod === method.id}
-                        onChange={(e) => handleFormChange('paymentMethod', e.target.value)}
-                        disabled={loading || showStripeForm}
-                        className="mr-4 w-5 h-5 text-orange-600 focus:ring-orange-500"
-                      />
-                      <span className="text-base font-medium text-gray-900">{method.title}</span>
-                    </label>
+                {/* Product Items */}
+                <div className="divide-y divide-gray-200">
+                  {items.map((item) => (
+                    <div key={item.key} className="flex justify-between py-4">
+                      <div className="flex-1">
+                        <p className="text-sm text-gray-700">
+                          {item.name} <span className="text-gray-500">× {item.quantity}</span>
+                        </p>
+                      </div>
+                      <p className="text-sm font-medium text-gray-900 ml-4">
+                        ${(item.price * item.quantity).toFixed(2)}
+                      </p>
+                    </div>
                   ))}
                 </div>
+
+                {/* Subtotal */}
+                <div className="flex justify-between py-4 border-t border-gray-200">
+                  <span className="text-sm text-gray-700">Subtotal</span>
+                  <span className="text-sm font-medium text-gray-900">${subtotal.toFixed(2)}</span>
+                </div>
+
+                {/* Discount */}
+                {discountTotal > 0 && (
+                  <div className="flex justify-between py-4 border-t border-gray-200">
+                    <span className="text-sm text-gray-700">Discount</span>
+                    <span className="text-sm font-medium text-green-600">-${discountTotal.toFixed(2)}</span>
+                  </div>
+                )}
+
+                {/* Shipping */}
+                <div className="flex justify-between py-4 border-t border-gray-200">
+                  <span className="text-sm text-gray-700">Shipping</span>
+                  <span className="text-sm text-gray-500">
+                    {shippingTotal === 0 ? 'Flat rate' : `$${shippingTotal.toFixed(2)}`}
+                  </span>
+                </div>
+
+                {/* Total */}
+                <div className="flex justify-between py-4 border-t-2 border-gray-900">
+                  <span className="text-base font-bold text-gray-900">Total</span>
+                  <span className="text-2xl font-bold text-gray-900">
+                    ${finalTotal.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Payment Methods */}
+              <div className="mb-6 border-t border-gray-200 pt-6">
+                {paymentMethods.map((method) => (
+                  <div key={method.id} className="mb-4 last:mb-0">
+                    <label className={cn(
+                      "flex items-start gap-3 cursor-pointer group",
+                      (loading || showStripeForm) && "opacity-50 cursor-not-allowed"
+                    )}>
+                      <div className="mt-1">
+                        <div className={cn(
+                          "w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors",
+                          form.paymentMethod === method.id
+                            ? "border-gray-900 bg-gray-900"
+                            : "border-gray-400 group-hover:border-gray-600"
+                        )}>
+                          {form.paymentMethod === method.id && (
+                            <div className="w-2 h-2 rounded-full bg-white"></div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex-1">
+                        <input
+                          type="radio"
+                          name="paymentMethod"
+                          value={method.id}
+                          checked={form.paymentMethod === method.id}
+                          onChange={(e) => handleFormChange('paymentMethod', e.target.value)}
+                          disabled={loading || showStripeForm}
+                          className="sr-only"
+                        />
+                        <span className="text-sm font-semibold text-gray-900 block mb-1">{method.title}</span>
+                        <p className="text-sm text-gray-600">
+                          {method.id === 'cod' && 'Pay with cash upon delivery.'}
+                          {method.id === 'stripe' && 'Pay securely with your credit card.'}
+                          {method.id === 'paypal' && 'Pay via PayPal; you can pay with your credit card if you don\'t have a PayPal account.'}
+                          {method.id === 'bacs' && 'Make your payment directly into our bank account.'}
+                        </p>
+                      </div>
+                    </label>
+                  </div>
+                ))}
               </div>
 
               {/* Stripe Payment Form */}
@@ -1655,28 +1641,14 @@ export function CheckoutPage({ className }: CheckoutPageProps) {
                 </div>
               )}
 
-              {/* WoodMart Style Terms and Conditions */}
-              <div className="mb-8">
-                <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
-                  <div className="flex items-start space-x-3">
-                    <Checkbox
-                      id="agreeToTerms"
-                      checked={form.agreeToTerms}
-                      onCheckedChange={(checked) => handleFormChange('agreeToTerms', checked)}
-                      className="mt-1"
-                    />
-                    <Label htmlFor="agreeToTerms" className="text-sm font-medium text-gray-700 leading-relaxed">
-                      I agree to the{' '}
-                      <Link href="/terms" className="text-orange-600 hover:text-orange-700 font-semibold hover:underline transition-colors">
-                        Terms and Conditions
-                      </Link>{' '}
-                      and{' '}
-                      <Link href="/privacy" className="text-orange-600 hover:text-orange-700 font-semibold hover:underline transition-colors">
-                        Privacy Policy
-                      </Link>
-                    </Label>
-                  </div>
-                </div>
+              {/* Privacy Policy Text */}
+              <div className="mb-6 border-t border-gray-200 pt-6">
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our{' '}
+                  <Link href="/privacy" className="text-gray-900 underline hover:text-gray-700">
+                    privacy policy
+                  </Link>.
+                </p>
               </div>
 
               {/* Error Message */}
@@ -1686,15 +1658,15 @@ export function CheckoutPage({ className }: CheckoutPageProps) {
                 </div>
               )}
 
-              {/* WoodMart Style Place Order Button - Hide when Stripe or PayPal form is shown */}
+              {/* Place Order Button - Hide when Stripe or PayPal form is shown */}
               {!showStripeForm && !showPayPalForm && (
                 <Button
                   type="submit"
                   size="lg"
-                  className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
-                  disabled={loading || !form.agreeToTerms}
+                  className="w-full h-14 text-base font-bold bg-amber-500 hover:bg-amber-600 text-white rounded-full uppercase tracking-wide transition-colors shadow-md hover:shadow-lg"
+                  disabled={loading}
                 >
-                  {loading ? 'Processing...' : `Place Order - $${finalTotal.toFixed(2)}`}
+                  {loading ? 'Processing...' : 'Place Order'}
                 </Button>
               )}
             </div>
