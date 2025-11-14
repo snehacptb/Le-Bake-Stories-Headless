@@ -13,6 +13,7 @@ import { ProductCard } from './product-card'
 import { PremiumSidebar } from '@/components/ui/sidebar'
 import { PremiumProductCard } from '@/components/ui/product-card'
 import { AceternityCard } from '@/components/ui/aceternity-card'
+import { QuickViewModal } from '@/components/ui/quick-view-modal'
 import { useCart } from '@/contexts/cart-context'
 import { useWooCommerceFeatures } from '@/contexts/woocommerce-context'
 // import { cachedAPI } from '@/lib/cached-api' // replaced by API route fetches
@@ -36,7 +37,7 @@ interface ShopFilters {
 }
 
 type SortOption = 'menu_order' | 'popularity' | 'rating' | 'date' | 'price' | 'price-desc' | 'title'
-type ViewMode = 'grid' | 'list'
+type ViewMode = 'grid' | 'grid-large' | 'list'
 
 const sortOptions = [
   { value: 'menu_order' as SortOption, label: 'Default sorting' },
@@ -69,6 +70,8 @@ export function ShopPage({ initialProducts = [], className }: ShopPageProps) {
   const [productsPerPage, setProductsPerPage] = useState(12)
   const [topRatedProducts, setTopRatedProducts] = useState<WooCommerceProduct[]>([])
   const [priceRange, setPriceRange] = useState({ min: 0, max: 10000 })
+  const [quickViewProduct, setQuickViewProduct] = useState<WooCommerceProduct | null>(null)
+  const [showQuickView, setShowQuickView] = useState(false)
 
   const [filters, setFilters] = useState<ShopFilters>({
     search: searchParams.get('search') || '',
@@ -199,19 +202,19 @@ export function ShopPage({ initialProducts = [], className }: ShopPageProps) {
 
   const fetchTopRatedProducts = async () => {
     try {
-      const res = await fetch('/api/cache/products', { cache: 'no-store' })
+      // Fetch from WooCommerce API: orderby=rating&order=desc&per_page=10
+      const res = await fetch('/api/products/top-rated?limit=10', { cache: 'no-store' })
       const json = await res.json()
-      const allProducts = json?.data || []
-      
-      // Get top 3 highest rated products
-      const topRated = [...allProducts]
-        .filter(p => parseFloat(p.average_rating || '0') > 0)
-        .sort((a, b) => parseFloat(b.average_rating || '0') - parseFloat(a.average_rating || '0'))
-        .slice(0, 3)
-      
-      setTopRatedProducts(topRated)
+
+      if (json.success) {
+        setTopRatedProducts(json.data || [])
+      } else {
+        console.warn('Failed to fetch top-rated products:', json.error)
+        setTopRatedProducts([])
+      }
     } catch (err) {
       console.error('Failed to fetch top rated products:', err)
+      setTopRatedProducts([])
     }
   }
 
@@ -277,7 +280,14 @@ export function ShopPage({ initialProducts = [], className }: ShopPageProps) {
   }
 
   const handleQuickView = (product: WooCommerceProduct) => {
-    router.push(`/product/${product.slug}`)
+    setQuickViewProduct(product)
+    setShowQuickView(true)
+  }
+
+  const handleAddToWishlist = (product: WooCommerceProduct) => {
+    // Add wishlist functionality here
+    console.log('Added to wishlist:', product.name)
+    // You can integrate with your wishlist context here
   }
 
   const handleFilterChange = (key: string, value: any) => {
@@ -319,16 +329,118 @@ export function ShopPage({ initialProducts = [], className }: ShopPageProps) {
         )}
       </AnimatePresence>
 
-      <div className="container mx-auto px-4 py-6 max-w-7xl">
-        {/* Breadcrumb */}
-        <nav className="flex items-center space-x-2 text-sm text-gray-500 mb-6 py-3">
-          <a href="/" className="hover:text-gray-700 transition-colors flex items-center gap-2">
-            <Home className="h-4 w-4" />
-            Home
-          </a>
-          <span>/</span>
-          <span className="text-gray-900">Shop</span>
-        </nav>
+        <div className="container mx-auto px-4 py-4 max-w-7xl">
+        {/* Breadcrumb and Toolbar Combined */}
+        <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
+          {/* Left Side: Breadcrumb */}
+          <nav className="flex items-center space-x-2 text-sm text-gray-700">
+            <a href="/" className="hover:text-gray-900 transition-colors">
+              Home
+            </a>
+            <span>/</span>
+            <span className="text-gray-900 font-medium">Shop</span>
+          </nav>
+
+          {/* Right Side: Show selector, view icons, and sort dropdown */}
+          <div className="flex items-center gap-6">
+            {/* Show selector */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-700">Show:</span>
+              <div className="flex items-center gap-1">
+                {[9, 12, 18, 24].map((count) => (
+                  <button
+                    key={count}
+                    onClick={() => {
+                      setProductsPerPage(count);
+                      setCurrentPage(1);
+                    }}
+                    className={cn(
+                      "px-2 py-1 text-sm transition-colors",
+                      productsPerPage === count
+                        ? "text-gray-900 font-medium"
+                        : "text-gray-500 hover:text-gray-900"
+                    )}
+                  >
+                    {count}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* View Toggle Icons */}
+            <div className="flex items-center gap-1 border border-gray-300 rounded">
+              {/* List View */}
+              <button
+                onClick={() => setViewMode('list')}
+                className={cn(
+                  "p-2 transition-colors border-r border-gray-300",
+                  viewMode === 'list' ? "bg-gray-100 text-gray-900" : "text-gray-400 hover:text-gray-700 hover:bg-gray-50"
+                )}
+                aria-label="List view"
+              >
+                <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                  <rect x="3" y="5" width="18" height="2" rx="1" />
+                  <rect x="3" y="11" width="18" height="2" rx="1" />
+                  <rect x="3" y="17" width="18" height="2" rx="1" />
+                </svg>
+              </button>
+              
+              {/* Grid View 2x2 */}
+              <button
+                onClick={() => setViewMode('grid')}
+                className={cn(
+                  "p-2 transition-colors border-r border-gray-300",
+                  viewMode === 'grid' ? "bg-gray-100 text-gray-900" : "text-gray-400 hover:text-gray-700 hover:bg-gray-50"
+                )}
+                aria-label="Grid view 2x2"
+              >
+                <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                  <rect x="3" y="3" width="7" height="7" rx="1" />
+                  <rect x="14" y="3" width="7" height="7" rx="1" />
+                  <rect x="3" y="14" width="7" height="7" rx="1" />
+                  <rect x="14" y="14" width="7" height="7" rx="1" />
+                </svg>
+              </button>
+              
+              {/* Grid View 3x3 */}
+              <button
+                onClick={() => setViewMode('grid-large')}
+                className={cn(
+                  "p-2 transition-colors",
+                  viewMode === 'grid-large' ? "bg-gray-100 text-gray-900" : "text-gray-400 hover:text-gray-700 hover:bg-gray-50"
+                )}
+                aria-label="Grid view 3x3"
+              >
+                <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                  <rect x="2" y="2" width="5" height="5" rx="0.5" />
+                  <rect x="9.5" y="2" width="5" height="5" rx="0.5" />
+                  <rect x="17" y="2" width="5" height="5" rx="0.5" />
+                  <rect x="2" y="9.5" width="5" height="5" rx="0.5" />
+                  <rect x="9.5" y="9.5" width="5" height="5" rx="0.5" />
+                  <rect x="17" y="9.5" width="5" height="5" rx="0.5" />
+                  <rect x="2" y="17" width="5" height="5" rx="0.5" />
+                  <rect x="9.5" y="17" width="5" height="5" rx="0.5" />
+                  <rect x="17" y="17" width="5" height="5" rx="0.5" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Sort Dropdown */}
+            <div>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as SortOption)}
+                className="px-4 py-2 border border-gray-300 bg-white text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-400 min-w-[200px]"
+              >
+                {sortOptions.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
 
         <div className="flex gap-6">
           {/* Desktop Sidebar */}
@@ -366,94 +478,6 @@ export function ShopPage({ initialProducts = [], className }: ShopPageProps) {
                 <Menu className="h-4 w-4" />
                 Show sidebar
               </Button>
-            </div>
-
-            {/* Results Header */}
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
-              <div className="flex items-center gap-4">
-                <p className="text-gray-600 text-sm">
-                  Showing {filteredProducts.length > 0 ? ((currentPage - 1) * productsPerPage) + 1 : 0}–{Math.min(currentPage * productsPerPage, (currentPage - 1) * productsPerPage + filteredProducts.length)} of {products.filter(p => {
-                    let filtered = true;
-                    if (filters.search.trim()) {
-                      const term = filters.search.toLowerCase();
-                      filtered = filtered && (
-                        p.name.toLowerCase().includes(term) ||
-                        (p.short_description || '').toLowerCase().includes(term) ||
-                        (p.description || '').toLowerCase().includes(term)
-                      );
-                    }
-                    if (filters.category) {
-                      filtered = filtered && p.categories?.some(c => c.slug === filters.category);
-                    }
-                    if (filters.minPrice > 0) {
-                      filtered = filtered && parseFloat(p.price) >= filters.minPrice;
-                    }
-                    if (filters.maxPrice > 0) {
-                      filtered = filtered && parseFloat(p.price) <= filters.maxPrice;
-                    }
-                    if (filters.onSale) filtered = filtered && p.on_sale;
-                    if (filters.featured) filtered = filtered && p.featured;
-                    if (filters.inStock) filtered = filtered && p.stock_status === 'instock';
-                    if (filters.rating > 0) {
-                      filtered = filtered && parseFloat(p.average_rating || '0') >= filters.rating;
-                    }
-                    return filtered;
-                  }).length} results
-                </p>
-              </div>
-
-              <div className="flex items-center gap-4 flex-wrap">
-                {/* Products Per Page Selector */}
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600">Show:</span>
-                  <select
-                    value={productsPerPage}
-                    onChange={(e) => {
-                      setProductsPerPage(parseInt(e.target.value));
-                      setCurrentPage(1);
-                    }}
-                    className="px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-gray-400 bg-white"
-                  >
-                    <option value="9">9</option>
-                    <option value="12">12</option>
-                    <option value="18">18</option>
-                    <option value="24">24</option>
-                  </select>
-                </div>
-
-                {/* View Toggle */}
-                <div className="flex border border-gray-300 rounded overflow-hidden">
-                  <Button
-                    variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => setViewMode('grid')}
-                    className="rounded-none px-3 py-2"
-                  >
-                    <Grid className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant={viewMode === 'list' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => setViewMode('list')}
-                    className="rounded-none px-3 py-2"
-                  >
-                    <List className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                {/* Sort Dropdown */}
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as SortOption)}
-                  className="px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-gray-400 bg-white"
-                >
-                  {sortOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
             </div>
 
             {/* Active Filters */}
@@ -520,10 +544,12 @@ export function ShopPage({ initialProducts = [], className }: ShopPageProps) {
             {/* Products Grid/List */}
             {loading ? (
               <div className={cn(
-                'grid gap-6',
-                viewMode === 'grid'
-                  ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
-                  : 'grid-cols-1'
+                'grid gap-4',
+                viewMode === 'list' 
+                  ? 'grid-cols-1'
+                  : viewMode === 'grid'
+                  ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+                  : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5'
               )}>
                 {Array.from({ length: productsPerPage }).map((_, i) => (
                   <Skeleton key={i} className="h-96 w-full" />
@@ -531,10 +557,12 @@ export function ShopPage({ initialProducts = [], className }: ShopPageProps) {
               </div>
             ) : filteredProducts.length > 0 ? (
               <div className={cn(
-                'grid gap-6',
-                viewMode === 'grid'
-                  ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
-                  : 'grid-cols-1'
+                'grid',
+                viewMode === 'list'
+                  ? 'grid-cols-1 gap-6'
+                  : viewMode === 'grid'
+                  ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'
+                  : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3'
               )}>
                 {filteredProducts.map((product, index) => (
                   <PremiumProductCard
@@ -542,6 +570,7 @@ export function ShopPage({ initialProducts = [], className }: ShopPageProps) {
                     product={product}
                     onAddToCart={handleAddToCart}
                     onQuickView={handleQuickView}
+                    onAddToWishlist={handleAddToWishlist}
                     variant={viewMode === 'list' ? 'compact' : 'default'}
                     priority={index < 6} // Add priority to first 6 products for LCP optimization
                   />
@@ -569,40 +598,61 @@ export function ShopPage({ initialProducts = [], className }: ShopPageProps) {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex justify-center items-center gap-2 mt-8">
-                <Button
-                  variant="outline"
-                  disabled={currentPage === 1}
-                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                >
-                  Previous
-                </Button>
-                
+              <div className="flex justify-center items-center gap-2 mt-12 pt-8 border-t border-gray-200">
+                {/* Previous Arrow */}
+                {currentPage > 1 && (
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    className="px-3 py-2 text-gray-700 hover:text-gray-900 transition-colors"
+                    aria-label="Previous page"
+                  >
+                    ←
+                  </button>
+                )}
+
+                {/* Page Numbers */}
                 {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                   const page = i + 1
                   return (
-                    <Button
+                    <button
                       key={page}
-                      variant={currentPage === page ? 'default' : 'outline'}
                       onClick={() => setCurrentPage(page)}
+                      className={cn(
+                        "px-3 py-2 transition-colors",
+                        currentPage === page
+                          ? "text-gray-900 font-bold"
+                          : "text-gray-600 hover:text-gray-900"
+                      )}
                     >
                       {page}
-                    </Button>
+                    </button>
                   )
                 })}
-                
-                <Button
-                  variant="outline"
-                  disabled={currentPage === totalPages}
-                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                >
-                  Next
-                </Button>
+
+                {/* Next Arrow */}
+                {currentPage < totalPages && (
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    className="px-3 py-2 text-gray-700 hover:text-gray-900 transition-colors"
+                    aria-label="Next page"
+                  >
+                    →
+                  </button>
+                )}
               </div>
             )}
           </main>
         </div>
       </div>
+
+      {/* Quick View Modal */}
+      <QuickViewModal
+        product={quickViewProduct}
+        isOpen={showQuickView}
+        onClose={() => setShowQuickView(false)}
+        onAddToCart={handleAddToCart}
+        onAddToWishlist={handleAddToWishlist}
+      />
     </div>
   )
 }

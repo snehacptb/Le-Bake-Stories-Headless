@@ -27,6 +27,8 @@ import { useAuth } from '@/contexts/auth-context'
 import { useWishlist } from '@/contexts/wishlist-context'
 import { useWooCommerceFeatures } from '@/contexts/woocommerce-context'
 import { CartDrawer } from './cart-drawer'
+import { LoginModal } from './LoginModal'
+import { MyAccountDropdown } from './MyAccountDropdown'
 
 interface NavigationItem {
   label: string
@@ -105,6 +107,7 @@ export function ThemesHeader({
     logo: null,
     siteIcon: null
   })
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
   const router = useRouter()
   
   // Use cart, auth, and wishlist contexts
@@ -494,11 +497,18 @@ export function ThemesHeader({
 
             {/* Right Side Actions */}
             <div className="flex items-center space-x-3 lg:space-x-6">
-              {/* Login/Register */}
+              {/* Login/Register or My Account */}
               <div className="hidden xl:flex items-center space-x-4 text-white">
-                <Link href="/login" className="text-sm hover:text-gray-300 transition-colors whitespace-nowrap">
-                  LOGIN / REGISTER
-                </Link>
+                {isAuthenticated ? (
+                  <MyAccountDropdown />
+                ) : (
+                  <button 
+                    onClick={() => setIsLoginModalOpen(true)}
+                    className="text-sm hover:text-gray-300 transition-colors whitespace-nowrap"
+                  >
+                    LOGIN / REGISTER
+                  </button>
+                )}
               </div>
 
               {/* Mobile Search Icon */}
@@ -800,14 +810,44 @@ export function ThemesHeader({
 
                 <div className="mt-6 pt-6 border-t">
                   <div className="space-y-2">
-                    {/* Always show account link */}
-                    <Link
-                      href="/my-account"
-                      className="block py-2 text-gray-700 hover:text-blue-600 transition-colors"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      My Account
-                    </Link>
+                    {/* Show different options based on auth state */}
+                    {isAuthenticated ? (
+                      <>
+                        <Link
+                          href="/my-account"
+                          className="block py-2 text-gray-700 hover:text-blue-600 transition-colors"
+                          onClick={() => setIsMenuOpen(false)}
+                        >
+                          My Account
+                        </Link>
+                        <Link
+                          href="/my-account/orders"
+                          className="block py-2 text-gray-700 hover:text-blue-600 transition-colors"
+                          onClick={() => setIsMenuOpen(false)}
+                        >
+                          My Orders
+                        </Link>
+                        <button
+                          onClick={() => {
+                            logout()
+                            setIsMenuOpen(false)
+                          }}
+                          className="block py-2 text-gray-700 hover:text-red-600 transition-colors w-full text-left"
+                        >
+                          Sign Out
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setIsLoginModalOpen(true)
+                          setIsMenuOpen(false)
+                        }}
+                        className="block py-2 text-gray-700 hover:text-blue-600 transition-colors w-full text-left"
+                      >
+                        Login / Register
+                      </button>
+                    )}
                     
                     {/* WooCommerce-specific links - only show when available */}
                     {shouldShowWishlist() && (
@@ -852,6 +892,12 @@ export function ThemesHeader({
           onClose={() => setIsCartOpen(false)}
         />
       )}
+
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+      />
     </header>
   )
 }

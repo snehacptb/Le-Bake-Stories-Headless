@@ -33,31 +33,31 @@ export const PremiumSidebar = ({
   // Fetch top-rated products
   useEffect(() => {
     const fetchTopRatedProducts = async () => {
-      // If topRatedProducts are provided via props, use them
-      if (propTopRatedProducts && propTopRatedProducts.length > 0) {
-        setTopRatedProducts(propTopRatedProducts);
-        return;
-      }
-
+      // Always fetch fresh data - don't rely on props
       setIsLoadingTopRated(true);
       try {
         const response = await fetch('/api/products/top-rated?limit=3');
         const data = await response.json();
 
-        if (data.success && data.data) {
+        console.log('Top-rated products API response:', data);
+
+        if (data.success && data.data && Array.isArray(data.data)) {
+          console.log('Setting top-rated products:', data.data.length);
           setTopRatedProducts(data.data);
         } else {
-          console.warn('Failed to fetch top-rated products:', data.error);
+          console.warn('Failed to fetch top-rated products:', data.error || 'No data returned');
+          setTopRatedProducts([]);
         }
       } catch (error) {
         console.error('Error fetching top-rated products:', error);
+        setTopRatedProducts([]);
       } finally {
         setIsLoadingTopRated(false);
       }
     };
 
     fetchTopRatedProducts();
-  }, [propTopRatedProducts]);
+  }, []);
 
   // Calculate dynamic price range from products
   useEffect(() => {
@@ -253,7 +253,7 @@ export const PremiumSidebar = ({
 
             {isLoadingTopRated ? (
               <div className="space-y-4">
-                {[1, 2, 3].map((i) => (
+                {[1, 2, 3, 4, 5].map((i) => (
                   <div key={i} className="flex gap-3 animate-pulse">
                     <div className="w-16 h-16 bg-gray-200 rounded"></div>
                     <div className="flex-1 space-y-2">
@@ -265,7 +265,7 @@ export const PremiumSidebar = ({
               </div>
             ) : topRatedProducts.length > 0 ? (
               <ul className="product_list_widget space-y-4">
-                {topRatedProducts.slice(0, 3).map((product) => (
+                {topRatedProducts.map((product) => (
                   <li key={product.id}>
                     <span className="widget-product-wrap flex gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors">
                       <a
