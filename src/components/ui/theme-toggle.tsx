@@ -56,7 +56,7 @@ export function ThemeToggle() {
       variant="ghost"
       size="sm"
       onClick={cycleTheme}
-      className="h-8 w-8 px-0 text-themes-gray-600 hover:text-themes-blue-600"
+      className="h-8 w-8 px-0 text-themes-gray-600 hover:text-themes-pink-600"
       aria-label={`Switch to ${theme === 'light' ? 'dark' : theme === 'dark' ? 'system' : 'light'} theme`}
       title={`Current: ${theme || 'system'} theme`}
     >
@@ -99,7 +99,7 @@ export function SimpleThemeToggle() {
       variant="ghost"
       size="sm"
       onClick={toggleTheme}
-      className="h-8 w-8 px-0 text-themes-gray-600 hover:text-themes-blue-600"
+      className="h-8 w-8 px-0 text-themes-gray-600 hover:text-themes-pink-600"
       aria-label="Toggle theme"
     >
       <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />

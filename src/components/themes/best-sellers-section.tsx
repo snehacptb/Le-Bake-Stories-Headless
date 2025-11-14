@@ -52,36 +52,62 @@ export function BestSellersSection({ products, className }: BestSellersSectionPr
   }
 
   return (
-    <section className={`py-16 ${className || ''}`}>
+    <section className={`py-16 lg:py-20 bg-white ${className || ''}`}>
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <Badge variant="featured" className="mb-4">Featured Products</Badge>
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Best Sellers
+        {/* WoodMart Style Header */}
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center justify-center mb-6">
+            <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent w-16"></div>
+            <Badge variant="secondary" className="mx-4 px-6 py-2 bg-orange-100 text-orange-800 border-orange-200 font-medium uppercase tracking-wide">
+              Featured Products
+            </Badge>
+            <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent w-16"></div>
+          </div>
+          
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+            <span className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent">
+              Best Sellers
+            </span>
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Discover the confections Le Bake Stories regulars recommend first.
+          
+          <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            Discover the confections Le Bake Stories regulars recommend first. 
+            <span className="block mt-2 text-base text-gray-500">
+              Handpicked favorites that keep our customers coming back for more.
+            </span>
           </p>
         </div>
 
-        <Suspense fallback={<ProductGridSkeleton />}>
-          <ProductGrid
-            products={products}
-            showFilters={false}
-            showSorting={false}
-            showViewToggle={false}
-            onAddToCart={handleAddToCart}
-            onQuickView={handleQuickView}
-          />
-        </Suspense>
+        {/* WoodMart Style Product Grid */}
+        <div className="relative">
+          <Suspense fallback={<ProductGridSkeleton />}>
+            <ProductGrid
+              products={products}
+              showFilters={false}
+              showSorting={false}
+              showViewToggle={false}
+              onAddToCart={handleAddToCart}
+              onQuickView={handleQuickView}
+            />
+          </Suspense>
+        </div>
 
-        <div className="text-center mt-12">
-          <Link href="/shop">
-            <Button variant="themes-outline" size="lg">
-              View All Products
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </Link>
+        {/* WoodMart Style CTA */}
+        <div className="text-center mt-16">
+          <div className="inline-flex flex-col items-center">
+            <Link href="/shop">
+              <Button 
+                size="lg" 
+                className="px-12 py-4 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+              >
+                View All Products
+                <ArrowRight className="ml-3 h-5 w-5" />
+              </Button>
+            </Link>
+            <p className="text-sm text-gray-500 mt-3">
+              Over 200+ premium products available
+            </p>
+          </div>
         </div>
       </div>
     </section>

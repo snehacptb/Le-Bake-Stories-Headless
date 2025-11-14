@@ -34,6 +34,15 @@ interface NavigationItem {
   children?: NavigationItem[]
 }
 
+interface ProductCategory {
+  id: number
+  name: string
+  slug: string
+  count: number
+  parent: number
+  description: string
+}
+
 interface HeaderProps {
   navigation?: NavigationItem[]
   menuSlug?: string // Allow specifying which menu to use
@@ -45,7 +54,7 @@ interface HeaderProps {
     alt: string
     width?: number
     height?: number
-  }
+  },
   contactInfo?: {
     phone?: string
     email?: string
@@ -68,12 +77,7 @@ export function ThemesHeader({
   menuLocation,
   isSticky = true,
   showTopBar = false,
-  logo = {
-    src: '',
-    alt: 'Logo',
-    width: 120,
-    height: 40
-  },
+  logo,
   contactInfo = {
     phone: '+1 (555) 123-4567',
     email: 'info@example.com',
@@ -86,6 +90,10 @@ export function ThemesHeader({
   const [isLoadingNavigation, setIsLoadingNavigation] = useState(false)
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+  const [categories, setCategories] = useState<ProductCategory[]>([])
+  const [isCategoriesOpen, setIsCategoriesOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState('')
   const [siteInfo, setSiteInfo] = useState<{
     title: string;
     description: string;
@@ -183,7 +191,22 @@ export function ThemesHeader({
       }
     }
 
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch('/api/product-categories', { cache: 'no-store' })
+        if (res.ok) {
+          const json = await res.json()
+          if (json?.data) {
+            setCategories(json.data)
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error)
+      }
+    }
+
     fetchSiteInfo()
+    fetchCategories()
   }, [])
 
   useEffect(() => {
@@ -300,6 +323,33 @@ export function ThemesHeader({
     }
   }, [isSticky])
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      const searchParams = new URLSearchParams()
+      searchParams.set('search', searchQuery.trim())
+      if (selectedCategory) {
+        searchParams.set('category', selectedCategory)
+      }
+      router.push(`/shop?${searchParams.toString()}`)
+    }
+  }
+
+  const handleCategorySelect = (categorySlug: string) => {
+    setSelectedCategory(categorySlug)
+    setIsCategoriesOpen(false)
+    const searchParams = new URLSearchParams()
+    searchParams.set('category', categorySlug)
+    if (searchQuery.trim()) {
+      searchParams.set('search', searchQuery.trim())
+    }
+    router.push(`/shop?${searchParams.toString()}`)
+  }
+
+  const handleBrowseCategories = () => {
+    setIsCategoriesOpen(!isCategoriesOpen)
+  }
+
   return (
     <header className={cn(
       "w-full z-50 transition-all duration-300",
@@ -395,10 +445,10 @@ export function ThemesHeader({
                   )}
                 </div>
               ) : (
-                logo?.src && (
+                logo && logo.src && logo.src.trim() !== '' && (
                   <Image
                     src={logo.src}
-                    alt={logo.alt}
+                    alt={logo.alt || 'Logo'}
                     width={160}
                     height={50}
                     className="h-8 sm:h-10 lg:h-12 w-auto"
@@ -407,29 +457,38 @@ export function ThemesHeader({
                 )
               )}
             </Link>
-
             {/* Search Bar - Dark Navy Style */}
             <div className="hidden md:flex flex-1 max-w-xl lg:max-w-2xl mx-4 lg:mx-8">
               <div className="relative w-full">
-                <div className="flex rounded-full border border-gray-300 bg-white overflow-hidden hover:border-gray-400 transition-colors">
-                  <select className="hidden lg:block px-3 lg:px-4 py-2 lg:py-3 bg-white text-xs lg:text-sm text-gray-600 focus:outline-none cursor-pointer border-r border-gray-300 appearance-none">
-                    <option>SELECT CATEGORY</option>
-                    {/* Add dynamic categories here */}
+                <form onSubmit={handleSearch} className="flex rounded-full border border-gray-300 bg-white overflow-hidden hover:border-gray-400 transition-colors">
+                  <select 
+                    className="hidden lg:block px-3 lg:px-4 py-2 lg:py-3 bg-white text-xs lg:text-sm text-gray-600 focus:outline-none cursor-pointer border-r border-gray-300 appearance-none"
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                  >
+                    <option value="">SELECT CATEGORY</option>
+                    {categories.map(category => (
+                      <option key={category.id} value={category.slug}>
+                        {category.name}
+                      </option>
+                    ))}
                   </select>
                   <div className="flex-1 relative">
                     <input
                       type="search"
                       placeholder="Search for products"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
                       className="w-full px-3 lg:px-4 py-2 lg:py-3 bg-white border-none focus:ring-0 focus:outline-none text-xs lg:text-sm placeholder:text-gray-500"
                     />
                   </div>
                   <button
-                    type="button"
-                    className="px-4 lg:px-6 py-2 lg:py-3 bg-purple-600 hover:bg-purple-700 text-white transition-colors flex items-center justify-center"
+                    type="submit"
+                    className="px-4 lg:px-6 py-2 lg:py-3 bg-themes-pink-600 hover:bg-themes-pink-700 text-white transition-colors flex items-center justify-center"
                   >
                     <Search className="h-3 w-3 lg:h-4 lg:w-4" />
                   </button>
-                </div>
+                </form>
               </div>
             </div>
 
@@ -448,6 +507,7 @@ export function ThemesHeader({
                   variant="ghost"
                   size="icon"
                   className="p-2 text-white hover:text-gray-300 hover:bg-transparent"
+                  onClick={() => router.push('/shop')}
                 >
                   <Search className="h-4 w-4" />
                 </Button>
@@ -496,21 +556,91 @@ export function ThemesHeader({
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between py-2 lg:py-3">
             {/* Browse Categories Button */}
-            <div className="hidden lg:flex items-center">
-              <Button variant="ghost" className="text-gray-800 hover:text-slate-900 hover:bg-transparent p-0 flex items-center space-x-2">
+            <div className="hidden lg:flex items-center relative">
+              <Button 
+                variant="ghost" 
+                className="text-gray-800 hover:text-slate-900 hover:bg-transparent p-0 flex items-center space-x-2"
+                onClick={handleBrowseCategories}
+              >
                 <Menu className="h-4 w-4" />
                 <span className="text-sm font-medium uppercase tracking-wide">BROWSE CATEGORIES</span>
-                <ChevronDown className="h-4 w-4" />
+                <ChevronDown className={cn("h-4 w-4 transition-transform", isCategoriesOpen && "rotate-180")} />
               </Button>
+              
+              {/* Categories Dropdown */}
+              <AnimatePresence>
+                {isCategoriesOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="absolute top-full left-0 mt-2 w-64 bg-white shadow-2xl border border-gray-100 rounded-lg z-50"
+                  >
+                    <div className="py-2">
+                      <Link
+                        href="/shop"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+                        onClick={() => setIsCategoriesOpen(false)}
+                      >
+                        All Categories
+                      </Link>
+                      {categories.map((category) => (
+                        <button
+                          key={category.id}
+                          onClick={() => handleCategorySelect(category.slug)}
+                          className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+                        >
+                          {category.name} ({category.count})
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             {/* Mobile Categories Button */}
-            <div className="lg:hidden">
-              <Button variant="ghost" className="text-gray-800 hover:text-slate-900 hover:bg-transparent p-0 flex items-center space-x-1">
+            <div className="lg:hidden relative">
+              <Button 
+                variant="ghost" 
+                className="text-gray-800 hover:text-slate-900 hover:bg-transparent p-0 flex items-center space-x-1"
+                onClick={handleBrowseCategories}
+              >
                 <Menu className="h-4 w-4" />
                 <span className="text-xs font-medium uppercase tracking-wide">CATEGORIES</span>
-                <ChevronDown className="h-3 w-3" />
+                <ChevronDown className={cn("h-3 w-3 transition-transform", isCategoriesOpen && "rotate-180")} />
               </Button>
+              
+              {/* Mobile Categories Dropdown */}
+              <AnimatePresence>
+                {isCategoriesOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="absolute top-full left-0 mt-2 w-48 bg-white shadow-2xl border border-gray-100 rounded-lg z-50"
+                  >
+                    <div className="py-2">
+                      <Link
+                        href="/shop"
+                        className="block px-3 py-2 text-xs text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+                        onClick={() => setIsCategoriesOpen(false)}
+                      >
+                        All Categories
+                      </Link>
+                      {categories.map((category) => (
+                        <button
+                          key={category.id}
+                          onClick={() => handleCategorySelect(category.slug)}
+                          className="w-full text-left block px-3 py-2 text-xs text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+                        >
+                          {category.name} ({category.count})
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             {/* Desktop Navigation - Left Aligned */}
@@ -550,14 +680,18 @@ export function ThemesHeader({
 
             {/* Mobile Search & Menu */}
             <div className="flex lg:hidden items-center space-x-2 flex-1 justify-end">
-              <div className="relative flex-1 max-w-xs">
+              <form onSubmit={handleSearch} className="relative flex-1 max-w-xs">
                 <Input
                   type="search"
                   placeholder="Search..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-3 pr-8 py-1.5 text-xs rounded-full bg-gray-50 border-gray-200"
                 />
-                <Search className="absolute right-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-gray-400" />
-              </div>
+                <button type="submit" className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                  <Search className="h-3 w-3 text-gray-400" />
+                </button>
+              </form>
               
               {/* Mobile Menu Toggle */}
               <Button
@@ -613,12 +747,12 @@ export function ThemesHeader({
                         height={siteInfo.logo.height}
                         className="h-8 w-auto"
                       />
-                    ) : logo?.src ? (
+                    ) : logo?.src && logo?.src.trim() !== '' ? (
                       <Image
-                        src={logo.src}
-                        alt={logo.alt}
-                        width={logo.width}
-                        height={logo.height}
+                        src={logo?.src || ''}
+                        alt={logo?.alt || 'Logo'}
+                        width={logo?.width || 120}
+                        height={logo?.height || 40}
                         className="h-8 w-auto"
                       />
                     ) : null}

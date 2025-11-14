@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Minus, Plus, X, ShoppingBag, ArrowRight, Trash2, Loader2, Frown, Heart } from 'lucide-react'
+import { Minus, Plus, X, ShoppingBag, ArrowRight, Trash2, Loader2, Frown, Heart, Shield, Truck, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
@@ -220,7 +220,7 @@ export function CartPage({ className }: CartPageProps) {
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Your cart is currently empty!</h2>
           <p className="text-gray-600">
-            <Link href="/shop" className="text-blue-600 hover:underline">Return to shop</Link>
+            <Link href="/shop" className="text-themes-pink-600 hover:underline">Return to shop</Link>
           </p>
         </div>
 
@@ -287,7 +287,7 @@ export function CartPage({ className }: CartPageProps) {
                     {/* Product Info */}
                     <div className="p-4">
                       <Link href={`/product/${product.slug}`}>
-                        <h3 className="text-sm font-medium text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                        <h3 className="text-sm font-medium text-gray-900 mb-2 line-clamp-2 group-hover:text-themes-pink-600 transition-colors">
                           {product.name}
                         </h3>
                       </Link>
@@ -335,11 +335,13 @@ export function CartPage({ className }: CartPageProps) {
           )}
 
           {/* Continue Shopping Button */}
-          <div className="text-center mt-12">
+          <div className="text-center mt-8">
             <Link href="/shop">
-              <Button size="lg" className="flex items-center gap-2 mx-auto">
+              <Button 
+                variant="outline" 
+                className="px-8 py-3 border-2 border-gray-200 hover:border-orange-300 hover:bg-orange-50 transition-all duration-300 rounded-xl font-semibold"
+              >
                 Continue Shopping
-                <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
           </div>
@@ -350,14 +352,6 @@ export function CartPage({ className }: CartPageProps) {
 
   return (
     <div className={cn('container mx-auto px-4 py-8', className)}>
-      {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Shopping Cart</h1>
-        <p className="text-gray-600">
-          {itemCount} {itemCount === 1 ? 'item' : 'items'} in your cart
-        </p>
-      </div>
-
       {/* Error Message */}
       {error && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -379,19 +373,19 @@ export function CartPage({ className }: CartPageProps) {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Cart Items */}
+        {/* WoodMart Style Cart Items */}
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-lg">
             {/* Header */}
-            <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+            <div className="bg-gradient-to-r from-orange-50 to-orange-100 px-8 py-6 border-b border-orange-200">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-gray-900">Cart Items</h3>
+                <h3 className="text-2xl font-bold text-orange-900">Cart Items</h3>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={clearCart}
                   disabled={loadingStates.clearingCart}
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50 disabled:opacity-50"
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50 disabled:opacity-50 px-4 py-2 rounded-xl font-medium"
                 >
                   {loadingStates.clearingCart ? (
                     <>
@@ -408,75 +402,78 @@ export function CartPage({ className }: CartPageProps) {
               </div>
             </div>
 
-            {/* Items List */}
-            <div className="divide-y divide-gray-200">
+            {/* WoodMart Style Items List */}
+            <div className="divide-y divide-gray-100">
               <AnimatePresence>
                 {items.map((item) => (
                   <motion.div
                     key={item.key}
                     initial={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="p-6"
+                    className="p-8 hover:bg-gray-50 transition-colors duration-200"
                   >
-                    <div className="flex items-center gap-4">
-                      {/* Product Image */}
-                      <div className="relative w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                    <div className="flex items-center gap-6">
+                      {/* WoodMart Style Product Image */}
+                      <div className="relative w-24 h-24 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl overflow-hidden flex-shrink-0 shadow-md">
                         {item.image ? (
                           <Image
                             src={item.image}
                             alt={item.name}
                             fill
-                            sizes="80px"
-                            className="object-cover"
+                            sizes="96px"
+                            className="object-cover hover:scale-105 transition-transform duration-300"
                           />
                         ) : (
                           <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                            <ShoppingBag className="h-8 w-8 text-gray-400" />
+                            <ShoppingBag className="h-10 w-10 text-gray-400" />
                           </div>
                         )}
                       </div>
 
-                      {/* Product Details */}
+                      {/* WoodMart Style Product Details */}
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-lg font-medium text-gray-900 truncate">
+                        <h4 className="text-xl font-bold text-gray-900 truncate mb-2">
                           {item.name}
                         </h4>
-                        <p className="text-sm text-gray-500">SKU: {item.slug}</p>
-                        <p className="text-lg font-semibold text-gray-900 mt-1">
-                          ${item.price.toFixed(2)}
-                        </p>
+                        <p className="text-sm text-gray-500 mb-3">SKU: {item.slug}</p>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-orange-700 bg-clip-text text-transparent">
+                            ${item.price.toFixed(2)}
+                          </span>
+                          <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                            per item
+                          </span>
+                        </div>
                       </div>
 
-                      {/* Quantity Controls */}
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center border border-gray-300 rounded-md">
+                      {/* WoodMart Style Quantity Controls */}
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center border-2 border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm">
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => handleQuantityChange(item.key, item.quantity - 1)}
                             disabled={loadingStates.updatingItem === item.key || processingItems.has(item.key)}
-                            className="h-8 w-8 p-0 rounded-none"
+                            className="h-12 w-12 p-0 rounded-none hover:bg-gray-100 transition-colors"
                           >
-                            <Minus className="h-4 w-4" />
+                            <Minus className="h-5 w-5" />
                           </Button>
                           <Input
                             type="number"
                             value={item.quantity}
                             onChange={(e) => {
                               const newQty = parseInt(e.target.value)
-                              // Only update if it's a valid number and different from current
                               if (!isNaN(newQty) && newQty !== item.quantity) {
                                 handleQuantityChange(item.key, newQty)
                               }
                             }}
                             onBlur={(e) => {
-                              // Ensure minimum quantity of 1 on blur if field is empty or invalid
                               const newQty = parseInt(e.target.value)
                               if (isNaN(newQty) || newQty < 1) {
                                 handleQuantityChange(item.key, 1)
                               }
                             }}
-                            className="w-16 h-8 text-center border-0 focus:ring-0 rounded-none"
+                            className="w-20 h-12 text-center border-0 focus:ring-0 rounded-none font-bold text-lg bg-gray-50"
                             min="1"
                             disabled={loadingStates.updatingItem === item.key || processingItems.has(item.key)}
                           />
@@ -485,31 +482,34 @@ export function CartPage({ className }: CartPageProps) {
                             size="sm"
                             onClick={() => handleQuantityChange(item.key, item.quantity + 1)}
                             disabled={loadingStates.updatingItem === item.key || processingItems.has(item.key)}
-                            className="h-8 w-8 p-0 rounded-none"
+                            className="h-12 w-12 p-0 rounded-none hover:bg-gray-100 transition-colors"
                           >
-                            <Plus className="h-4 w-4" />
+                            <Plus className="h-5 w-5" />
                           </Button>
                         </div>
 
-                        {/* Subtotal */}
-                        <div className="text-right min-w-[80px]">
-                          <p className="text-lg font-semibold text-gray-900">
-                            ${(item.price * item.quantity).toFixed(2)}
-                          </p>
+                        {/* WoodMart Style Subtotal */}
+                        <div className="text-right min-w-[120px]">
+                          <div className="bg-gradient-to-r from-green-50 to-green-100 p-3 rounded-xl border border-green-200">
+                            <p className="text-sm text-green-700 font-medium mb-1">Subtotal</p>
+                            <p className="text-2xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
+                              ${(item.price * item.quantity).toFixed(2)}
+                            </p>
+                          </div>
                         </div>
 
-                        {/* Remove Button */}
+                        {/* WoodMart Style Remove Button */}
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => removeFromCart(item.key)}
                           disabled={loadingStates.removingItem === item.key}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0"
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50 h-12 w-12 p-0 rounded-xl border-2 border-transparent hover:border-red-200 transition-all duration-300"
                         >
                           {loadingStates.removingItem === item.key ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <Loader2 className="h-5 w-5 animate-spin" />
                           ) : (
-                            <X className="h-4 w-4" />
+                            <X className="h-5 w-5" />
                           )}
                         </Button>
                       </div>
@@ -520,21 +520,27 @@ export function CartPage({ className }: CartPageProps) {
             </div>
           </div>
 
-          {/* Continue Shopping */}
-          <div className="mt-6">
+          {/* WoodMart Style Continue Shopping */}
+          <div className="mt-8 text-center">
             <Link href="/shop">
-              <Button variant="outline" className="flex items-center gap-2">
-                <ArrowRight className="h-4 w-4 rotate-180" />
+              <Button 
+                variant="outline" 
+                className="px-8 py-4 border-2 border-gray-200 hover:border-orange-300 hover:bg-orange-50 transition-all duration-300 rounded-xl font-semibold text-lg"
+              >
+                <ArrowRight className="h-5 w-5 mr-3 rotate-180" />
                 Continue Shopping
               </Button>
             </Link>
           </div>
         </div>
 
-        {/* Cart Summary */}
+        {/* WoodMart Style Cart Summary */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-lg border border-gray-200 p-6 sticky top-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Summary</h3>
+          <div className="bg-white rounded-2xl border border-gray-200 p-8 sticky top-4 shadow-lg">
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">Order Summary</h3>
+              <div className="h-1 w-16 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full mx-auto"></div>
+            </div>
 
             {/* Coupon Code */}
             <div className="mb-6">
@@ -543,53 +549,86 @@ export function CartPage({ className }: CartPageProps) {
 
             <Separator className="mb-4" />
 
-            {/* Order Totals */}
-            <div className="space-y-3">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Subtotal</span>
-                <span className="font-medium">${subtotal.toFixed(2)}</span>
+            {/* WoodMart Style Order Totals */}
+            <div className="space-y-4">
+              <div className="flex justify-between items-center py-3 border-b border-gray-100">
+                <span className="text-gray-600 font-medium">Subtotal</span>
+                <span className="text-lg font-bold text-gray-900">${subtotal.toFixed(2)}</span>
               </div>
 
               {discountTotal > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Discount</span>
-                  <span className="font-medium text-green-600">-${discountTotal.toFixed(2)}</span>
+                <div className="flex justify-between items-center py-3 border-b border-gray-100">
+                  <span className="text-gray-600 font-medium">Discount</span>
+                  <span className="text-lg font-bold text-green-600">-${discountTotal.toFixed(2)}</span>
                 </div>
               )}
 
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Shipping</span>
-                <span className="font-medium">
-                  {shippingTotal === 0 ? 'Free' : `$${shippingTotal.toFixed(2)}`}
+              <div className="flex justify-between items-center py-3 border-b border-gray-100">
+                <span className="text-gray-600 font-medium">Shipping</span>
+                <span className="text-lg font-bold text-gray-900">
+                  {shippingTotal === 0 ? (
+                    <span className="text-green-600">Free</span>
+                  ) : (
+                    `$${shippingTotal.toFixed(2)}`
+                  )}
                 </span>
               </div>
 
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Tax</span>
-                <span className="font-medium">${taxTotal.toFixed(2)}</span>
+              <div className="flex justify-between items-center py-3 border-b border-gray-100">
+                <span className="text-gray-600 font-medium">Tax</span>
+                <span className="text-lg font-bold text-gray-900">${taxTotal.toFixed(2)}</span>
               </div>
 
-              <Separator />
-
-              <div className="flex justify-between text-lg font-semibold">
-                <span>Total</span>
-                <span>${finalTotal.toFixed(2)}</span>
+              <div className="bg-gradient-to-r from-orange-50 to-orange-100 p-4 rounded-xl border border-orange-200 mt-6">
+                <div className="flex justify-between items-center">
+                  <span className="text-xl font-bold text-orange-900">Total</span>
+                  <span className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-orange-700 bg-clip-text text-transparent">
+                    ${total.toFixed(2)}
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* Checkout Button */}
-            <Link href="/checkout" className="block mt-6">
-              <Button size="lg" className="w-full">
-                Proceed to Checkout
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
-            </Link>
+            {/* WoodMart Style Checkout Button */}
+            <div className="mt-8">
+              <Link href="/checkout">
+                <Button 
+                  className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300" 
+                  disabled={items.length === 0}
+                >
+                  Proceed to Checkout
+                  <ArrowRight className="ml-3 h-5 w-5" />
+                </Button>
+              </Link>
+            </div>
 
-            {/* Security Badge */}
-            <div className="mt-4 text-center">
-              <p className="text-xs text-gray-500">
-                🔒 Secure checkout with SSL encryption
-              </p>
+            {/* WoodMart Style Security Features */}
+            <div className="mt-6 space-y-3">
+              <div className="flex items-center justify-center space-x-2 text-sm text-gray-600 bg-green-50 p-3 rounded-xl border border-green-200">
+                <Shield className="h-5 w-5 text-green-600" />
+                <span className="font-medium">256-bit SSL Secure Checkout</span>
+              </div>
+              
+              <div className="grid grid-cols-3 gap-2 text-xs text-gray-500">
+                <div className="text-center">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-1">
+                    <Shield className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <span>Secure</span>
+                </div>
+                <div className="text-center">
+                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-1">
+                    <Truck className="h-4 w-4 text-green-600" />
+                  </div>
+                  <span>Fast Shipping</span>
+                </div>
+                <div className="text-center">
+                  <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-1">
+                    <RotateCcw className="h-4 w-4 text-purple-600" />
+                  </div>
+                  <span>Easy Returns</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>

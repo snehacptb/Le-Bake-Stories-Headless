@@ -198,99 +198,103 @@ export function SingleProductPage({ product, relatedProducts = [] }: SingleProdu
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Breadcrumb */}
-      <div className="bg-white border-b">
-        <div className="container mx-auto px-4 py-4">
-          <nav className="flex items-center space-x-2 text-sm text-gray-600">
-            <Link href="/" className="hover:text-themes-blue-600">Home</Link>
-            <span>/</span>
-            <Link href="/shop" className="hover:text-themes-blue-600">Shop</Link>
+    <div className="min-h-screen bg-white">
+      {/* WoodMart Style Breadcrumb */}
+      <div className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-200">
+        <div className="container mx-auto px-4 py-6">
+          <nav className="flex items-center space-x-3 text-sm">
+            <Link href="/" className="text-gray-600 hover:text-orange-600 transition-colors font-medium">
+              Home
+            </Link>
+            <span className="text-gray-400">/</span>
+            <Link href="/shop" className="text-gray-600 hover:text-orange-600 transition-colors font-medium">
+              Shop
+            </Link>
             {product.categories && product.categories.length > 0 && (
               <>
-                <span>/</span>
+                <span className="text-gray-400">/</span>
                 <Link 
                   href={`/shop?category=${product.categories[0].slug}`}
-                  className="hover:text-themes-blue-600"
+                  className="text-gray-600 hover:text-orange-600 transition-colors font-medium"
                 >
                   {product.categories[0].name}
                 </Link>
               </>
             )}
-            <span>/</span>
-            <span className="text-gray-900">{product.name}</span>
+            <span className="text-gray-400">/</span>
+            <span className="text-gray-900 font-semibold">{product.name}</span>
           </nav>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+      <div className="container mx-auto px-4 py-8 lg:py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 mb-16">
           {/* Product Images */}
           <div className="space-y-4">
-            {/* Main Image */}
-            <div className="relative aspect-square bg-white rounded-lg overflow-hidden group">
+            {/* Main Image - WoodMart Style */}
+            <div className="relative aspect-square bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl overflow-hidden group shadow-lg hover:shadow-xl transition-all duration-300">
               {primaryImage && (
                 <Image
                   src={primaryImage.src}
                   alt={primaryImage.alt || product.name}
                   fill
                   sizes="(max-width: 768px) 100vw, 50vw"
-                  className="object-cover"
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
                   priority
                 />
               )}
               
-              {/* Image Navigation */}
+              {/* WoodMart Style Image Navigation */}
               {images.length > 1 && (
                 <>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/90 backdrop-blur-sm hover:bg-white text-gray-800 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-full shadow-lg hover:scale-110"
                     onClick={prevImage}
                   >
-                    <ChevronLeft className="h-4 w-4" />
+                    <ChevronLeft className="h-5 w-5" />
                   </Button>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/90 backdrop-blur-sm hover:bg-white text-gray-800 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-full shadow-lg hover:scale-110"
                     onClick={nextImage}
                   >
-                    <ChevronRight className="h-4 w-4" />
+                    <ChevronRight className="h-5 w-5" />
                   </Button>
                 </>
               )}
 
-              {/* Zoom Button */}
+              {/* WoodMart Style Zoom Button */}
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute top-4 right-4 bg-white/80 hover:bg-white opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute top-6 right-6 w-12 h-12 bg-white/90 backdrop-blur-sm hover:bg-white text-gray-800 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-full shadow-lg hover:scale-110"
                 onClick={() => setShowImageModal(true)}
               >
-                <ZoomIn className="h-4 w-4" />
+                <ZoomIn className="h-5 w-5" />
               </Button>
 
-              {/* Badges */}
-              <div className="absolute top-4 left-4 flex flex-col space-y-2">
+              {/* WoodMart Style Badges */}
+              <div className="absolute top-6 left-6 flex flex-col space-y-3">
                 {product.on_sale && discountPercentage > 0 && (
-                  <Badge variant="sale" className="text-xs font-bold">
+                  <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white font-bold px-3 py-1.5 rounded-full shadow-lg">
                     -{discountPercentage}%
                   </Badge>
                 )}
                 {product.featured && (
-                  <Badge variant="featured" className="text-xs">
+                  <Badge className="bg-gradient-to-r from-orange-500 to-orange-600 text-white font-medium px-3 py-1.5 rounded-full shadow-lg">
                     Featured
                   </Badge>
                 )}
                 {isOutOfStock && (
-                  <Badge variant="destructive" className="text-xs">
+                  <Badge className="bg-gradient-to-r from-gray-500 to-gray-600 text-white font-medium px-3 py-1.5 rounded-full shadow-lg">
                     Out of Stock
                   </Badge>
                 )}
                 {isLowStock && (
-                  <Badge variant="outline" className="text-xs bg-orange-100 text-orange-800 border-orange-200">
+                  <Badge className="bg-gradient-to-r from-amber-500 to-amber-600 text-white font-medium px-3 py-1.5 rounded-full shadow-lg">
                     Only {product.stock_quantity} left!
                   </Badge>
                 )}
@@ -324,51 +328,57 @@ export function SingleProductPage({ product, relatedProducts = [] }: SingleProdu
             )}
           </div>
 
-          {/* Product Info */}
-          <div className="space-y-6">
-            {/* Product Title and Category */}
-            <div>
+          {/* Product Details - WoodMart Style */}
+          <div className="space-y-8">
+            {/* Product Title and Rating */}
+            <div className="border-b border-gray-200 pb-6">
               {product.categories && product.categories.length > 0 && (
-                <p className="text-sm text-gray-500 mb-2">
-                  {product.categories[0].name}
-                </p>
+                <div className="flex items-center space-x-2 mb-3">
+                  <Badge variant="secondary" className="bg-orange-100 text-orange-800 border-orange-200 font-medium">
+                    {product.categories[0].name}
+                  </Badge>
+                </div>
               )}
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                {product.name}
-              </h1>
+              <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4 leading-tight">{product.name}</h1>
               
               {/* Rating */}
               {parseFloat(product.average_rating) > 0 && (
-                <div className="flex items-center space-x-2 mb-4">
-                  <div className="flex">
+                <div className="flex items-center space-x-4 mb-6">
+                  <div className="flex items-center space-x-1">
                     {renderStars(parseFloat(product.average_rating))}
                   </div>
-                  <span className="text-sm text-gray-500">
-                    ({product.rating_count} reviews)
+                  <span className="text-lg text-gray-600 font-medium">
+                    {product.average_rating ? `${product.average_rating}/5` : 'No rating'}
+                  </span>
+                  <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                    ({product.rating_count || 0} reviews)
                   </span>
                 </div>
               )}
             </div>
 
-            {/* Price */}
-            <div className="flex items-center space-x-4">
-              {currentProduct.on_sale && currentProduct.sale_price ? (
-                <>
-                  <span className="text-3xl font-bold text-themes-blue-600">
-                    {formatPrice(currentProduct.sale_price)}
+            {/* WoodMart Style Price */}
+            <div className="bg-gradient-to-r from-gray-50 to-white p-6 rounded-2xl border border-gray-200">
+              <div className="flex items-center space-x-4 mb-2">
+                {currentProduct.on_sale && currentProduct.sale_price ? (
+                  <>
+                    <span className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-orange-600 to-orange-700 bg-clip-text text-transparent">
+                      {formatPrice(currentProduct.sale_price)}
+                    </span>
+                    <span className="text-2xl text-gray-500 line-through">
+                      {formatPrice(currentProduct.regular_price)}
+                    </span>
+                    <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white font-bold px-4 py-2 rounded-full shadow-lg">
+                      Save {currentDiscountPercentage}%
+                    </Badge>
+                  </>
+                ) : (
+                  <span className="text-4xl lg:text-5xl font-bold text-gray-900">
+                    {formatPrice(currentProduct.price)}
                   </span>
-                  <span className="text-xl text-gray-500 line-through">
-                    {formatPrice(currentProduct.regular_price)}
-                  </span>
-                  <Badge variant="sale" className="text-sm">
-                    Save {currentDiscountPercentage}%
-                  </Badge>
-                </>
-              ) : (
-                <span className="text-3xl font-bold text-gray-900">
-                  {formatPrice(currentProduct.price)}
-                </span>
-              )}
+                )}
+              </div>
+              <p className="text-sm text-gray-500">Price includes all taxes</p>
             </div>
 
             {/* Short Description */}
@@ -406,40 +416,39 @@ export function SingleProductPage({ product, relatedProducts = [] }: SingleProdu
               selectedAttributes={selectedAttributes}
             />
 
-            {/* Quantity and Add to Cart */}
-            <div className="space-y-4">
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center border rounded-md">
+            {/* WoodMart Style Quantity and Add to Cart */}
+            <div className="space-y-6">
+              <div className="flex items-center space-x-6">
+                <div className="flex items-center border-2 border-gray-200 rounded-xl overflow-hidden">
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-10 w-10"
+                    className="h-14 w-14 hover:bg-gray-100 transition-colors"
                     onClick={() => handleQuantityChange(quantity - 1)}
                     disabled={quantity <= 1}
                   >
-                    <Minus className="h-4 w-4" />
+                    <Minus className="h-5 w-5" />
                   </Button>
-                  <span className="px-4 py-2 min-w-[60px] text-center font-medium">
+                  <span className="px-6 py-4 min-w-[80px] text-center font-bold text-lg bg-gray-50">
                     {quantity}
                   </span>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-10 w-10"
+                    className="h-14 w-14 hover:bg-gray-100 transition-colors"
                     onClick={() => handleQuantityChange(quantity + 1)}
                     disabled={currentProduct.manage_stock && currentProduct.stock_quantity ? quantity >= currentProduct.stock_quantity : false}
                   >
-                    <Plus className="h-4 w-4" />
+                    <Plus className="h-5 w-5" />
                   </Button>
                 </div>
 
                 <Button
-                  className="flex-1 h-12"
-                  variant="themes"
+                  className="flex-1 h-14 text-lg font-semibold bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
                   onClick={handleAddToCart}
                   disabled={isOutOfStock || isAddingToCart || loadingStates.addingToCart}
                 >
-                  <ShoppingCart className="h-4 w-4 mr-2" />
+                  <ShoppingCart className="h-5 w-5 mr-3" />
                   {isAddingToCart || loadingStates.addingToCart 
                     ? 'Adding...' 
                     : isOutOfStock 
@@ -449,41 +458,60 @@ export function SingleProductPage({ product, relatedProducts = [] }: SingleProdu
                 </Button>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex space-x-2">
+              {/* WoodMart Style Action Buttons */}
+              <div className="grid grid-cols-2 gap-4">
                 <Button
                   variant="outline"
-                  className="flex-1"
+                  className="h-12 border-2 border-gray-200 hover:border-red-300 hover:bg-red-50 transition-all duration-300 rounded-xl"
                   onClick={handleWishlistToggle}
                 >
                   <Heart className={cn(
-                    "h-4 w-4 mr-2",
+                    "h-5 w-5 mr-2",
                     isWishlisted ? "fill-red-500 text-red-500" : ""
                   )} />
-                  {isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'}
+                  {isWishlisted ? 'Wishlisted' : 'Add to Wishlist'}
                 </Button>
                 <Button
                   variant="outline"
+                  className="h-12 border-2 border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-300 rounded-xl"
                   onClick={handleShare}
                 >
-                  <Share2 className="h-4 w-4" />
+                  <Share2 className="h-5 w-5 mr-2" />
+                  Share Product
                 </Button>
               </div>
             </div>
 
-            {/* Product Features */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t">
-              <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <Truck className="h-4 w-4" />
-                <span>Free Shipping</span>
-              </div>
-              <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <Shield className="h-4 w-4" />
-                <span>Secure Payment</span>
-              </div>
-              <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <RotateCcw className="h-4 w-4" />
-                <span>Easy Returns</span>
+            {/* WoodMart Style Product Features */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-2xl border border-blue-100">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <div className="flex items-center space-x-3 text-blue-800">
+                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                    <Truck className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <div className="font-semibold">Free Shipping</div>
+                    <div className="text-sm text-blue-600">On orders over $50</div>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3 text-green-800">
+                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                    <Shield className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <div className="font-semibold">Secure Payment</div>
+                    <div className="text-sm text-green-600">SSL encrypted</div>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3 text-purple-800">
+                  <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                    <RotateCcw className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <div className="font-semibold">Easy Returns</div>
+                    <div className="text-sm text-purple-600">30-day policy</div>
+                  </div>
+                </div>
               </div>
             </div>
 

@@ -2,16 +2,24 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { woocommerceApi } from '@/lib/woocommerce-api'
 
-// Initialize Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+// Initialize Stripe with proper error handling for build process
+const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2025-10-29.clover',
-})
+}) : null
 
 // Webhook secret for signature verification
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
+const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
 
 export async function POST(request: NextRequest) {
   try {
+    if (!stripe) {
+      console.error('Stripe is not configured')
+      return NextResponse.json(
+        { error: 'Payment system not configured' },
+        { status: 500 }
+      )
+    }
+
     const body = await request.text()
     const signature = request.headers.get('stripe-signature')
 

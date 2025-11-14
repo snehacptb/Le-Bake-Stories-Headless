@@ -948,7 +948,7 @@ export function CheckoutPage({ className }: CheckoutPageProps) {
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Your cart is currently empty!</h2>
           <p className="text-gray-600">
-            <Link href="/shop" className="text-blue-600 hover:underline">Return to shop</Link>
+            <Link href="/shop" className="text-themes-pink-600 hover:underline">Return to shop</Link>
           </p>
         </div>
 
@@ -1015,7 +1015,7 @@ export function CheckoutPage({ className }: CheckoutPageProps) {
                     {/* Product Info */}
                     <div className="p-4">
                       <Link href={`/product/${product.slug}`}>
-                        <h3 className="text-sm font-medium text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                        <h3 className="text-sm font-medium text-gray-900 mb-2 line-clamp-2 group-hover:text-themes-pink-600 transition-colors">
                           {product.name}
                         </h3>
                       </Link>
@@ -1124,12 +1124,14 @@ export function CheckoutPage({ className }: CheckoutPageProps) {
 
   return (
     <div className={cn('container mx-auto px-4 py-8', className)}>
-      {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Checkout</h1>
-        <div className="flex items-center text-sm text-gray-600">
-          <Lock className="h-4 w-4 mr-2" />
-          Secure checkout with SSL encryption
+      {/* WoodMart Style Page Header */}
+      <div className="mb-12">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-600 to-orange-700 bg-clip-text text-transparent mb-4">Secure Checkout</h1>
+          <div className="flex items-center justify-center text-sm text-gray-600 bg-green-50 px-6 py-3 rounded-xl border border-green-200 max-w-md mx-auto">
+            <Lock className="h-5 w-5 mr-3 text-green-600" />
+            <span className="font-medium">256-bit SSL Secure Encryption</span>
+          </div>
         </div>
       </div>
 
@@ -1157,12 +1159,15 @@ export function CheckoutPage({ className }: CheckoutPageProps) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Checkout Form */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Billing Address */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <MapPin className="h-5 w-5 mr-2" />
-                Billing Address
-              </h3>
+            {/* WoodMart Style Billing Address */}
+            <div className="bg-white rounded-2xl border border-gray-200 p-8 shadow-lg">
+              <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-xl border border-blue-200 mb-6">
+                <h3 className="text-2xl font-bold text-blue-900 flex items-center">
+                  <MapPin className="h-6 w-6 mr-3 text-blue-600" />
+                  Billing Address
+                </h3>
+                <p className="text-blue-700 text-sm mt-2">Enter your billing information for payment processing</p>
+              </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -1246,7 +1251,7 @@ export function CheckoutPage({ className }: CheckoutPageProps) {
                       id="billing_state"
                       value={form.billing.state}
                       onChange={(e) => handleInputChange('billing', 'state', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-themes-pink-500"
                       required
                       disabled={loadingStates.billingStates}
                     >
@@ -1280,7 +1285,7 @@ export function CheckoutPage({ className }: CheckoutPageProps) {
                     id="billing_country"
                     value={form.billing.country}
                     onChange={(e) => handleInputChange('billing', 'country', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-themes-pink-500"
                     required
                     disabled={loadingStates.countries}
                   >
@@ -1297,20 +1302,25 @@ export function CheckoutPage({ className }: CheckoutPageProps) {
               </div>
             </div>
 
-            {/* Shipping Address */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                  <MapPin className="h-5 w-5 mr-2" />
-                  Shipping Address
-                </h3>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="sameAsShipping"
-                    checked={form.sameAsShipping}
-                    onCheckedChange={(checked) => handleFormChange('sameAsShipping', checked)}
-                  />
-                  <Label htmlFor="sameAsShipping">Same as billing address</Label>
+            {/* WoodMart Style Shipping Address */}
+            <div className="bg-white rounded-2xl border border-gray-200 p-8 shadow-lg">
+              <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-4 rounded-xl border border-purple-200 mb-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-2xl font-bold text-purple-900 flex items-center">
+                      <MapPin className="h-6 w-6 mr-3 text-purple-600" />
+                      Shipping Address
+                    </h3>
+                    <p className="text-purple-700 text-sm mt-2">Where should we deliver your order?</p>
+                  </div>
+                  <div className="flex items-center space-x-3 bg-white px-4 py-2 rounded-xl border border-purple-200">
+                    <Checkbox
+                      id="sameAsShipping"
+                      checked={form.sameAsShipping}
+                      onCheckedChange={(checked) => handleFormChange('sameAsShipping', checked)}
+                    />
+                    <Label htmlFor="sameAsShipping" className="font-medium text-purple-800">Same as billing address</Label>
+                  </div>
                 </div>
               </div>
 
@@ -1375,7 +1385,7 @@ export function CheckoutPage({ className }: CheckoutPageProps) {
                         id="shipping_state"
                         value={form.shipping.state}
                         onChange={(e) => handleInputChange('shipping', 'state', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-themes-pink-500"
                         required
                         disabled={loadingStates.shippingStates}
                       >
@@ -1409,7 +1419,7 @@ export function CheckoutPage({ className }: CheckoutPageProps) {
                       id="shipping_country"
                       value={form.shipping.country}
                       onChange={(e) => handleInputChange('shipping', 'country', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-themes-pink-500"
                       required
                       disabled={loadingStates.countries}
                     >
@@ -1427,25 +1437,31 @@ export function CheckoutPage({ className }: CheckoutPageProps) {
               )}
             </div>
 
-            {/* Order Notes */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Notes</h3>
-              <Label htmlFor="customerNote">Notes about your order (optional)</Label>
+            {/* WoodMart Style Order Notes */}
+            <div className="bg-white rounded-2xl border border-gray-200 p-8 shadow-lg">
+              <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-xl border border-green-200 mb-6">
+                <h3 className="text-2xl font-bold text-green-900 mb-2">Order Notes</h3>
+                <p className="text-green-700 text-sm">Add special instructions for your order (optional)</p>
+              </div>
+              <Label htmlFor="customerNote" className="text-lg font-medium text-gray-900">Notes about your order</Label>
               <textarea
                 id="customerNote"
                 value={form.customerNote}
                 onChange={(e) => handleFormChange('customerNote', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mt-2"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 mt-3 bg-gray-50 hover:bg-white transition-colors duration-200"
                 rows={4}
-                placeholder="Special notes for delivery..."
+                placeholder="Special delivery instructions, gift message, etc..."
               />
             </div>
           </div>
 
-          {/* Order Summary */}
+          {/* WoodMart Style Order Summary */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg border border-gray-200 p-6 sticky top-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Your Order</h3>
+            <div className="bg-white rounded-2xl border border-gray-200 p-8 sticky top-4 shadow-lg">
+              <div className="text-center mb-6">
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">Order Summary</h3>
+                <div className="h-1 w-16 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full mx-auto"></div>
+              </div>
 
               {/* Order Items */}
               <div className="space-y-4 mb-6">
@@ -1482,47 +1498,59 @@ export function CheckoutPage({ className }: CheckoutPageProps) {
 
               <Separator className="mb-4" />
 
-              {/* Order Totals */}
-              <div className="space-y-3 mb-6">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Subtotal</span>
-                  <span className="font-medium">${subtotal.toFixed(2)}</span>
+              {/* WoodMart Style Order Totals */}
+              <div className="space-y-4 mb-8">
+                <div className="flex justify-between items-center py-3 border-b border-gray-100">
+                  <span className="text-gray-600 font-medium">Subtotal</span>
+                  <span className="text-lg font-bold text-gray-900">${subtotal.toFixed(2)}</span>
                 </div>
                 
                 {discountTotal > 0 && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Discount</span>
-                    <span className="font-medium text-green-600">-${discountTotal.toFixed(2)}</span>
+                  <div className="flex justify-between items-center py-3 border-b border-gray-100">
+                    <span className="text-gray-600 font-medium">Discount</span>
+                    <span className="text-lg font-bold text-green-600">-${discountTotal.toFixed(2)}</span>
                   </div>
                 )}
                 
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Shipping</span>
-                  <span className="font-medium">
-                    {shippingTotal === 0 ? 'Free' : `$${shippingTotal.toFixed(2)}`}
+                <div className="flex justify-between items-center py-3 border-b border-gray-100">
+                  <span className="text-gray-600 font-medium">Shipping</span>
+                  <span className="text-lg font-bold text-gray-900">
+                    {shippingTotal === 0 ? (
+                      <span className="text-green-600">Free</span>
+                    ) : (
+                      `$${shippingTotal.toFixed(2)}`
+                    )}
                   </span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Tax</span>
-                  <span className="font-medium">${taxTotal.toFixed(2)}</span>
+                <div className="flex justify-between items-center py-3 border-b border-gray-100">
+                  <span className="text-gray-600 font-medium">Tax</span>
+                  <span className="text-lg font-bold text-gray-900">${taxTotal.toFixed(2)}</span>
                 </div>
-                <Separator />
-                <div className="flex justify-between text-lg font-semibold">
-                  <span>Total</span>
-                  <span>${finalTotal.toFixed(2)}</span>
+                
+                <div className="bg-gradient-to-r from-orange-50 to-orange-100 p-4 rounded-xl border border-orange-200 mt-6">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xl font-bold text-orange-900">Total</span>
+                    <span className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-orange-700 bg-clip-text text-transparent">
+                      ${finalTotal.toFixed(2)}
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              {/* Payment Methods */}
-              <div className="mb-6">
-                <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center">
-                  <CreditCard className="h-4 w-4 mr-2" />
-                  Payment Method
-                </h4>
-                <div className="space-y-2">
+              {/* WoodMart Style Payment Methods */}
+              <div className="mb-8">
+                <div className="bg-gradient-to-r from-indigo-50 to-indigo-100 p-4 rounded-xl border border-indigo-200 mb-4">
+                  <h4 className="text-lg font-bold text-indigo-900 flex items-center">
+                    <CreditCard className="h-5 w-5 mr-3 text-indigo-600" />
+                    Payment Method
+                  </h4>
+                  <p className="text-indigo-700 text-sm mt-1">Choose your preferred payment option</p>
+                </div>
+                <div className="space-y-3">
                   {paymentMethods.map((method) => (
                     <label key={method.id} className={cn(
-                      "flex items-center",
+                      "flex items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-orange-300 hover:bg-orange-50 transition-all duration-200",
+                      form.paymentMethod === method.id && "border-orange-500 bg-orange-50",
                       (loading || showStripeForm) && "opacity-50 cursor-not-allowed"
                     )}>
                       <input
@@ -1532,9 +1560,9 @@ export function CheckoutPage({ className }: CheckoutPageProps) {
                         checked={form.paymentMethod === method.id}
                         onChange={(e) => handleFormChange('paymentMethod', e.target.value)}
                         disabled={loading || showStripeForm}
-                        className="mr-2"
+                        className="mr-4 w-5 h-5 text-orange-600 focus:ring-orange-500"
                       />
-                      <span className="text-sm">{method.title}</span>
+                      <span className="text-base font-medium text-gray-900">{method.title}</span>
                     </label>
                   ))}
                 </div>
@@ -1543,9 +1571,9 @@ export function CheckoutPage({ className }: CheckoutPageProps) {
               {/* Stripe Payment Form */}
               {showStripeForm && stripeClientSecret && currentOrder && (
                 <div className="mb-6">
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                    <h4 className="text-blue-800 font-medium mb-2">Complete Your Payment</h4>
-                    <p className="text-blue-600 text-sm">
+                  <div className="bg-pink-50 border border-pink-200 rounded-lg p-4 mb-4">
+                    <h4 className="text-pink-800 font-medium mb-2">Complete Your Payment</h4>
+                    <p className="text-pink-600 text-sm">
                       Order #{currentOrder.id} created. Complete payment below to finalize your purchase.
                     </p>
                   </div>
@@ -1594,9 +1622,9 @@ export function CheckoutPage({ className }: CheckoutPageProps) {
               {/* PayPal Payment Form */}
               {showPayPalForm && currentOrder && (
                 <div className="mb-6">
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                    <h4 className="text-blue-800 font-medium mb-2">Complete Your Payment</h4>
-                    <p className="text-blue-600 text-sm">
+                  <div className="bg-pink-50 border border-pink-200 rounded-lg p-4 mb-4">
+                    <h4 className="text-pink-800 font-medium mb-2">Complete Your Payment</h4>
+                    <p className="text-pink-600 text-sm">
                       Order #{currentOrder.id} created. Complete payment with PayPal below to finalize your purchase.
                     </p>
                   </div>
@@ -1627,24 +1655,27 @@ export function CheckoutPage({ className }: CheckoutPageProps) {
                 </div>
               )}
 
-              {/* Terms and Conditions */}
-              <div className="mb-6">
-                <div className="flex items-start space-x-2">
-                  <Checkbox
-                    id="agreeToTerms"
-                    checked={form.agreeToTerms}
-                    onCheckedChange={(checked) => handleFormChange('agreeToTerms', checked)}
-                  />
-                  <Label htmlFor="agreeToTerms" className="text-sm">
-                    I agree to the{' '}
-                    <Link href="/terms" className="text-blue-600 hover:underline">
-                      Terms and Conditions
-                    </Link>{' '}
-                    and{' '}
-                    <Link href="/privacy" className="text-blue-600 hover:underline">
-                      Privacy Policy
-                    </Link>
-                  </Label>
+              {/* WoodMart Style Terms and Conditions */}
+              <div className="mb-8">
+                <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                  <div className="flex items-start space-x-3">
+                    <Checkbox
+                      id="agreeToTerms"
+                      checked={form.agreeToTerms}
+                      onCheckedChange={(checked) => handleFormChange('agreeToTerms', checked)}
+                      className="mt-1"
+                    />
+                    <Label htmlFor="agreeToTerms" className="text-sm font-medium text-gray-700 leading-relaxed">
+                      I agree to the{' '}
+                      <Link href="/terms" className="text-orange-600 hover:text-orange-700 font-semibold hover:underline transition-colors">
+                        Terms and Conditions
+                      </Link>{' '}
+                      and{' '}
+                      <Link href="/privacy" className="text-orange-600 hover:text-orange-700 font-semibold hover:underline transition-colors">
+                        Privacy Policy
+                      </Link>
+                    </Label>
+                  </div>
                 </div>
               </div>
 
@@ -1655,12 +1686,12 @@ export function CheckoutPage({ className }: CheckoutPageProps) {
                 </div>
               )}
 
-              {/* Place Order Button - Hide when Stripe or PayPal form is shown */}
+              {/* WoodMart Style Place Order Button - Hide when Stripe or PayPal form is shown */}
               {!showStripeForm && !showPayPalForm && (
                 <Button
                   type="submit"
                   size="lg"
-                  className="w-full"
+                  className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
                   disabled={loading || !form.agreeToTerms}
                 >
                   {loading ? 'Processing...' : `Place Order - $${finalTotal.toFixed(2)}`}

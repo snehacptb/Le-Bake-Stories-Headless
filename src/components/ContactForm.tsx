@@ -102,7 +102,7 @@ export default function ContactForm({ className = '', onSuccess, onError }: Cont
               value={formData.firstName}
               onChange={handleInputChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-themes-pink-500 focus:border-transparent transition-colors"
               placeholder="Enter your first name"
             />
           </div>
@@ -118,7 +118,7 @@ export default function ContactForm({ className = '', onSuccess, onError }: Cont
               value={formData.lastName}
               onChange={handleInputChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-themes-pink-500 focus:border-transparent transition-colors"
               placeholder="Enter your last name"
             />
           </div>
@@ -136,7 +136,7 @@ export default function ContactForm({ className = '', onSuccess, onError }: Cont
             value={formData.email}
             onChange={handleInputChange}
             required
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-themes-pink-500 focus:border-transparent transition-colors"
             placeholder="Enter your email address"
           />
         </div>
@@ -152,7 +152,7 @@ export default function ContactForm({ className = '', onSuccess, onError }: Cont
             name="phone"
             value={formData.phone}
             onChange={handleInputChange}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-themes-pink-500 focus:border-transparent transition-colors"
             placeholder="Enter your phone number"
           />
         </div>
@@ -169,7 +169,7 @@ export default function ContactForm({ className = '', onSuccess, onError }: Cont
             value={formData.subject}
             onChange={handleInputChange}
             required
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-themes-pink-500 focus:border-transparent transition-colors"
             placeholder="Enter the subject of your message"
           />
         </div>
@@ -210,7 +210,7 @@ export default function ContactForm({ className = '', onSuccess, onError }: Cont
             className={`w-full px-6 py-3 text-white font-medium rounded-lg transition-colors ${
               isSubmitting
                 ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
+                : 'bg-themes-pink-600 hover:bg-themes-pink-700 focus:ring-2 focus:ring-themes-pink-500 focus:ring-offset-2'
             }`}
           >
             {isSubmitting ? (

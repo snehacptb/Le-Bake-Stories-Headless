@@ -71,7 +71,7 @@ export function BlogCard({
                 </div>
               )}
               <div className="flex-1 min-w-0">
-                <h3 className="font-medium text-sm line-clamp-2 group-hover:text-themes-blue-600 transition-colors mb-2">
+                <h3 className="font-medium text-sm line-clamp-2 group-hover:text-themes-pink-600 transition-colors mb-2">
                   {post.title.rendered}
                 </h3>
                 {showDate && (
@@ -138,7 +138,7 @@ export function BlogCard({
               </div>
 
               <Link href={`/blog/${post.slug}`}>
-                <h3 className="text-xl font-semibold mb-3 group-hover:text-themes-blue-600 transition-colors line-clamp-2">
+                <h3 className="text-xl font-semibold mb-3 group-hover:text-themes-pink-600 transition-colors line-clamp-2">
                   {post.title.rendered}
                 </h3>
               </Link>
@@ -222,7 +222,7 @@ export function BlogCard({
           {/* Title */}
           <Link href={`/blog/${post.slug}`}>
             <h3 className={cn(
-              "font-semibold mb-3 group-hover:text-themes-blue-600 transition-colors line-clamp-2",
+              "font-semibold mb-3 group-hover:text-themes-pink-600 transition-colors line-clamp-2",
               variant === 'featured' ? "text-2xl" : "text-xl"
             )}>
               {post.title.rendered}

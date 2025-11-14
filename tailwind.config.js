@@ -53,6 +53,18 @@ module.exports = {
         },
         // Themes-inspired color palette with dark mode support
         themes: {
+          pink: {
+            50: '#fef7f7',
+            100: '#feeaea',
+            200: '#fdd8d8',
+            300: '#fbbfbf',
+            400: '#f89b9b',
+            500: '#ffc9d9',
+            600: '#f472b6',
+            700: '#e879a7',
+            800: '#d946ef',
+            900: '#c026d3',
+          },
           blue: {
             50: '#eff6ff',
             100: '#dbeafe',

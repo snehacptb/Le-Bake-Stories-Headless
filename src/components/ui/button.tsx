@@ -18,9 +18,9 @@ const buttonVariants = cva(
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
         // Themes-specific variants
-        themes: "bg-themes-blue-600 text-white hover:bg-themes-blue-700 shadow-lg",
-        "themes-outline": "border-2 border-themes-blue-600 text-themes-blue-600 hover:bg-themes-blue-600 hover:text-white",
-        "themes-ghost": "text-themes-blue-600 hover:bg-themes-blue-50",
+        themes: "bg-themes-pink-600 text-white hover:bg-themes-pink-700 shadow-lg",
+        "themes-outline": "border-2 border-themes-pink-600 text-themes-pink-600 hover:bg-themes-pink-600 hover:text-white",
+        "themes-ghost": "text-themes-pink-600 hover:bg-themes-pink-50",
       },
       size: {
         default: "h-10 px-4 py-2",

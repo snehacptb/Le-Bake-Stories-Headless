@@ -12,11 +12,11 @@ const nextConfig = {
       },
       {
         protocol: 'http',
-        hostname: 'https://manila.esdemo.in',
+        hostname: 'manila.esdemo.in',
       },
       {
         protocol: 'https',
-        hostname: 'https://manila.esdemo.in',
+        hostname: 'manila.esdemo.in',
       },
       {
         protocol: 'https',
