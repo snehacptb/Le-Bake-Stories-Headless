@@ -1,481 +1,299 @@
-import { Metadata } from 'next'
-import { notFound } from 'next/navigation'
+'use client'
+
+import { useState, useEffect } from 'react'
 import { ClientLayout } from '@/components/themes/client-layout'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { wordpressAPI } from '@/lib/api'
-import { WordPressPage } from '@/types'
+import { Card, CardContent } from '@/components/ui/card'
 import Image from 'next/image'
-import { 
-  Users,
-  Target,
+import Link from 'next/link'
+import {
+  ChevronRight,
+  Truck,
+  Headphones,
+  CreditCard,
+  Zap,
+  Star,
   Award,
-  Heart,
-  ArrowRight,
-  CheckCircle,
-  Lightbulb,
-  Globe
+  Shield,
+  Heart
 } from 'lucide-react'
 
-// Use WordPress API instance
-const wpApi = wordpressAPI
+interface WordPressPage {
+  id: number
+  title: {
+    rendered: string
+  }
+  content: {
+    rendered: string
+  }
+  excerpt: {
+    rendered: string
+  }
+  featured_media?: number
+  _embedded?: {
+    'wp:featuredmedia'?: Array<{
+      source_url: string
+      alt_text: string
+    }>
+  }
+}
 
-// Helper functions for processing WordPress content
-function processWordPressContent(content: string): string {
-  if (!content) return ''
-  
-  const wpUrl = process.env.NEXT_PUBLIC_WORDPRESS_URL || 'http://headless-wp.local'
-  const frontendUrl = process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3000'
-  
-  let processedContent = content.replace(
-    new RegExp(wpUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'),
-    frontendUrl
+export default function AboutPage() {
+  const [page, setPage] = useState<WordPressPage | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetchAboutPage()
+  }, [])
+
+  const fetchAboutPage = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      // Fetch the about page from WordPress
+      const res = await fetch('/api/pages?slug=about-us', { cache: 'no-store' })
+      const json = await res.json()
+
+      if (json.success && json.data) {
+        setPage(json.data)
+      } else {
+        // Try alternate slug
+        const res2 = await fetch('/api/pages?slug=about', { cache: 'no-store' })
+        const json2 = await res2.json()
+
+        if (json2.success && json2.data) {
+          setPage(json2.data)
+        } else {
+          setError('About page not found')
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching about page:', error)
+      setError('Failed to load about page')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <ClientLayout>
+        <div className="min-h-screen bg-gray-50">
+          <div className="bg-white border-b">
+            <div className="container mx-auto px-4 py-4">
+              <div className="h-4 bg-gray-200 rounded w-1/4 animate-pulse"></div>
+            </div>
+          </div>
+          <div className="container mx-auto px-4 py-12">
+            <div className="animate-pulse">
+              <div className="h-12 bg-gray-200 rounded mb-8 w-1/3 mx-auto"></div>
+              <div className="space-y-4 max-w-4xl mx-auto">
+                <div className="h-4 bg-gray-200 rounded"></div>
+                <div className="h-4 bg-gray-200 rounded"></div>
+                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ClientLayout>
+    )
+  }
+
+  if (error || !page) {
+    return (
+      <ClientLayout>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-800 mb-4">
+              {error || 'About page not found'}
+            </h1>
+            <p className="text-gray-600 mb-4">
+              Please create an &quot;About Us&quot; page in your WordPress backend.
+            </p>
+            <Link
+              href="/"
+              className="text-purple-700 hover:text-purple-900 font-medium"
+            >
+              Go to Homepage
+            </Link>
+          </div>
+        </div>
+      </ClientLayout>
+    )
+  }
+
+  const pageTitle = page.title.rendered
+  const pageContent = page.content.rendered
+
+  // Extract first paragraph for intro
+  const introMatch = pageContent.match(/<p[^>]*>([\s\S]*?)<\/p>/)
+  const introText = introMatch
+    ? introMatch[1].replace(/<[^>]*>/g, '').trim()
+    : page.excerpt.rendered.replace(/<[^>]*>/g, '').trim()
+
+  // Extract images from content
+  const imageMatches = Array.from(
+    pageContent.matchAll(/<img[^>]*src="([^"]*)"[^>]*alt="([^"]*)"[^>]*\/?>/g)
   )
-  
-  processedContent = processedContent.replace(
-    /href="\/([^"]*?)"/g,
-    `href="${frontendUrl}/$1"`
-  )
-  
-  return processedContent
-}
+  const contentImages = imageMatches.map((match) => ({
+    src: match[1],
+    alt: match[2] || 'About us image',
+  }))
 
-function parseContentIntoSections(content: string, pageType: 'about' | 'services' | 'default' = 'default') {
-  if (!content) return []
-  
-  const firstHeadingMatch = content.match(/<h[1-6][^>]*>([^<]+)<\/h[1-6]>/)
-  const firstParagraphMatch = content.match(/<p[^>]*>([^<]+)<\/p>/)
-  
-  const h2Sections = content.split(/<h2[^>]*>/)
-  const parsedSections = []
-  
-  for (let i = 1; i < h2Sections.length; i++) {
-    const section = h2Sections[i]
-    const titleMatch = section.match(/^([^<]+)/)
-    const title = titleMatch ? titleMatch[1].trim() : `Section ${i}`
-    
-    if (firstHeadingMatch && title === firstHeadingMatch[1].trim()) {
-      continue
-    }
-    
-    const contentMatch = section.match(/<\/h2>\s*([\s\S]+?)(?=<h2|$)/)
-    const sectionContent = contentMatch ? contentMatch[1] : section.replace(/^[^<]*<\/h2>\s*/, '')
-    
-    // Extract image from section content
-    const imageMatch = sectionContent.match(/<img[^>]*src="([^"]*)"[^>]*alt="([^"]*)"[^>]*\/?>/)
-    const imageSrc = imageMatch ? imageMatch[1] : undefined
-    const imageAlt = imageMatch ? imageMatch[2] : ''
-    
-    const cleanContent = sectionContent
-      .replace(/<[^>]*>/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim()
-    
-    if (title && cleanContent) {
-      // Process image URL to use correct domain
-      const processedImageSrc = imageSrc ? (() => {
-        const processed = processWordPressContent(`<img src="${imageSrc}">`)
-        const match = processed.match(/src="([^"]*)"/)
-        return match ? match[1] : imageSrc
-      })() : undefined
-      
-      parsedSections.push({
-        title,
-        content: cleanContent.substring(0, 200) + (cleanContent.length > 200 ? '...' : ''),
-        image: processedImageSrc,
-        imageAlt: imageAlt || title,
-        icon: getIconForSection(title, i - 1, pageType)
-      })
-    }
-  }
-  
-  if (parsedSections.length === 0) {
-    const h3Sections = content.split(/<h3[^>]*>/)
-    
-    for (let i = 1; i < h3Sections.length; i++) {
-      const section = h3Sections[i]
-      const titleMatch = section.match(/^([^<]+)/)
-      const title = titleMatch ? titleMatch[1].trim() : `Section ${i}`
-      
-      if (firstHeadingMatch && title === firstHeadingMatch[1].trim()) {
-        continue
-      }
-      
-      const contentMatch = section.match(/<\/h3>\s*([\s\S]+?)(?=<h3|$)/)
-      const sectionContent = contentMatch ? contentMatch[1] : section.replace(/^[^<]*<\/h3>\s*/, '')
-      
-      // Extract image from section content
-      const imageMatch = sectionContent.match(/<img[^>]*src="([^"]*)"[^>]*alt="([^"]*)"[^>]*\/?>/)
-      const imageSrc = imageMatch ? imageMatch[1] : undefined
-      const imageAlt = imageMatch ? imageMatch[2] : ''
-      
-      const cleanContent = sectionContent
-        .replace(/<[^>]*>/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim()
-      
-      if (title && cleanContent) {
-        // Process image URL to use correct domain
-        const processedImageSrc = imageSrc ? (() => {
-          const processed = processWordPressContent(`<img src="${imageSrc}">`)
-          const match = processed.match(/src="([^"]*)"/)
-          return match ? match[1] : imageSrc
-        })() : undefined
-        
-        parsedSections.push({
-          title,
-          content: cleanContent.substring(0, 200) + (cleanContent.length > 200 ? '...' : ''),
-          image: processedImageSrc,
-          imageAlt: imageAlt || title,
-          icon: getIconForSection(title, i - 1, pageType)
-        })
-      }
-    }
-  }
-  
-  return parsedSections.length > 0 ? parsedSections : []
-}
-
-function getIconForSection(title: string, index: number, pageType: 'about' | 'services' | 'default' = 'default') {
-  const titleLower = title.toLowerCase()
-  
-  // About page and general icons
-  if (titleLower.includes('mission') || titleLower.includes('goal') || titleLower.includes('purpose')) {
-    return Target
-  } else if (titleLower.includes('value') || titleLower.includes('principle') || titleLower.includes('belief')) {
-    return Heart
-  } else if (titleLower.includes('innovation') || titleLower.includes('idea') || titleLower.includes('creative')) {
-    return Lightbulb
-  } else if (titleLower.includes('team') || titleLower.includes('people') || titleLower.includes('community')) {
-    return Users
-  } else if (titleLower.includes('service') || titleLower.includes('offer') || titleLower.includes('provide')) {
-    return Globe
-  } else if (titleLower.includes('achievement') || titleLower.includes('success') || titleLower.includes('award')) {
-    return Award
-  } else {
-    const icons = [Target, Heart, Lightbulb, Users, Globe, Award]
-    return icons[index % icons.length]
-  }
-}
-
-async function getAboutPage(): Promise<WordPressPage | null> {
-  try {
-    console.log('🔍 Fetching About page from WordPress API...')
-    
-    // Try to fetch via API route first
-    const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/pages?slug=about`, {
-      cache: 'no-store',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-    
-    if (response.ok) {
-      const result = await response.json()
-      if (result.success && result.data) {
-        console.log('✅ About page fetched successfully via API route')
-        console.log('📄 Page title:', result.data.title?.rendered)
-        console.log('📄 Content length:', result.data.content?.rendered?.length || 0)
-        return result.data
-      }
-    }
-    
-    console.log('⚠️ API route failed, trying direct API call...')
-    // Fallback to direct API call
-    const page = await wpApi.getPage('about')
-    if (page) {
-      console.log('✅ About page fetched via direct API call')
-      console.log('📄 Page title:', page.title?.rendered)
-      console.log('📄 Content length:', page.content?.rendered?.length || 0)
-    } else {
-      console.log('❌ No About page found in WordPress')
-    }
-    return page
-  } catch (error) {
-    console.error('❌ Error fetching About page:', error)
-    return null
-  }
-}
-
-export async function generateMetadata(): Promise<Metadata> {
-  const page = await getAboutPage()
-  
-  return {
-    title: page?.title?.rendered || 'About Us',
-    description: page?.excerpt?.rendered?.replace(/<[^>]*>/g, '') || 'Learn more about our company, mission, and values.',
-    openGraph: {
-      title: page?.title?.rendered || 'About Us',
-      description: page?.excerpt?.rendered?.replace(/<[^>]*>/g, '') || 'Learn more about our company, mission, and values.',
-      type: 'website',
-    },
-  }
-}
-
-export default async function AboutPage() {
-  const page = await getAboutPage()
-
-  // Extract content from WordPress page or use fallback content
-  const pageTitle = page?.title?.rendered || 'About Us'
-  const pageContent = page?.content?.rendered || ''
-  const pageExcerpt = page?.excerpt?.rendered?.replace(/<[^>]*>/g, '') || 'Learn more about our company, mission, and values.'
-  
-  // Get featured image if available
-  const featuredImage = page?._embedded?.['wp:featuredmedia']?.[0]?.source_url
+  // Get featured image
+  const featuredImage = page._embedded?.['wp:featuredmedia']?.[0]?.source_url
 
   return (
     <ClientLayout>
-      {/* Hero Section */}
-      <section className="py-12 md:py-16 lg:py-20 bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-white">
-        <div className="container mx-auto px-4 text-center">
-          <Badge variant="secondary" className="mb-4 md:mb-6 bg-white/20 text-white border-white/30">
-            About Us
-          </Badge>
-          
-          <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6">
-            {pageTitle}
-          </h1>
-          
-          <p className="text-base md:text-xl lg:text-2xl text-blue-100 mb-6 md:mb-8 max-w-3xl mx-auto px-4">
-            {pageExcerpt}
-          </p>
+      {/* Breadcrumb */}
+      <div className="bg-white border-b">
+        <div className="container mx-auto px-4 py-4">
+          <nav className="flex items-center text-sm text-gray-600">
+            <Link href="/" className="hover:text-purple-700 transition-colors">
+              Home
+            </Link>
+            <ChevronRight className="h-4 w-4 mx-2" />
+            <span className="text-gray-900 font-medium">{pageTitle}</span>
+          </nav>
+        </div>
+      </div>
+
+      {/* Title Section */}
+      <section className="py-12 md:py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              {pageTitle}
+            </h1>
+          </div>
         </div>
       </section>
 
-      {/* Featured Image Section */}
+      {/* Featured Image */}
       {featuredImage && (
-        <section className="py-8 md:py-12 lg:py-16">
+        <section className="py-8 md:py-12 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
-              <img
-                src={featuredImage}
-                alt={pageTitle}
-                className="w-full h-48 md:h-64 lg:h-96 object-cover rounded-lg shadow-lg"
-              />
+              <div className="relative h-64 md:h-96 overflow-hidden rounded-lg shadow-lg">
+                <Image
+                  src={featuredImage}
+                  alt={pageTitle}
+                  fill
+                  className="object-cover"
+                />
+              </div>
             </div>
           </div>
         </section>
       )}
 
-      {/* WordPress Content - Primary Content */}
-      {pageContent ? (() => {
-        // Process About Us content if available
-        const processedAboutContent = processWordPressContent(pageContent)
-        const aboutSections = parseContentIntoSections(processedAboutContent, 'about')
-        
-        return aboutSections.length > 0 ? (
-          <section className="py-12 md:py-16 bg-gray-50">
-            <div className="container mx-auto px-4">
-              <div className="text-center mb-8 md:mb-12">
-                <Badge variant="info" className="mb-3 md:mb-4">About Us</Badge>
-                {(() => {
-                  const headingMatch = processedAboutContent.match(/<h[1-6][^>]*>([^<]+)<\/h[1-6]>/)
-                  return headingMatch ? (
-                    <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 md:mb-4">
-                      {headingMatch[1].trim()}
-                    </h2>
-                  ) : (
-                    <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 md:mb-4">
-                      Learn About Us
-                    </h2>
-                  )
-                })()}
-                
-                {(() => {
-                  const paragraphMatch = processedAboutContent.match(/<p[^>]*>([^<]+)<\/p>/)
-                  return paragraphMatch ? (
-                    <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto px-4">
-                      {paragraphMatch[1].trim()}
-                    </p>
-                  ) : (
-                    <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto px-4">
-                      Learn more about our mission, values, and the services we provide to our community.
-                    </p>
-                  )
-                })()}
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                {aboutSections.map((section: any, index: number) => {
-                  const IconComponent = section.icon
-                  const colors = [
-                    { bg: 'bg-blue-100', text: 'text-blue-600' },
-                    { bg: 'bg-green-100', text: 'text-green-600' },
-                    { bg: 'bg-purple-100', text: 'text-purple-600' },
-                    { bg: 'bg-orange-100', text: 'text-orange-600' },
-                    { bg: 'bg-red-100', text: 'text-red-600' },
-                    { bg: 'bg-indigo-100', text: 'text-indigo-600' }
-                  ]
-                  const colorSet = colors[index % colors.length]
-                  
-                  return (
-                    <Card key={index} className="text-center hover:shadow-lg transition-all duration-300 group">
-                      <CardContent className="p-6 md:p-8">
-                        {section.image ? (
-                          <div className="relative w-14 h-14 md:w-16 md:h-16 mx-auto mb-4 md:mb-6 group-hover:scale-110 transition-transform duration-300">
-                            <Image
-                              src={section.image}
-                              alt={section.imageAlt || section.title}
-                              fill
-                              sizes="(max-width: 768px) 56px, 64px"
-                              className="object-cover rounded-full"
-                            />
-                          </div>
-                        ) : (
-                          <div className={`${colorSet.bg} w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6 group-hover:scale-110 transition-transform duration-300`}>
-                            <IconComponent className={`h-6 w-6 md:h-8 md:w-8 ${colorSet.text}`} />
-                          </div>
-                        )}
-                        <h3 className="text-lg md:text-xl font-semibold mb-3 md:mb-4">{section.title}</h3>
-                        <p className="text-sm md:text-base text-gray-600">
-                          {section.content}
-                        </p>
-                      </CardContent>
-                    </Card>
-                  )
-                })}
+      {/* Introduction Section */}
+      {introText && (
+        <section className="py-12 md:py-16 bg-gray-50">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto">
+              <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed text-center">
+                {introText}
               </div>
             </div>
-          </section>
-        ) : (
-          <section className="py-12 md:py-16">
-            <div className="container mx-auto px-4">
-              <div className="max-w-4xl mx-auto">
-                <div 
-                  dangerouslySetInnerHTML={{ __html: processedAboutContent }}
-                  className="wordpress-content"
-                />
-              </div>
-            </div>
-          </section>
-        )
-      })() : (
-        /* Fallback Content - Only show when no WordPress content */
-        <>
-          {/* Our Mission & Values - Fallback */}
-          <section className="py-12 md:py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-8 md:mb-12">
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 md:mb-4">
-              Our Mission & Values
-            </h2>
-            <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto px-4">
-              We're driven by a clear mission and guided by strong values that shape everything we do.
-            </p>
           </div>
+        </section>
+      )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-            <Card className="text-center">
-              <CardHeader>
-                <div className="bg-blue-100 p-4 rounded-full w-16 h-16 mx-auto mb-4">
-                  <Target className="h-8 w-8 text-blue-600 mx-auto" />
-                </div>
-                <CardTitle className="text-xl">Our Mission</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">
-                  To deliver exceptional solutions that drive success and create lasting value for our clients.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center">
-              <CardHeader>
-                <div className="bg-green-100 p-4 rounded-full w-16 h-16 mx-auto mb-4">
-                  <Award className="h-8 w-8 text-green-600 mx-auto" />
-                </div>
-                <CardTitle className="text-xl">Excellence</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">
-                  We strive for excellence in everything we do, setting high standards and exceeding expectations.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center">
-              <CardHeader>
-                <div className="bg-purple-100 p-4 rounded-full w-16 h-16 mx-auto mb-4">
-                  <Users className="h-8 w-8 text-purple-600 mx-auto" />
-                </div>
-                <CardTitle className="text-xl">Collaboration</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">
-                  We believe in the power of teamwork and building strong partnerships with our clients.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center">
-              <CardHeader>
-                <div className="bg-orange-100 p-4 rounded-full w-16 h-16 mx-auto mb-4">
-                  <Heart className="h-8 w-8 text-orange-600 mx-auto" />
-                </div>
-                <CardTitle className="text-xl">Integrity</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">
-                  We operate with honesty, transparency, and ethical practices in all our business dealings.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-          </section>
-
-      {/* Why Choose Us */}
-      <section className="py-12 md:py-16">
+      {/* Main Content */}
+      <section className="py-12 md:py-16 bg-white">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center">
-            <div>
-              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 md:mb-6">
-                Why Choose Us?
-              </h2>
-              <p className="text-base md:text-lg text-gray-600 mb-6 md:mb-8">
-                We combine expertise, innovation, and dedication to deliver results that matter.
-              </p>
-
-              <div className="space-y-4">
-                {[
-                  'Proven track record of success',
-                  'Expert team with years of experience',
-                  'Customer-focused approach',
-                  'Innovative solutions tailored to your needs',
-                  'Reliable support and maintenance',
-                  'Competitive pricing and transparent costs'
-                ].map((item, index) => (
-                  <div key={index} className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-green-600 mr-3 flex-shrink-0" />
-                    <span className="text-gray-700">{item}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-lg">
-              <div className="text-center">
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                  Ready to Get Started?
-                </h3>
-                <p className="text-gray-600 mb-6">
-                  Let's discuss how we can help you achieve your goals.
-                </p>
-                <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
-                  Contact Us Today
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </div>
-            </div>
+          <div className="max-w-4xl mx-auto">
+            <div
+              className="wordpress-content prose prose-lg max-w-none"
+              dangerouslySetInnerHTML={{ __html: pageContent }}
+            />
           </div>
         </div>
       </section>
 
-   
-
-   
-        </>
+      {/* Content Images Section */}
+      {contentImages.length > 0 && (
+        <section className="py-12 md:py-16 bg-gray-50">
+          <div className="container mx-auto px-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+              {contentImages.slice(0, 2).map((image, index) => (
+                <div
+                  key={index}
+                  className="relative h-64 md:h-96 overflow-hidden rounded-lg shadow-lg"
+                >
+                  <Image
+                    src={image.src}
+                    alt={image.alt}
+                    fill
+                    className="object-cover hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
       )}
+
+      {/* Why Choose Us Section */}
+      <section className="py-12 md:py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Why Choose Us
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              We curate an exclusive collection of the finest luxury goods from around the globe
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
+            {[
+              {
+                icon: Star,
+                title: 'Exclusive Selection',
+                description:
+                  'Curated collection of coveted luxury brands from around the world',
+              },
+              {
+                icon: Award,
+                title: 'Exceptional Quality',
+                description:
+                  'Impeccable craftsmanship and attention to detail in every product',
+              },
+              {
+                icon: Shield,
+                title: 'Trust and Integrity',
+                description:
+                  'Built on principles of transparency and customer satisfaction',
+              },
+              {
+                icon: Heart,
+                title: 'Experience Luxury',
+                description: 'Redefining luxury shopping with personalized service',
+              },
+            ].map((item, index) => (
+              <Card
+                key={index}
+                className="text-center hover:shadow-xl transition-all duration-300 group border-0"
+              >
+                <CardContent className="p-8">
+                  <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-purple-700 transition-colors duration-300">
+                    <item.icon className="h-8 w-8 text-purple-700 group-hover:text-white transition-colors duration-300" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-3 text-gray-900">
+                    {item.title}
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed">{item.description}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      
     </ClientLayout>
   )
 }

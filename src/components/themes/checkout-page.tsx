@@ -1276,7 +1276,19 @@ export function CheckoutPage({ className }: CheckoutPageProps) {
                     />
                   )}
                 </div>
-                <div className="md:col-span-2">
+                <div>
+                  <Label htmlFor="billing_postcode" className="text-sm text-gray-700 mb-2 block">
+                    Postcode <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="billing_postcode"
+                    value={form.billing.postcode}
+                    onChange={(e) => handleInputChange('billing', 'postcode', e.target.value)}
+                    required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-transparent"
+                  />
+                </div>
+                <div>
                   <Label htmlFor="billing_phone" className="text-sm text-gray-700 mb-2 block">
                     Phone <span className="text-red-500">*</span>
                   </Label>
@@ -1641,8 +1653,24 @@ export function CheckoutPage({ className }: CheckoutPageProps) {
                 </div>
               )}
 
-              {/* Privacy Policy Text */}
+              {/* Terms and Conditions Checkbox */}
               <div className="mb-6 border-t border-gray-200 pt-6">
+                <div className="flex items-start gap-3 mb-4">
+                  <Checkbox
+                    id="agreeToTerms"
+                    checked={form.agreeToTerms}
+                    onCheckedChange={(checked) => handleFormChange('agreeToTerms', checked)}
+                    className="w-5 h-5 mt-0.5"
+                  />
+                  <Label htmlFor="agreeToTerms" className="text-sm text-gray-700 leading-relaxed cursor-pointer">
+                    I have read and agree to the website{' '}
+                    <Link href="/terms" className="text-gray-900 underline hover:text-gray-700">
+                      terms and conditions
+                    </Link>{' '}
+                    <span className="text-red-500">*</span>
+                  </Label>
+                </div>
+                
                 <p className="text-sm text-gray-600 leading-relaxed">
                   Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our{' '}
                   <Link href="/privacy" className="text-gray-900 underline hover:text-gray-700">

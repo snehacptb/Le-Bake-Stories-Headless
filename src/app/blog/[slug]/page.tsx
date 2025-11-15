@@ -6,10 +6,10 @@ import Link from 'next/link'
 import Image from 'next/image'
 // Use local API routes to avoid browser CORS with WordPress
 import { WordPressPost } from '@/types'
-import { Calendar, User, ArrowLeft, Share2, Tag, Clock } from 'lucide-react'
+import { Calendar, User, ArrowLeft, Share2, Tag, Clock, ChevronRight, MessageCircle, Facebook, Twitter, Linkedin, Send } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { ClientLayout } from '@/components/themes/client-layout'
 
@@ -115,193 +115,290 @@ export default function BlogPostPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="container mx-auto px-4 py-12">
-          <div className="max-w-4xl mx-auto">
-            <div className="animate-pulse">
-              <div className="h-8 bg-gray-200 rounded mb-4 w-1/4"></div>
-              <div className="h-12 bg-gray-200 rounded mb-6"></div>
-              <div className="h-6 bg-gray-200 rounded mb-8 w-1/3"></div>
-              <div className="h-64 bg-gray-200 rounded mb-8"></div>
-              <div className="space-y-4">
-                <div className="h-4 bg-gray-200 rounded"></div>
-                <div className="h-4 bg-gray-200 rounded"></div>
-                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+      <ClientLayout>
+        <div className="min-h-screen bg-gray-50">
+          <div className="bg-white border-b">
+            <div className="container mx-auto px-4 py-4">
+              <div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse"></div>
+            </div>
+          </div>
+          <div className="container mx-auto px-4 py-12">
+            <div className="flex flex-col lg:flex-row gap-8">
+              <div className="flex-1">
+                <div className="animate-pulse">
+                  <div className="bg-white p-8 rounded-lg shadow-sm mb-8">
+                    <div className="h-12 bg-gray-200 rounded mb-6"></div>
+                    <div className="h-6 bg-gray-200 rounded mb-8 w-1/3"></div>
+                  </div>
+                  <div className="h-64 bg-gray-200 rounded-lg mb-8"></div>
+                  <div className="bg-white p-8 rounded-lg shadow-sm">
+                    <div className="space-y-4">
+                      <div className="h-4 bg-gray-200 rounded"></div>
+                      <div className="h-4 bg-gray-200 rounded"></div>
+                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                    </div>
+                  </div>
+                </div>
               </div>
+              <aside className="lg:w-80">
+                <div className="bg-white p-6 rounded-lg shadow-sm animate-pulse">
+                  <div className="h-6 bg-gray-200 rounded mb-4 w-1/2"></div>
+                  <div className="space-y-3">
+                    <div className="h-4 bg-gray-200 rounded"></div>
+                    <div className="h-4 bg-gray-200 rounded"></div>
+                    <div className="h-4 bg-gray-200 rounded"></div>
+                  </div>
+                </div>
+              </aside>
             </div>
           </div>
         </div>
-      </div>
+      </ClientLayout>
     )
   }
 
   if (error || !post) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">
-            {error || 'Post not found'}
-          </h1>
-          <Link href="/blog">
-            <Button>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Blog
-            </Button>
-          </Link>
+      <ClientLayout>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-800 mb-4">
+              {error || 'Post not found'}
+            </h1>
+            <Link href="/blog">
+              <Button>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Blog
+              </Button>
+            </Link>
+          </div>
         </div>
-      </div>
+      </ClientLayout>
     )
+  }
+
+  const getCategoryName = () => {
+    if (post.categories && post.categories.length > 0) {
+      const category = categories.find(cat => cat.id === post.categories[0])
+      return category ? category.name : 'Uncategorized'
+    }
+    return 'Uncategorized'
+  }
+
+  const handleSocialShare = (platform: string) => {
+    const url = encodeURIComponent(window.location.href)
+    const title = encodeURIComponent(post?.title.rendered || '')
+
+    const shareUrls: { [key: string]: string } = {
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}`,
+      twitter: `https://twitter.com/intent/tweet?url=${url}&text=${title}`,
+      pinterest: `https://pinterest.com/pin/create/button/?url=${url}&description=${title}`,
+      linkedin: `https://www.linkedin.com/shareArticle?mini=true&url=${url}&title=${title}`,
+      telegram: `https://t.me/share/url?url=${url}&text=${title}`
+    }
+
+    if (shareUrls[platform]) {
+      window.open(shareUrls[platform], '_blank', 'width=600,height=400')
+    }
   }
 
   return (
     <ClientLayout>
       <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        {/* Back to Blog Link */}
-        <div className="mb-8">
-          <Link href="/blog">
-            <Button variant="ghost" className="text-blue-600 hover:text-blue-700">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Blog
-            </Button>
-          </Link>
+        {/* Breadcrumb */}
+        <div className="bg-white border-b">
+          <div className="container mx-auto px-4 py-4">
+            <nav className="flex items-center text-sm text-gray-600">
+              <Link href="/" className="hover:text-purple-700 transition-colors">
+                Home
+              </Link>
+              <ChevronRight className="h-4 w-4 mx-2" />
+              <Link href="/blog" className="hover:text-purple-700 transition-colors">
+                Blog
+              </Link>
+              <ChevronRight className="h-4 w-4 mx-2" />
+              <span className="text-gray-400">{getCategoryName()}</span>
+              <ChevronRight className="h-4 w-4 mx-2" />
+              <span className="text-gray-900 font-medium truncate">{post.title.rendered}</span>
+            </nav>
+          </div>
         </div>
 
-        <article className="max-w-4xl mx-auto">
-          {/* Article Header */}
-          <header className="mb-8">
-            {/* Categories */}
-            {post.categories && post.categories.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-4">
-                {post.categories.map((categoryId) => {
-                  const category = categories.find(cat => cat.id === categoryId)
-                  return category ? (
-                    <Badge key={categoryId} variant="secondary">
-                      <Tag className="h-3 w-3 mr-1" />
-                      {category.name}
-                    </Badge>
-                  ) : null
-                })}
-              </div>
-            )}
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Main Content */}
+          <article className="flex-1">
+            {/* Article Header */}
+            <header className="mb-8 bg-white p-6 md:p-8 rounded-lg shadow-sm">
+              {/* Title */}
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 leading-tight">
+                {post.title.rendered}
+              </h1>
 
-            {/* Title */}
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
-              {post.title.rendered}
-            </h1>
-
-            {/* Meta Information */}
-            <div className="flex flex-wrap items-center gap-6 text-gray-600 mb-6">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                <span>{formatDate(post.date)}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                <span>Author</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4" />
-                <span>{getReadingTime(post.content.rendered)}</span>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleShare}
-                className="text-gray-600 hover:text-gray-800"
-              >
-                <Share2 className="h-4 w-4 mr-2" />
-                Share
-              </Button>
-            </div>
-
-            <Separator className="mb-8" />
-          </header>
-
-          {/* Featured Image */}
-          {post.featured_media && (
-            <div className="relative h-64 md:h-96 mb-8 rounded-lg overflow-hidden">
-              <Image
-                src={`/api/media/${post.featured_media}`}
-                alt={post.title.rendered}
-                fill
-                className="object-cover"
-                priority
-              />
-            </div>
-          )}
-
-          {/* Article Content */}
-          <div 
-            className="prose prose-lg max-w-none mb-12"
-            dangerouslySetInnerHTML={{ __html: post.content.rendered }}
-          />
-
-          {/* Article Footer */}
-          <footer className="border-t pt-8">
-            {/* Tags */}
-            {post.tags && post.tags.length > 0 && (
-              <div className="mb-8">
-                <h3 className="text-lg font-semibold mb-4">Tags</h3>
-                <div className="flex flex-wrap gap-2">
-                  {post.tags.map((tagId) => (
-                    <Badge key={tagId} variant="outline">
-                      #{tagId}
-                    </Badge>
-                  ))}
+              {/* Meta Information */}
+              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-6">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                    <User className="h-4 w-4 text-gray-600" />
+                  </div>
+                  <span className="font-medium">tbmahesh</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  <span>{formatDate(post.date)}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <MessageCircle className="h-4 w-4" />
+                  <span>0 Comments</span>
                 </div>
               </div>
+            </header>
+
+            {/* Featured Image */}
+            {post.featured_media && (
+              <div className="relative h-64 md:h-96 mb-8 rounded-lg overflow-hidden shadow-md">
+                <Image
+                  src={`/api/media/${post.featured_media}`}
+                  alt={post.title.rendered}
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              </div>
             )}
 
-            {/* Share Section */}
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h3 className="text-lg font-semibold mb-2">Share this article</h3>
-                <p className="text-gray-600">Help others discover this content</p>
-              </div>
-              <Button onClick={handleShare}>
-                <Share2 className="h-4 w-4 mr-2" />
-                Share
-              </Button>
+            {/* Article Content */}
+            <div className="bg-white p-6 md:p-8 rounded-lg shadow-sm mb-8">
+              <div
+                className="prose prose-lg max-w-none"
+                dangerouslySetInnerHTML={{ __html: post.content.rendered }}
+              />
             </div>
-          </footer>
-        </article>
 
-        {/* Related Posts */}
-        {relatedPosts.length > 0 && (
-          <section className="max-w-4xl mx-auto mt-16">
-            <h2 className="text-2xl font-bold mb-8">Related Articles</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {relatedPosts.map((relatedPost) => (
-                <Card key={relatedPost.id} className="group hover:shadow-lg transition-shadow">
-                  {relatedPost.featured_media && (
-                    <div className="relative h-40 overflow-hidden rounded-t-lg">
-                      <Image
-                        src={`/api/media/${relatedPost.featured_media}`}
-                        alt={relatedPost.title.rendered}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
-                  )}
-                  <CardContent className="p-4">
-                    <h3 className="font-semibold mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
-                      <Link href={`/blog/${relatedPost.slug}`}>
-                        {relatedPost.title.rendered}
-                      </Link>
-                    </h3>
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                      {relatedPost.excerpt.rendered.replace(/<[^>]*>/g, '')}
-                    </p>
-                    <div className="text-xs text-gray-500">
-                      {formatDate(relatedPost.date)}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+            {/* Social Share Section */}
+            <div className="bg-white p-6 md:p-8 rounded-lg shadow-sm mb-8">
+              <h3 className="text-lg font-semibold mb-4">Share this post</h3>
+              <div className="flex flex-wrap gap-3">
+                <Button
+                  onClick={() => handleSocialShare('facebook')}
+                  className="bg-[#3b5998] hover:bg-[#2d4373] text-white"
+                  size="sm"
+                >
+                  <Facebook className="h-4 w-4 mr-2" />
+                  Facebook
+                </Button>
+                <Button
+                  onClick={() => handleSocialShare('twitter')}
+                  className="bg-[#1da1f2] hover:bg-[#1a8cd8] text-white"
+                  size="sm"
+                >
+                  <Twitter className="h-4 w-4 mr-2" />
+                  Twitter
+                </Button>
+                <Button
+                  onClick={() => handleSocialShare('pinterest')}
+                  className="bg-[#bd081c] hover:bg-[#8c0615] text-white"
+                  size="sm"
+                >
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Pinterest
+                </Button>
+                <Button
+                  onClick={() => handleSocialShare('linkedin')}
+                  className="bg-[#0077b5] hover:bg-[#005582] text-white"
+                  size="sm"
+                >
+                  <Linkedin className="h-4 w-4 mr-2" />
+                  LinkedIn
+                </Button>
+                <Button
+                  onClick={() => handleSocialShare('telegram')}
+                  className="bg-[#0088cc] hover:bg-[#006699] text-white"
+                  size="sm"
+                >
+                  <Send className="h-4 w-4 mr-2" />
+                  Telegram
+                </Button>
+              </div>
             </div>
-          </section>
-        )}
+
+          </article>
+
+          {/* Sidebar */}
+          <aside className="lg:w-80 space-y-8">
+            {/* Categories */}
+            <Card>
+              <CardHeader className="pb-4">
+                <h3 className="text-xl font-bold uppercase tracking-wide">Categories</h3>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3">
+                  {categories.length > 0 ? (
+                    categories.map((category) => (
+                      <li key={category.id}>
+                        <Link
+                          href={`/blog?category=${category.id}`}
+                          className="text-gray-600 hover:text-purple-700 transition-colors text-sm"
+                        >
+                          {category.name}
+                        </Link>
+                      </li>
+                    ))
+                  ) : (
+                    <li className="text-gray-500 text-sm">Uncategorized</li>
+                  )}
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* Recent Posts */}
+            <Card>
+              <CardHeader className="pb-4">
+                <h3 className="text-xl font-bold uppercase tracking-wide">Recent Posts</h3>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {relatedPosts.slice(0, 3).map((relatedPost) => {
+                    const postDate = new Date(relatedPost.date)
+                    return (
+                      <Link
+                        key={relatedPost.id}
+                        href={`/blog/${relatedPost.slug}`}
+                        className="flex gap-3 group"
+                      >
+                        {relatedPost.featured_media && (
+                          <div className="relative w-20 h-20 flex-shrink-0 overflow-hidden rounded">
+                            <Image
+                              src={`/api/media/${relatedPost.featured_media}`}
+                              alt={relatedPost.title.rendered}
+                              fill
+                              className="object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-sm line-clamp-2 group-hover:text-purple-700 transition-colors mb-1">
+                            {relatedPost.title.rendered}
+                          </h4>
+                          <p className="text-xs text-gray-500">
+                            {postDate.toLocaleDateString('en-US', {
+                              month: 'long',
+                              day: 'numeric',
+                              year: 'numeric'
+                            })}
+                            <span className="mx-1">•</span>
+                            No Comments
+                          </p>
+                        </div>
+                      </Link>
+                    )
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          </aside>
+        </div>
+
       </div>
     </div>
     </ClientLayout>
