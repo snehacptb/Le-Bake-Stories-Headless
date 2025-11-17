@@ -316,7 +316,15 @@ class WordPressAPI {
 
   async getPage(slug: string): Promise<any | null> {
     try {
-      const response = await this.client.get(`/pages?slug=${slug}&_embed`)
+      // Fetch with _embed to get featured media and author info
+      // Also include _fields to ensure we get all meta data including elementor data
+      const response = await this.client.get(`/pages`, {
+        params: {
+          slug: slug,
+          _embed: true,
+          _fields: 'id,date,date_gmt,guid,modified,modified_gmt,slug,status,type,link,title,content,excerpt,author,featured_media,comment_status,ping_status,template,meta,_embedded'
+        }
+      })
       return response.data[0] || null
     } catch (error) {
       console.error('Error fetching page:', error)

@@ -39,8 +39,15 @@ async function getProductCategories(): Promise<CachedProductCategory[]> {
     // During build time, directly use the cached API instead of making HTTP requests
     if (typeof window === 'undefined') {
       // Server-side: use cached API directly
-      const { cachedAPI } = await import('@/lib/cached-api')
-      return await cachedAPI.getProductCategories()
+      try {
+        const { cachedAPI } = await import('@/lib/cached-api')
+        const categories = await cachedAPI.getProductCategories()
+        // Ensure we return an array
+        return Array.isArray(categories) ? categories : []
+      } catch (importError) {
+        console.error('Error importing or calling cached API:', importError)
+        return []
+      }
     }
     
     // Client-side: use API route
@@ -54,7 +61,7 @@ async function getProductCategories(): Promise<CachedProductCategory[]> {
     }
     
     const result = await response.json()
-    return result.success ? result.data : []
+    return result.success && Array.isArray(result.data) ? result.data : []
   } catch (error) {
     console.error('Error fetching product categories:', error)
     return []
@@ -118,13 +125,29 @@ function BlogCardSkeleton() {
 export default async function HomePage() {
   console.log('🏠 Rendering Le Bake Stories ecommerce home page')
 
-  const [featuredProducts, productCategories, latestPosts, testimonials, banners] = await Promise.all([
+  // Use Promise.allSettled to prevent one failure from crashing the entire page
+  const results = await Promise.allSettled([
     getFeaturedProducts(),
     getProductCategories(),
     getLatestPosts(),
     getTestimonials(),
     getBanners()
   ])
+
+  // Extract results, defaulting to empty arrays on failure
+  const featuredProducts = results[0].status === 'fulfilled' ? results[0].value : []
+  const productCategories = results[1].status === 'fulfilled' ? results[1].value : []
+  const latestPosts = results[2].status === 'fulfilled' ? results[2].value : []
+  const testimonials = results[3].status === 'fulfilled' ? results[3].value : []
+  const banners = results[4].status === 'fulfilled' ? results[4].value : []
+
+  // Log any failures
+  results.forEach((result, index) => {
+    if (result.status === 'rejected') {
+      const names = ['featuredProducts', 'productCategories', 'latestPosts', 'testimonials', 'banners']
+      console.error(`❌ Failed to fetch ${names[index]}:`, result.reason)
+    }
+  })
   
   console.log('🛍️ Home page data loaded:', {
     featuredProducts: featuredProducts.length,

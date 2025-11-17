@@ -595,15 +595,15 @@ export function CheckoutPage({ className }: CheckoutPageProps) {
           break
           
         case 'cod':
-          // Cash on Delivery - no immediate payment processing needed
-          console.log('Cash on Delivery selected - no immediate payment processing')
-          await woocommerceApi.updateOrderStatus(order.id, 'on-hold', 'Awaiting cash on delivery payment')
+          // Cash on Delivery - leave order in pending status
+          // Status can be updated later from WordPress admin.
+          console.log('Cash on Delivery selected - keeping order in pending status (no client-side status update)')
           break
           
         case 'bacs':
-          // Bank Transfer - no immediate payment processing needed
-          console.log('Bank Transfer selected - awaiting payment')
-          await woocommerceApi.updateOrderStatus(order.id, 'on-hold', 'Awaiting bank transfer payment')
+          // Bank Transfer - leave order in pending status
+          // Status can be updated later from WordPress admin.
+          console.log('Bank Transfer selected - keeping order in pending status (no client-side status update)')
           break
           
         default:
@@ -1146,16 +1146,16 @@ export function CheckoutPage({ className }: CheckoutPageProps) {
       )}
 
       <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Checkout Form */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-6 lg:space-y-8">
             {/* Billing Address */}
             <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-6 uppercase tracking-wide">
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6 uppercase tracking-wide">
                 Billing details
               </h3>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                   <Label htmlFor="billing_first_name" className="text-sm text-gray-700 mb-2 block">
                     First name <span className="text-red-500">*</span>
@@ -1463,13 +1463,13 @@ export function CheckoutPage({ className }: CheckoutPageProps) {
 
           {/* Order Summary */}
           <div className="lg:col-span-1">
-            <div className="bg-white border border-gray-200 p-8 sticky top-4">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6 uppercase tracking-wide">
+            <div className="bg-white border border-gray-200 p-4 sm:p-6 lg:p-8 sticky top-4">
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6 uppercase tracking-wide">
                 Your order
               </h3>
 
               {/* Order Table */}
-              <div className="mb-6">
+              <div className="mb-4 sm:mb-6">
                 {/* Table Header */}
                 <div className="flex justify-between pb-4 border-b-2 border-gray-900">
                   <span className="text-sm font-bold text-gray-900 uppercase">Product</span>
@@ -1524,26 +1524,26 @@ export function CheckoutPage({ className }: CheckoutPageProps) {
               </div>
 
               {/* Payment Methods */}
-              <div className="mb-6 border-t border-gray-200 pt-6">
+              <div className="mb-4 sm:mb-6 border-t border-gray-200 pt-4 sm:pt-6">
                 {paymentMethods.map((method) => (
-                  <div key={method.id} className="mb-4 last:mb-0">
+                  <div key={method.id} className="mb-3 sm:mb-4 last:mb-0">
                     <label className={cn(
-                      "flex items-start gap-3 cursor-pointer group",
+                      "flex items-start gap-2 sm:gap-3 cursor-pointer group p-2 sm:p-0 rounded-lg hover:bg-gray-50 transition-colors",
                       (loading || showStripeForm) && "opacity-50 cursor-not-allowed"
                     )}>
-                      <div className="mt-1">
+                      <div className="mt-1 flex-shrink-0">
                         <div className={cn(
-                          "w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors",
+                          "w-5 h-5 sm:w-4 sm:h-4 rounded-full border-2 flex items-center justify-center transition-colors",
                           form.paymentMethod === method.id
                             ? "border-gray-900 bg-gray-900"
                             : "border-gray-400 group-hover:border-gray-600"
                         )}>
                           {form.paymentMethod === method.id && (
-                            <div className="w-2 h-2 rounded-full bg-white"></div>
+                            <div className="w-2.5 h-2.5 sm:w-2 sm:h-2 rounded-full bg-white"></div>
                           )}
                         </div>
                       </div>
-                      <div className="flex-1">
+                      <div className="flex-1 min-w-0">
                         <input
                           type="radio"
                           name="paymentMethod"
@@ -1553,8 +1553,8 @@ export function CheckoutPage({ className }: CheckoutPageProps) {
                           disabled={loading || showStripeForm}
                           className="sr-only"
                         />
-                        <span className="text-sm font-semibold text-gray-900 block mb-1">{method.title}</span>
-                        <p className="text-sm text-gray-600">
+                        <span className="text-sm sm:text-sm font-semibold text-gray-900 block mb-1">{method.title}</span>
+                        <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
                           {method.id === 'cod' && 'Pay with cash upon delivery.'}
                           {method.id === 'stripe' && 'Pay securely with your credit card.'}
                           {method.id === 'paypal' && 'Pay via PayPal; you can pay with your credit card if you don\'t have a PayPal account.'}
@@ -1654,15 +1654,15 @@ export function CheckoutPage({ className }: CheckoutPageProps) {
               )}
 
               {/* Terms and Conditions Checkbox */}
-              <div className="mb-6 border-t border-gray-200 pt-6">
-                <div className="flex items-start gap-3 mb-4">
+              <div className="mb-4 sm:mb-6 border-t border-gray-200 pt-4 sm:pt-6">
+                <div className="flex items-start gap-2 sm:gap-3 mb-3 sm:mb-4">
                   <Checkbox
                     id="agreeToTerms"
                     checked={form.agreeToTerms}
                     onCheckedChange={(checked) => handleFormChange('agreeToTerms', checked)}
-                    className="w-5 h-5 mt-0.5"
+                    className="w-5 h-5 mt-0.5 flex-shrink-0"
                   />
-                  <Label htmlFor="agreeToTerms" className="text-sm text-gray-700 leading-relaxed cursor-pointer">
+                  <Label htmlFor="agreeToTerms" className="text-xs sm:text-sm text-gray-700 leading-relaxed cursor-pointer">
                     I have read and agree to the website{' '}
                     <Link href="/terms" className="text-gray-900 underline hover:text-gray-700">
                       terms and conditions
@@ -1670,8 +1670,8 @@ export function CheckoutPage({ className }: CheckoutPageProps) {
                     <span className="text-red-500">*</span>
                   </Label>
                 </div>
-                
-                <p className="text-sm text-gray-600 leading-relaxed">
+
+                <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
                   Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our{' '}
                   <Link href="/privacy" className="text-gray-900 underline hover:text-gray-700">
                     privacy policy
@@ -1681,8 +1681,8 @@ export function CheckoutPage({ className }: CheckoutPageProps) {
 
               {/* Error Message */}
               {error && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-                  <p className="text-red-600 text-sm">{error}</p>
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-3 sm:mb-4">
+                  <p className="text-red-600 text-xs sm:text-sm">{error}</p>
                 </div>
               )}
 
@@ -1691,7 +1691,7 @@ export function CheckoutPage({ className }: CheckoutPageProps) {
                 <Button
                   type="submit"
                   size="lg"
-                  className="w-full h-14 text-base font-bold bg-amber-500 hover:bg-amber-600 text-white rounded-full uppercase tracking-wide transition-colors shadow-md hover:shadow-lg"
+                  className="w-full h-12 sm:h-14 text-sm sm:text-base font-bold bg-amber-500 hover:bg-amber-600 text-white rounded-full uppercase tracking-wide transition-colors shadow-md hover:shadow-lg"
                   disabled={loading}
                 >
                   {loading ? 'Processing...' : 'Place Order'}

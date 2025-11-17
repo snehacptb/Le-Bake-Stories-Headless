@@ -68,26 +68,127 @@
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 1;
   }
-  
+
   .line-clamp-2 {
     overflow: hidden;
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
   }
-  
+
   .line-clamp-3 {
     overflow: hidden;
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
   }
-  
+
   .line-clamp-4 {
     overflow: hidden;
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 4;
+  }
+
+  /* Mobile-first responsive utilities */
+  /* Touch-friendly tap targets - minimum 44x44px for mobile */
+  .tap-target {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Prevent text from being too small on mobile */
+  .text-mobile-readable {
+    font-size: clamp(14px, 4vw, 16px);
+  }
+
+  /* Responsive padding utilities */
+  .px-mobile {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  @media (min-width: 640px) {
+    .px-mobile {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .px-mobile {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+
+  /* Prevent horizontal scroll on mobile */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Smooth font scaling */
+  .text-responsive-sm {
+    font-size: clamp(0.75rem, 2vw, 0.875rem);
+  }
+
+  .text-responsive-base {
+    font-size: clamp(0.875rem, 2.5vw, 1rem);
+  }
+
+  .text-responsive-lg {
+    font-size: clamp(1rem, 3vw, 1.125rem);
+  }
+
+  .text-responsive-xl {
+    font-size: clamp(1.125rem, 3.5vw, 1.25rem);
+  }
+
+  .text-responsive-2xl {
+    font-size: clamp(1.25rem, 4vw, 1.5rem);
+  }
+
+  .text-responsive-3xl {
+    font-size: clamp(1.5rem, 5vw, 1.875rem);
+  }
+
+  /* Mobile-friendly spacing */
+  .gap-mobile {
+    gap: 0.5rem;
+  }
+
+  @media (min-width: 640px) {
+    .gap-mobile {
+      gap: 0.75rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .gap-mobile {
+      gap: 1rem;
+    }
+  }
+
+  /* Safe area padding for mobile devices (notches, etc) */
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-left {
+    padding-left: env(safe-area-inset-left);
+  }
+
+  .safe-right {
+    padding-right: env(safe-area-inset-right);
   }
 }
 
@@ -465,6 +566,53 @@ html {
 
 .wordpress-content pre code {
   @apply bg-transparent p-0;
+}
+
+/* Elementor-specific styles - minimal interference, let Elementor CSS handle styling */
+.elementor-content,
+.wordpress-content {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Elementor container and sections - preserve Elementor's native structure */
+.elementor-content .elementor-section,
+.wordpress-content .elementor-section {
+  position: relative;
+  width: 100%;
+}
+
+/* Ensure Elementor content doesn't break layout */
+.elementor-content *,
+.wordpress-content * {
+  box-sizing: border-box;
+}
+
+/* Hide broken images */
+.elementor-content img[src=""],
+.elementor-content img:not([src]),
+.wordpress-content img[src=""],
+.wordpress-content img:not([src]) {
+  display: none !important;
+}
+
+/* Elementor responsive visibility */
+@media (max-width: 767px) {
+  .elementor-content .elementor-hidden-mobile {
+    display: none !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  .elementor-content .elementor-hidden-tablet {
+    display: none !important;
+  }
+}
+
+@media (min-width: 1025px) {
+  .elementor-content .elementor-hidden-desktop {
+    display: none !important;
+  }
 }
 
 /* Line clamp utilities - using Tailwind's built-in line-clamp */

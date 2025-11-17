@@ -45,6 +45,20 @@ const nextConfig = {
     WORDPRESS_CONSUMER_KEY: process.env.WORDPRESS_CONSUMER_KEY,
     WORDPRESS_CONSUMER_SECRET: process.env.WORDPRESS_CONSUMER_SECRET,
   },
+  async redirects() {
+    return [
+      {
+        source: '/about-us',
+        destination: '/about',
+        permanent: true,
+      },
+      {
+        source: '/contact-us',
+        destination: '/contact',
+        permanent: true,
+      },
+    ];
+  },
   async rewrites() {
     const wordpressUrl = process.env.WORDPRESS_API_URL;
     const destination = wordpressUrl?.startsWith('http') 

@@ -329,11 +329,11 @@ export function ShopPage({ initialProducts = [], className }: ShopPageProps) {
         )}
       </AnimatePresence>
 
-        <div className="container mx-auto px-4 py-4 max-w-7xl">
+        <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 max-w-7xl">
         {/* Breadcrumb and Toolbar Combined */}
-        <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-gray-200 gap-3 sm:gap-0">
           {/* Left Side: Breadcrumb */}
-          <nav className="flex items-center space-x-2 text-sm text-gray-700">
+          <nav className="flex items-center space-x-2 text-xs sm:text-sm text-gray-700">
             <a href="/" className="hover:text-gray-900 transition-colors">
               Home
             </a>
@@ -342,10 +342,10 @@ export function ShopPage({ initialProducts = [], className }: ShopPageProps) {
           </nav>
 
           {/* Right Side: Show selector, view icons, and sort dropdown */}
-          <div className="flex items-center gap-6">
-            {/* Show selector */}
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-700">Show:</span>
+          <div className="flex items-center gap-2 sm:gap-4 md:gap-6 overflow-x-auto no-scrollbar">
+            {/* Show selector - Hidden on mobile */}
+            <div className="hidden md:flex items-center gap-2 flex-shrink-0">
+              <span className="text-sm text-gray-700 whitespace-nowrap">Show:</span>
               <div className="flex items-center gap-1">
                 {[9, 12, 18, 24].map((count) => (
                   <button
@@ -355,7 +355,7 @@ export function ShopPage({ initialProducts = [], className }: ShopPageProps) {
                       setCurrentPage(1);
                     }}
                     className={cn(
-                      "px-2 py-1 text-sm transition-colors",
+                      "px-2 py-1 text-sm transition-colors whitespace-nowrap",
                       productsPerPage === count
                         ? "text-gray-900 font-medium"
                         : "text-gray-500 hover:text-gray-900"
@@ -368,50 +368,50 @@ export function ShopPage({ initialProducts = [], className }: ShopPageProps) {
             </div>
 
             {/* View Toggle Icons */}
-            <div className="flex items-center gap-1 border border-gray-300 rounded">
-              {/* List View */}
+            <div className="flex items-center gap-0.5 sm:gap-1 border border-gray-300 rounded flex-shrink-0">
+              {/* List View - Hidden on mobile */}
               <button
                 onClick={() => setViewMode('list')}
                 className={cn(
-                  "p-2 transition-colors border-r border-gray-300",
+                  "p-1.5 sm:p-2 transition-colors border-r border-gray-300 hidden sm:block",
                   viewMode === 'list' ? "bg-gray-100 text-gray-900" : "text-gray-400 hover:text-gray-700 hover:bg-gray-50"
                 )}
                 aria-label="List view"
               >
-                <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="currentColor" viewBox="0 0 24 24">
                   <rect x="3" y="5" width="18" height="2" rx="1" />
                   <rect x="3" y="11" width="18" height="2" rx="1" />
                   <rect x="3" y="17" width="18" height="2" rx="1" />
                 </svg>
               </button>
-              
+
               {/* Grid View 2x2 */}
               <button
                 onClick={() => setViewMode('grid')}
                 className={cn(
-                  "p-2 transition-colors border-r border-gray-300",
+                  "p-1.5 sm:p-2 transition-colors border-r border-gray-300",
                   viewMode === 'grid' ? "bg-gray-100 text-gray-900" : "text-gray-400 hover:text-gray-700 hover:bg-gray-50"
                 )}
                 aria-label="Grid view 2x2"
               >
-                <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="currentColor" viewBox="0 0 24 24">
                   <rect x="3" y="3" width="7" height="7" rx="1" />
                   <rect x="14" y="3" width="7" height="7" rx="1" />
                   <rect x="3" y="14" width="7" height="7" rx="1" />
                   <rect x="14" y="14" width="7" height="7" rx="1" />
                 </svg>
               </button>
-              
+
               {/* Grid View 3x3 */}
               <button
                 onClick={() => setViewMode('grid-large')}
                 className={cn(
-                  "p-2 transition-colors",
+                  "p-1.5 sm:p-2 transition-colors",
                   viewMode === 'grid-large' ? "bg-gray-100 text-gray-900" : "text-gray-400 hover:text-gray-700 hover:bg-gray-50"
                 )}
                 aria-label="Grid view 3x3"
               >
-                <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="currentColor" viewBox="0 0 24 24">
                   <rect x="2" y="2" width="5" height="5" rx="0.5" />
                   <rect x="9.5" y="2" width="5" height="5" rx="0.5" />
                   <rect x="17" y="2" width="5" height="5" rx="0.5" />
@@ -426,11 +426,11 @@ export function ShopPage({ initialProducts = [], className }: ShopPageProps) {
             </div>
 
             {/* Sort Dropdown */}
-            <div>
+            <div className="flex-1 sm:flex-initial min-w-0">
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortOption)}
-                className="px-4 py-2 border border-gray-300 bg-white text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-400 min-w-[200px]"
+                className="w-full sm:w-auto px-2 sm:px-4 py-1.5 sm:py-2 border border-gray-300 bg-white text-xs sm:text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-gray-400 sm:min-w-[200px]"
               >
                 {sortOptions.map(option => (
                   <option key={option.value} value={option.value}>
@@ -442,7 +442,7 @@ export function ShopPage({ initialProducts = [], className }: ShopPageProps) {
           </div>
         </div>
 
-        <div className="flex gap-6">
+        <div className="flex gap-4 lg:gap-6">
           {/* Desktop Sidebar */}
           <PremiumSidebar
             isOpen={true}
@@ -467,47 +467,47 @@ export function ShopPage({ initialProducts = [], className }: ShopPageProps) {
           />
 
           {/* Main Content */}
-          <main className="flex-1">
+          <main className="flex-1 min-w-0">
             {/* Mobile Filter Toggle */}
-            <div className="lg:hidden mb-6">
+            <div className="lg:hidden mb-4 sm:mb-6">
               <Button
                 variant="outline"
                 onClick={() => setShowSidebar(true)}
-                className="flex items-center gap-2"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 py-2.5 sm:py-2"
               >
-                <Menu className="h-4 w-4" />
-                Show sidebar
+                <Sliders className="h-4 w-4" />
+                <span className="text-sm sm:text-base">Filters</span>
               </Button>
             </div>
 
             {/* Active Filters */}
             {hasActiveFilters && (
-              <AceternityCard className="mb-6">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600">Active filters:</span>
+              <AceternityCard className="mb-4 sm:mb-6">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs sm:text-sm text-gray-600">Active filters:</span>
                   {filters.search && (
-                    <Badge variant="secondary" className="flex items-center gap-1">
+                    <Badge variant="secondary" className="flex items-center gap-1 text-xs">
                       Search: {filters.search}
-                      <X 
-                        className="h-3 w-3 cursor-pointer" 
+                      <X
+                        className="h-3 w-3 cursor-pointer"
                         onClick={() => handleFilterChange('search', '')}
                       />
                     </Badge>
                   )}
                   {filters.category && (
-                    <Badge variant="secondary" className="flex items-center gap-1">
+                    <Badge variant="secondary" className="flex items-center gap-1 text-xs">
                       Category: {categories.find(c => c.slug === filters.category)?.name}
-                      <X 
-                        className="h-3 w-3 cursor-pointer" 
+                      <X
+                        className="h-3 w-3 cursor-pointer"
                         onClick={() => handleFilterChange('category', '')}
                       />
                     </Badge>
                   )}
                   {filters.onSale && (
-                    <Badge variant="secondary" className="flex items-center gap-1">
+                    <Badge variant="secondary" className="flex items-center gap-1 text-xs">
                       On Sale
-                      <X 
-                        className="h-3 w-3 cursor-pointer" 
+                      <X
+                        className="h-3 w-3 cursor-pointer"
                         onClick={() => handleFilterChange('onSale', false)}
                       />
                     </Badge>
@@ -516,7 +516,7 @@ export function ShopPage({ initialProducts = [], className }: ShopPageProps) {
                     variant="ghost"
                     size="sm"
                     onClick={clearFilters}
-                    className="text-themes-pink-600 hover:text-themes-pink-700"
+                    className="text-themes-pink-600 hover:text-themes-pink-700 text-xs sm:text-sm h-auto py-1"
                   >
                     Clear all
                   </Button>
@@ -526,14 +526,14 @@ export function ShopPage({ initialProducts = [], className }: ShopPageProps) {
 
             {/* Error State */}
             {error && (
-              <AceternityCard className="mb-6">
-                <div className="text-center">
-                  <p className="text-red-600 mb-4">{error}</p>
+              <AceternityCard className="mb-4 sm:mb-6">
+                <div className="text-center py-4 sm:py-6">
+                  <p className="text-red-600 mb-3 sm:mb-4 text-sm sm:text-base">{error}</p>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={fetchProducts}
-                    className="border-red-200 text-red-600 hover:bg-red-50"
+                    className="border-red-200 text-red-600 hover:bg-red-50 text-xs sm:text-sm"
                   >
                     Try Again
                   </Button>
@@ -544,25 +544,25 @@ export function ShopPage({ initialProducts = [], className }: ShopPageProps) {
             {/* Products Grid/List */}
             {loading ? (
               <div className={cn(
-                'grid gap-4',
-                viewMode === 'list' 
+                'grid gap-3 sm:gap-4',
+                viewMode === 'list'
                   ? 'grid-cols-1'
                   : viewMode === 'grid'
-                  ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
-                  : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5'
+                  ? 'grid-cols-2 md:grid-cols-2 lg:grid-cols-3'
+                  : 'grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5'
               )}>
                 {Array.from({ length: productsPerPage }).map((_, i) => (
-                  <Skeleton key={i} className="h-96 w-full" />
+                  <Skeleton key={i} className="h-72 sm:h-80 md:h-96 w-full" />
                 ))}
               </div>
             ) : filteredProducts.length > 0 ? (
               <div className={cn(
                 'grid',
                 viewMode === 'list'
-                  ? 'grid-cols-1 gap-6'
+                  ? 'grid-cols-1 gap-4 sm:gap-6'
                   : viewMode === 'grid'
-                  ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'
-                  : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3'
+                  ? 'grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4'
+                  : 'grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-2 sm:gap-3'
               )}>
                 {filteredProducts.map((product, index) => (
                   <PremiumProductCard
@@ -578,16 +578,16 @@ export function ShopPage({ initialProducts = [], className }: ShopPageProps) {
               </div>
             ) : (
               <AceternityCard>
-                <div className="text-center py-8">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center">
-                    <Search className="w-8 h-8 text-gray-400" />
+                <div className="text-center py-6 sm:py-8 px-4">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center">
+                    <Search className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" />
                   </div>
-                  <p className="text-gray-500 text-lg mb-4">No products found</p>
+                  <p className="text-gray-500 text-base sm:text-lg mb-3 sm:mb-4">No products found</p>
                   {hasActiveFilters && (
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       onClick={clearFilters}
-                      className="border-themes-pink-200 text-themes-pink-600 hover:bg-themes-pink-50"
+                      className="border-themes-pink-200 text-themes-pink-600 hover:bg-themes-pink-50 text-sm sm:text-base"
                     >
                       Clear Filters
                     </Button>
@@ -598,12 +598,12 @@ export function ShopPage({ initialProducts = [], className }: ShopPageProps) {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex justify-center items-center gap-2 mt-12 pt-8 border-t border-gray-200">
+              <div className="flex justify-center items-center gap-1 sm:gap-2 mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-gray-200">
                 {/* Previous Arrow */}
                 {currentPage > 1 && (
                   <button
                     onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                    className="px-3 py-2 text-gray-700 hover:text-gray-900 transition-colors"
+                    className="px-2 sm:px-3 py-1.5 sm:py-2 text-gray-700 hover:text-gray-900 transition-colors text-sm sm:text-base tap-target"
                     aria-label="Previous page"
                   >
                     ←
@@ -618,10 +618,12 @@ export function ShopPage({ initialProducts = [], className }: ShopPageProps) {
                       key={page}
                       onClick={() => setCurrentPage(page)}
                       className={cn(
-                        "px-3 py-2 transition-colors",
+                        "px-2 sm:px-3 py-1.5 sm:py-2 transition-colors text-sm sm:text-base tap-target min-w-[32px] sm:min-w-[40px]",
                         currentPage === page
                           ? "text-gray-900 font-bold"
-                          : "text-gray-600 hover:text-gray-900"
+                          : "text-gray-600 hover:text-gray-900",
+                        // Hide extra pages on mobile
+                        i >= 3 && "hidden sm:inline-flex"
                       )}
                     >
                       {page}
@@ -633,7 +635,7 @@ export function ShopPage({ initialProducts = [], className }: ShopPageProps) {
                 {currentPage < totalPages && (
                   <button
                     onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                    className="px-3 py-2 text-gray-700 hover:text-gray-900 transition-colors"
+                    className="px-2 sm:px-3 py-1.5 sm:py-2 text-gray-700 hover:text-gray-900 transition-colors text-sm sm:text-base tap-target"
                     aria-label="Next page"
                   >
                     →

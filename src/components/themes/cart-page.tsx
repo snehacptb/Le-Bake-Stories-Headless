@@ -13,6 +13,7 @@ import { useWishlist } from '@/contexts/wishlist-context'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { woocommerceApi } from '@/lib/woocommerce-api'
 
 interface CartPageProps {
@@ -41,6 +42,7 @@ export function CartPage({ className }: CartPageProps) {
     addToCart
   } = useCart()
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist()
+  const router = useRouter()
   const [processingItems, setProcessingItems] = useState<Set<string>>(new Set())
   const [newProducts, setNewProducts] = useState<any[]>([])
   const [loadingProducts, setLoadingProducts] = useState(false)
@@ -421,32 +423,32 @@ export function CartPage({ className }: CartPageProps) {
         )}
 
         {/* Manila Style Progress Steps */}
-        <div className="mb-8">
-          <div className="flex items-center justify-center space-x-8">
+        <div className="mb-6 md:mb-8">
+          <div className="flex items-center justify-center space-x-2 sm:space-x-4 md:space-x-8 px-2">
             <div className="flex items-center">
-              <div className="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-medium">1</div>
-              <span className="ml-2 text-orange-500 font-medium">SHOPPING CART</span>
+              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs sm:text-sm font-medium flex-shrink-0">1</div>
+              <span className="ml-1.5 sm:ml-2 text-orange-500 font-medium text-xs sm:text-sm md:text-base whitespace-nowrap">SHOPPING CART</span>
             </div>
-            <div className="w-16 h-px bg-gray-300"></div>
+            <div className="w-4 sm:w-8 md:w-16 h-px bg-gray-300 flex-shrink-0"></div>
             <div className="flex items-center">
-              <div className="w-8 h-8 bg-gray-300 text-gray-500 rounded-full flex items-center justify-center text-sm font-medium">2</div>
-              <span className="ml-2 text-gray-500">CHECKOUT</span>
+              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gray-300 text-gray-500 rounded-full flex items-center justify-center text-xs sm:text-sm font-medium flex-shrink-0">2</div>
+              <span className="ml-1.5 sm:ml-2 text-gray-500 text-xs sm:text-sm md:text-base whitespace-nowrap hidden sm:inline">CHECKOUT</span>
             </div>
-            <div className="w-16 h-px bg-gray-300"></div>
+            <div className="w-4 sm:w-8 md:w-16 h-px bg-gray-300 flex-shrink-0"></div>
             <div className="flex items-center">
-              <div className="w-8 h-8 bg-gray-300 text-gray-500 rounded-full flex items-center justify-center text-sm font-medium">3</div>
-              <span className="ml-2 text-gray-500">ORDER COMPLETE</span>
+              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gray-300 text-gray-500 rounded-full flex items-center justify-center text-xs sm:text-sm font-medium flex-shrink-0">3</div>
+              <span className="ml-1.5 sm:ml-2 text-gray-500 text-xs sm:text-sm md:text-base whitespace-nowrap hidden md:inline">ORDER COMPLETE</span>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Manila Style Cart Items */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-              {/* Manila Style Table Header */}
-              <div className="bg-gray-50 px-6 py-4 border-b">
-                <div className="grid grid-cols-12 gap-4 text-sm font-medium text-gray-700 uppercase tracking-wide">
+              {/* Manila Style Table Header - Hidden on Mobile */}
+              <div className="hidden md:block bg-gray-50 px-4 md:px-6 py-3 md:py-4 border-b">
+                <div className="grid grid-cols-12 gap-2 md:gap-4 text-xs md:text-sm font-medium text-gray-700 uppercase tracking-wide">
                   <div className="col-span-6">PRODUCT</div>
                   <div className="col-span-2 text-center">PRICE</div>
                   <div className="col-span-2 text-center">QUANTITY</div>
@@ -462,55 +464,56 @@ export function CartPage({ className }: CartPageProps) {
                       key={item.key}
                       initial={{ opacity: 1, height: 'auto' }}
                       exit={{ opacity: 0, height: 0 }}
-                      className="px-6 py-6 hover:bg-gray-50 transition-colors duration-200"
+                      className="px-3 sm:px-4 md:px-6 py-4 md:py-6 hover:bg-gray-50 transition-colors duration-200"
                     >
-                      <div className="grid grid-cols-12 gap-4 items-center">
+                      {/* Desktop Layout (md and up) */}
+                      <div className="hidden md:grid md:grid-cols-12 gap-2 md:gap-4 items-center">
                         {/* Product Column */}
-                        <div className="col-span-6 flex items-center space-x-4">
+                        <div className="col-span-6 flex items-center space-x-2 md:space-x-4">
                           {/* Remove Button */}
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => removeFromCart(item.key)}
                             disabled={loadingStates.removingItem === item.key}
-                            className="text-gray-400 hover:text-red-500 p-1 h-auto w-auto"
+                            className="text-gray-400 hover:text-red-500 p-1 h-auto w-auto flex-shrink-0"
                           >
                             {loadingStates.removingItem === item.key ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
+                              <Loader2 className="h-3 w-3 md:h-4 md:w-4 animate-spin" />
                             ) : (
-                              <X className="h-4 w-4" />
+                              <X className="h-3 w-3 md:h-4 md:w-4" />
                             )}
                           </Button>
-                          
+
                           {/* Product Image */}
-                          <div className="relative w-16 h-16 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                          <div className="relative w-12 h-12 md:w-16 md:h-16 bg-gray-100 rounded overflow-hidden flex-shrink-0">
                             {item.image ? (
                               <Image
                                 src={item.image}
                                 alt={item.name}
                                 fill
-                                sizes="64px"
+                                sizes="(max-width: 768px) 48px, 64px"
                                 className="object-cover"
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center">
-                                <ShoppingBag className="h-8 w-8 text-gray-400" />
+                                <ShoppingBag className="h-6 w-6 md:h-8 md:w-8 text-gray-400" />
                               </div>
                             )}
                           </div>
 
                           {/* Product Details */}
                           <div className="flex-1 min-w-0">
-                            <h4 className="text-sm font-medium text-gray-900 truncate">
+                            <h4 className="text-xs md:text-sm font-medium text-gray-900 truncate">
                               {item.name}
                             </h4>
-                            <p className="text-xs text-gray-500 mt-1">SKU: {item.slug}</p>
+                            <p className="text-[10px] md:text-xs text-gray-500 mt-1">SKU: {item.slug}</p>
                           </div>
                         </div>
 
                         {/* Price Column */}
                         <div className="col-span-2 text-center">
-                          <span className="text-sm font-medium text-gray-900">
+                          <span className="text-xs md:text-sm font-medium text-gray-900">
                             ${item.price.toFixed(2)}
                           </span>
                         </div>
@@ -523,7 +526,7 @@ export function CartPage({ className }: CartPageProps) {
                               size="sm"
                               onClick={() => handleQuantityChange(item.key, item.quantity - 1)}
                               disabled={loadingStates.updatingItem === item.key || processingItems.has(item.key)}
-                              className="h-8 w-8 p-0 rounded-none hover:bg-gray-100"
+                              className="h-7 w-7 md:h-8 md:w-8 p-0 rounded-none hover:bg-gray-100"
                             >
                               <Minus className="h-3 w-3" />
                             </Button>
@@ -536,7 +539,7 @@ export function CartPage({ className }: CartPageProps) {
                                   handleQuantityChange(item.key, newQty)
                                 }
                               }}
-                              className="w-12 h-8 text-center border-0 focus:ring-0 rounded-none text-sm"
+                              className="w-10 md:w-12 h-7 md:h-8 text-center border-0 focus:ring-0 rounded-none text-xs md:text-sm"
                               min="1"
                               disabled={loadingStates.updatingItem === item.key || processingItems.has(item.key)}
                             />
@@ -545,7 +548,7 @@ export function CartPage({ className }: CartPageProps) {
                               size="sm"
                               onClick={() => handleQuantityChange(item.key, item.quantity + 1)}
                               disabled={loadingStates.updatingItem === item.key || processingItems.has(item.key)}
-                              className="h-8 w-8 p-0 rounded-none hover:bg-gray-100"
+                              className="h-7 w-7 md:h-8 md:w-8 p-0 rounded-none hover:bg-gray-100"
                             >
                               <Plus className="h-3 w-3" />
                             </Button>
@@ -554,9 +557,102 @@ export function CartPage({ className }: CartPageProps) {
 
                         {/* Subtotal Column */}
                         <div className="col-span-2 text-center">
-                          <span className="text-sm font-medium text-gray-900">
+                          <span className="text-xs md:text-sm font-medium text-gray-900">
                             ${(item.price * item.quantity).toFixed(2)}
                           </span>
+                        </div>
+                      </div>
+
+                      {/* Mobile Layout (below md) */}
+                      <div className="md:hidden">
+                        <div className="flex items-start gap-3">
+                          {/* Remove Button */}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeFromCart(item.key)}
+                            disabled={loadingStates.removingItem === item.key}
+                            className="text-gray-400 hover:text-red-500 p-1 h-auto w-auto mt-1"
+                          >
+                            {loadingStates.removingItem === item.key ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <X className="h-4 w-4" />
+                            )}
+                          </Button>
+
+                          {/* Product Image */}
+                          <div className="relative w-20 h-20 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                            {item.image ? (
+                              <Image
+                                src={item.image}
+                                alt={item.name}
+                                fill
+                                sizes="80px"
+                                className="object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <ShoppingBag className="h-8 w-8 text-gray-400" />
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Product Info */}
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-sm font-medium text-gray-900 mb-1 line-clamp-2">
+                              {item.name}
+                            </h4>
+                            <p className="text-xs text-gray-500 mb-2">SKU: {item.slug}</p>
+                            <p className="text-sm font-medium text-gray-900 mb-3">
+                              ${item.price.toFixed(2)}
+                            </p>
+
+                            {/* Quantity Controls - Full Width on Mobile */}
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center border border-gray-300 rounded">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleQuantityChange(item.key, item.quantity - 1)}
+                                  disabled={loadingStates.updatingItem === item.key || processingItems.has(item.key)}
+                                  className="h-9 w-9 p-0 rounded-none hover:bg-gray-100"
+                                >
+                                  <Minus className="h-3 w-3" />
+                                </Button>
+                                <Input
+                                  type="number"
+                                  value={item.quantity}
+                                  onChange={(e) => {
+                                    const newQty = parseInt(e.target.value)
+                                    if (!isNaN(newQty) && newQty !== item.quantity) {
+                                      handleQuantityChange(item.key, newQty)
+                                    }
+                                  }}
+                                  className="w-14 h-9 text-center border-0 focus:ring-0 rounded-none text-sm"
+                                  min="1"
+                                  disabled={loadingStates.updatingItem === item.key || processingItems.has(item.key)}
+                                />
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleQuantityChange(item.key, item.quantity + 1)}
+                                  disabled={loadingStates.updatingItem === item.key || processingItems.has(item.key)}
+                                  className="h-9 w-9 p-0 rounded-none hover:bg-gray-100"
+                                >
+                                  <Plus className="h-3 w-3" />
+                                </Button>
+                              </div>
+
+                              {/* Subtotal */}
+                              <div className="text-right">
+                                <p className="text-xs text-gray-500 mb-1">Subtotal</p>
+                                <p className="text-sm font-bold text-gray-900">
+                                  ${(item.price * item.quantity).toFixed(2)}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </motion.div>
@@ -566,12 +662,12 @@ export function CartPage({ className }: CartPageProps) {
             </div>
 
             {/* Manila Style Action Buttons */}
-            <div className="mt-6 flex flex-col sm:flex-row gap-4">
+            <div className="mt-4 md:mt-6 flex flex-col sm:flex-row gap-3 md:gap-4">
               <Button
                 variant="outline"
                 onClick={clearCart}
                 disabled={loadingStates.clearingCart}
-                className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50"
+                className="w-full sm:flex-1 border-gray-300 text-gray-700 hover:bg-gray-50 py-2.5 md:py-3 text-sm md:text-base"
               >
                 {loadingStates.clearingCart ? (
                   <>
@@ -584,15 +680,15 @@ export function CartPage({ className }: CartPageProps) {
               </Button>
               <Button
                 variant="outline"
-                className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50"
+                className="w-full sm:flex-1 border-gray-300 text-gray-700 hover:bg-gray-50 py-2.5 md:py-3 text-sm md:text-base"
               >
                 Update Shopping Cart
               </Button>
             </div>
 
             {/* Continue Shopping */}
-            <div className="mt-6">
-              <Link href="/shop" className="text-orange-500 hover:text-orange-600 text-sm font-medium">
+            <div className="mt-4 md:mt-6">
+              <Link href="/shop" className="text-orange-500 hover:text-orange-600 text-sm md:text-base font-medium inline-flex items-center">
                 ← Continue Shopping
               </Link>
             </div>
@@ -683,6 +779,10 @@ export function CartPage({ className }: CartPageProps) {
               <Button 
                 className="w-full bg-orange-500 hover:bg-orange-600 text-white py-4 text-sm font-medium rounded-full" 
                 disabled={items.length === 0}
+                onClick={() => {
+                  if (items.length === 0) return
+                  router.push('/checkout')
+                }}
               >
                 PLACE ORDER
               </Button>

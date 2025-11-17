@@ -122,13 +122,15 @@ export function ThemesHeader({
   const transformMenuUrl = (url: string): string => {
     if (!url) return '/'
     
-    // If it's already a relative URL, return as is
+    // If it's already a relative URL, return as is (but apply mappings)
     if (!url.startsWith('http')) {
-      return url.startsWith('/') ? url : `/${url}`
+      const path = url.startsWith('/') ? url : `/${url}`
+      return mapWordPressPathToFrontend(path)
     }
     
     try {
       const urlObj = new URL(url)
+      let path = urlObj.pathname
       
       // Common WordPress URL patterns to transform
       const patterns = [
@@ -140,8 +142,6 @@ export function ThemesHeader({
         // Remove trailing slashes except for root
         /\/+$/g
       ]
-      
-      let path = urlObj.pathname
       
       // Apply transformations
       patterns.forEach(pattern => {
@@ -170,12 +170,30 @@ export function ThemesHeader({
       // Clean up double slashes
       path = path.replace(/\/+/g, '/')
       
+      // Apply WordPress to frontend path mappings
+      path = mapWordPressPathToFrontend(path)
+      
       console.log(`🔗 Transformed menu URL: ${url} → ${path}`)
       return path
     } catch (error) {
       console.warn(`⚠️ Failed to parse menu URL: ${url}`, error)
       return '/'
     }
+  }
+
+  // Map WordPress paths to frontend paths
+  const mapWordPressPathToFrontend = (path: string): string => {
+    // WordPress path to frontend path mappings
+    const pathMappings: Record<string, string> = {
+      '/about-us': '/about',
+      '/about-us/': '/about',
+      '/contact-us': '/contact',
+      '/contact-us/': '/contact',
+    }
+    
+    // Check for exact match or match with trailing slash
+    const normalizedPath = path.replace(/\/+$/, '') || '/'
+    return pathMappings[normalizedPath] || pathMappings[path] || path
   }
 
   useEffect(() => {
@@ -360,54 +378,54 @@ export function ThemesHeader({
       isScrolled && "shadow-lg backdrop-blur-md bg-slate-900/95"
     )}>
       {/* Top Bar - Dark Navy Style */}
-      <div className="bg-slate-900 border-b border-slate-700 text-white text-xs">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between py-2">
+      <div className="bg-slate-900 border-b border-slate-700 text-white text-[10px] sm:text-xs">
+        <div className="container mx-auto px-3 sm:px-4">
+          <div className="flex items-center justify-between py-1.5 sm:py-2">
             {/* Left Side - Language/Country */}
-            <div className="hidden md:flex items-center space-x-4 lg:space-x-6">
-              <div className="flex items-center space-x-2 hover:text-gray-300 transition-colors cursor-pointer">
-                <Globe className="h-3 w-3" />
+            <div className="hidden md:flex items-center space-x-3 lg:space-x-6">
+              <div className="flex items-center space-x-1 sm:space-x-2 hover:text-gray-300 transition-colors cursor-pointer">
+                <Globe className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                 <span className="hidden lg:inline">ENGLISH</span>
                 <span className="lg:hidden">EN</span>
               </div>
-              <div className="flex items-center space-x-2 hover:text-gray-300 transition-colors cursor-pointer">
+              <div className="flex items-center space-x-1 sm:space-x-2 hover:text-gray-300 transition-colors cursor-pointer">
                 <span className="hidden lg:inline">COUNTRY</span>
                 <span className="lg:hidden">US</span>
               </div>
             </div>
-            
+
             {/* Right Side - Social Links & Account */}
-            <div className="flex items-center space-x-2 sm:space-x-4 lg:space-x-6 text-xs ml-auto">
-              <div className="flex items-center space-x-2 sm:space-x-3">
+            <div className="flex items-center space-x-1.5 sm:space-x-3 lg:space-x-6 ml-auto">
+              <div className="flex items-center space-x-1.5 sm:space-x-3">
                 {/* Social Icons */}
                 <div className="hidden sm:flex items-center space-x-1 sm:space-x-2">
-                  <div className="w-4 h-4 bg-blue-600 rounded-sm flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">f</span>
+                  <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 bg-blue-600 rounded-sm flex items-center justify-center">
+                    <span className="text-white text-[10px] sm:text-xs font-bold">f</span>
                   </div>
-                  <div className="w-4 h-4 bg-black rounded-sm flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">X</span>
+                  <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 bg-black rounded-sm flex items-center justify-center">
+                    <span className="text-white text-[10px] sm:text-xs font-bold">X</span>
                   </div>
-                  <div className="w-4 h-4 bg-pink-500 rounded-sm flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">@</span>
+                  <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 bg-pink-500 rounded-sm flex items-center justify-center">
+                    <span className="text-white text-[10px] sm:text-xs font-bold">@</span>
                   </div>
-                  <div className="w-4 h-4 bg-blue-700 rounded-sm flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">in</span>
+                  <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 bg-blue-700 rounded-sm flex items-center justify-center">
+                    <span className="text-white text-[10px] sm:text-xs font-bold">in</span>
                   </div>
-                  <div className="w-4 h-4 bg-cyan-400 rounded-sm flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">S</span>
+                  <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 bg-cyan-400 rounded-sm flex items-center justify-center">
+                    <span className="text-white text-[10px] sm:text-xs font-bold">S</span>
                   </div>
                 </div>
               </div>
               <span className="hidden sm:inline text-gray-400">|</span>
-              <div className="flex items-center space-x-2 sm:space-x-4">
-                <Link href="/newsletter" className="hover:text-gray-300 transition-colors hidden lg:inline">
+              <div className="flex items-center space-x-1.5 sm:space-x-3 lg:space-x-4">
+                <Link href="/newsletter" className="hover:text-gray-300 transition-colors hidden lg:inline whitespace-nowrap">
                   NEWSLETTER
                 </Link>
-                <Link href="/contact" className="hover:text-gray-300 transition-colors">
+                <Link href="/contact" className="hover:text-gray-300 transition-colors whitespace-nowrap">
                   <span className="hidden sm:inline">CONTACT US</span>
                   <span className="sm:hidden">CONTACT</span>
                 </Link>
-                <Link href="/faqs" className="hover:text-gray-300 transition-colors">
+                <Link href="/faqs" className="hover:text-gray-300 transition-colors whitespace-nowrap">
                   FAQS
                 </Link>
               </div>
@@ -418,19 +436,19 @@ export function ThemesHeader({
 
       {/* Main Header - Dark Navy Style */}
       <div className="bg-slate-900 shadow-sm">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between py-4 lg:py-6">
+        <div className="container mx-auto px-3 sm:px-4">
+          <div className="flex items-center justify-between py-3 sm:py-4 lg:py-6 gap-2 sm:gap-4">
             {/* Logo */}
             <Link href="/" className="flex-shrink-0 z-10">
               {(siteInfo.logo || siteInfo.siteIcon || (siteInfo.title && siteInfo.title.trim().length > 0)) ? (
-                <div className="flex items-center gap-2 lg:gap-3">
+                <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3">
                   {siteInfo.logo ? (
                     <Image
                       src={siteInfo.logo.url}
                       alt={siteInfo.logo.alt}
                       width={160}
                       height={50}
-                      className="h-8 sm:h-10 lg:h-12 w-auto"
+                      className="h-7 sm:h-9 lg:h-12 w-auto"
                       priority
                     />
                   ) : siteInfo.siteIcon ? (
@@ -439,12 +457,12 @@ export function ThemesHeader({
                       alt={siteInfo.siteIcon.alt}
                       width={48}
                       height={48}
-                      className="h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 rounded"
+                      className="h-7 w-7 sm:h-9 sm:w-9 lg:h-12 lg:w-12 rounded"
                       priority
                     />
                   ) : null}
                   {siteInfo.title && siteInfo.title.trim().length > 0 && (
-                    <span className="text-lg sm:text-xl lg:text-2xl font-bold text-white tracking-tight">{siteInfo.title}</span>
+                    <span className="text-base sm:text-lg lg:text-2xl font-bold text-white tracking-tight">{siteInfo.title}</span>
                   )}
                 </div>
               ) : (
@@ -454,18 +472,18 @@ export function ThemesHeader({
                     alt={logo.alt || 'Logo'}
                     width={160}
                     height={50}
-                    className="h-8 sm:h-10 lg:h-12 w-auto"
+                    className="h-7 sm:h-9 lg:h-12 w-auto"
                     priority
                   />
                 )
               )}
             </Link>
             {/* Search Bar - Dark Navy Style */}
-            <div className="hidden md:flex flex-1 max-w-xl lg:max-w-2xl mx-4 lg:mx-8">
+            <div className="hidden md:flex flex-1 max-w-lg lg:max-w-2xl mx-2 sm:mx-4 lg:mx-8">
               <div className="relative w-full">
                 <form onSubmit={handleSearch} className="flex rounded-full border border-gray-300 bg-white overflow-hidden hover:border-gray-400 transition-colors">
-                  <select 
-                    className="hidden lg:block px-3 lg:px-4 py-2 lg:py-3 bg-white text-xs lg:text-sm text-gray-600 focus:outline-none cursor-pointer border-r border-gray-300 appearance-none"
+                  <select
+                    className="hidden lg:block px-2 lg:px-4 py-2 lg:py-3 bg-white text-xs lg:text-sm text-gray-600 focus:outline-none cursor-pointer border-r border-gray-300 appearance-none"
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
                   >
@@ -482,21 +500,21 @@ export function ThemesHeader({
                       placeholder="Search for products"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full px-3 lg:px-4 py-2 lg:py-3 bg-white border-none focus:ring-0 focus:outline-none text-xs lg:text-sm placeholder:text-gray-500"
+                      className="w-full px-2 sm:px-3 lg:px-4 py-2 lg:py-3 bg-white border-none focus:ring-0 focus:outline-none text-xs lg:text-sm placeholder:text-gray-500"
                     />
                   </div>
                   <button
                     type="submit"
-                    className="px-4 lg:px-6 py-2 lg:py-3 bg-themes-pink-600 hover:bg-themes-pink-700 text-white transition-colors flex items-center justify-center"
+                    className="px-3 sm:px-4 lg:px-6 py-2 lg:py-3 bg-themes-pink-600 hover:bg-themes-pink-700 text-white transition-colors flex items-center justify-center"
                   >
-                    <Search className="h-3 w-3 lg:h-4 lg:w-4" />
+                    <Search className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   </button>
                 </form>
               </div>
             </div>
 
             {/* Right Side Actions */}
-            <div className="flex items-center space-x-3 lg:space-x-6">
+            <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-6">
               {/* Login/Register or My Account */}
               <div className="hidden xl:flex items-center space-x-4 text-white">
                 {isAuthenticated ? (
@@ -736,7 +754,7 @@ export function ThemesHeader({
               onClick={(e) => e.stopPropagation()}
             >
               <div className="p-4 sm:p-6">
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center justify-between mb-6 sm:mb-8">
                   <div className="flex items-center gap-2">
                     {/* Site Icon (favicon) - smaller, used as fallback or alongside logo */}
                     {siteInfo.siteIcon && !siteInfo.logo && (
@@ -745,7 +763,7 @@ export function ThemesHeader({
                         alt={siteInfo.siteIcon.alt}
                         width={24}
                         height={24}
-                        className="h-6 w-6 rounded"
+                        className="h-5 w-5 sm:h-6 sm:w-6 rounded"
                       />
                     )}
                     {/* Main Logo */}
@@ -755,7 +773,7 @@ export function ThemesHeader({
                         alt={siteInfo.logo.alt}
                         width={siteInfo.logo.width}
                         height={siteInfo.logo.height}
-                        className="h-8 w-auto"
+                        className="h-7 sm:h-8 w-auto"
                       />
                     ) : logo?.src && logo?.src.trim() !== '' ? (
                       <Image
@@ -763,40 +781,41 @@ export function ThemesHeader({
                         alt={logo?.alt || 'Logo'}
                         width={logo?.width || 120}
                         height={logo?.height || 40}
-                        className="h-8 w-auto"
+                        className="h-7 sm:h-8 w-auto"
                       />
                     ) : null}
                     {/* Site Title */}
                     {siteInfo.title && siteInfo.title.trim().length > 0 && (
-                      <span className="text-lg font-semibold text-gray-900">{siteInfo.title}</span>
+                      <span className="text-base sm:text-lg font-semibold text-gray-900">{siteInfo.title}</span>
                     )}
                   </div>
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => setIsMenuOpen(false)}
+                    className="h-9 w-9 sm:h-10 sm:w-10"
                   >
-                    <X className="h-5 w-5" />
+                    <X className="h-5 w-5 sm:h-6 sm:w-6" />
                   </Button>
                 </div>
 
-                <nav className="space-y-2">
+                <nav className="space-y-1 sm:space-y-2">
                   {dynamicNavigation.map((item) => (
                     <div key={item.href}>
                       <Link
                         href={item.href}
-                        className="block py-3 px-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors uppercase tracking-wide"
+                        className="block py-2.5 sm:py-3 px-3 sm:px-2 text-sm sm:text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors uppercase tracking-wide"
                         onClick={() => setIsMenuOpen(false)}
                       >
                         {item.label}
                       </Link>
                       {item.children && (
-                        <div className="ml-4 mt-1 space-y-1">
+                        <div className="ml-3 sm:ml-4 mt-1 space-y-0.5 sm:space-y-1">
                           {item.children.map((child) => (
                             <Link
                               key={child.href}
                               href={child.href}
-                              className="block py-2 px-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors"
+                              className="block py-2 px-3 sm:px-2 text-xs sm:text-sm text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors"
                               onClick={() => setIsMenuOpen(false)}
                             >
                               {child.label}
