@@ -224,6 +224,39 @@ export function CheckoutPage({ className }: CheckoutPageProps) {
     loadData()
   }, [isWooCommerceAvailable, isWooCommerceLoading])
 
+  // Load form data from localStorage on mount (if available)
+  useEffect(() => {
+    try {
+      const savedFormData = localStorage.getItem('checkout-form-data')
+      if (savedFormData) {
+        const parsed = JSON.parse(savedFormData)
+        setForm(prev => ({ ...prev, ...parsed }))
+        console.log('Loaded saved checkout form data from localStorage')
+      }
+    } catch (error) {
+      console.warn('Failed to load saved checkout form data:', error)
+    }
+  }, [])
+
+  // Save form data to localStorage whenever it changes (debounced)
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      try {
+        localStorage.setItem('checkout-form-data', JSON.stringify({
+          billing: form.billing,
+          shipping: form.shipping,
+          sameAsShipping: form.sameAsShipping,
+          paymentMethod: form.paymentMethod,
+          customerNote: form.customerNote,
+        }))
+      } catch (error) {
+        console.warn('Failed to save checkout form data:', error)
+      }
+    }, 500) // Debounce saves to avoid too many localStorage writes
+
+    return () => clearTimeout(timeoutId)
+  }, [form.billing, form.shipping, form.sameAsShipping, form.paymentMethod, form.customerNote])
+
   // Update form when user data becomes available
   useEffect(() => {
     if (user) {
@@ -701,10 +734,23 @@ export function CheckoutPage({ className }: CheckoutPageProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
+    // Validate session - ensure cart is loaded
+    if (!isHydrated) {
+      setError('Please wait while we load your cart...')
+      return
+    }
+    
     if (!validateForm()) return
     if (items.length === 0) {
       setError('Your cart is empty')
       return
+    }
+    
+    // Clear saved form data after successful submission
+    try {
+      localStorage.removeItem('checkout-form-data')
+    } catch (error) {
+      console.warn('Failed to clear saved form data:', error)
     }
 
     setLoading(true)

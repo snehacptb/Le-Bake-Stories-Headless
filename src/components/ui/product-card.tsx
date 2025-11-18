@@ -5,6 +5,7 @@ import { Heart, ShoppingCart, Eye, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { WooCommerceProduct } from "@/types";
+import { useWishlist } from "@/contexts/wishlist-context";
 
 interface PremiumProductCardProps {
   product: WooCommerceProduct;
@@ -27,6 +28,10 @@ export const PremiumProductCard = ({
 }: PremiumProductCardProps) => {
   const [isHovered, setIsHovered] = React.useState(false);
   const [imageLoaded, setImageLoaded] = React.useState(false);
+  
+  // Use wishlist context to show correct state - access state.items directly to trigger re-renders
+  const { state: wishlistState } = useWishlist();
+  const isWishlisted = wishlistState.items.some(item => item.id === product.id);
 
   const price = parseFloat(product.price);
   const regularPrice = parseFloat(product.regular_price || product.price);
@@ -71,9 +76,12 @@ export const PremiumProductCard = ({
                 <button
                   className="w-9 h-9 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center shadow-md transition-colors"
                   onClick={() => onAddToWishlist(product)}
-                  aria-label="Add to wishlist"
+                  aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
                 >
-                  <Heart className="w-4 h-4 text-gray-600" />
+                  <Heart className={cn(
+                    "w-4 h-4 transition-colors",
+                    isWishlisted ? "text-red-500 fill-current" : "text-gray-600"
+                  )} />
                 </button>
               )}
             </motion.div>

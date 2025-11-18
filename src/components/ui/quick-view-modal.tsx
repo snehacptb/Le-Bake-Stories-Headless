@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { WooCommerceProduct } from "@/types";
+import { useWishlist } from "@/contexts/wishlist-context";
 
 interface QuickViewModalProps {
   product: WooCommerceProduct | null;
@@ -24,6 +25,10 @@ export const QuickViewModal = ({
 }: QuickViewModalProps) => {
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
+  
+  // Use wishlist context to show correct state - access state.items directly to trigger re-renders
+  const { state: wishlistState } = useWishlist();
+  const isWishlisted = product ? wishlistState.items.some(item => item.id === product.id) : false;
 
   if (!product) return null;
 
@@ -232,10 +237,16 @@ export const QuickViewModal = ({
                     {onAddToWishlist && (
                       <button
                         onClick={handleAddToWishlist}
-                        className="flex items-center gap-2 text-gray-600 hover:text-red-500 transition-colors"
+                        className={cn(
+                          "flex items-center gap-2 transition-colors",
+                          isWishlisted ? "text-red-500" : "text-gray-600 hover:text-red-500"
+                        )}
                       >
-                        <Heart className="w-4 h-4" />
-                        <span className="text-sm">Add to Wishlist</span>
+                        <Heart className={cn(
+                          "w-4 h-4",
+                          isWishlisted && "fill-current"
+                        )} />
+                        <span className="text-sm">{isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}</span>
                       </button>
                     )}
                   </div>

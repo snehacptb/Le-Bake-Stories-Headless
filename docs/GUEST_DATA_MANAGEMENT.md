@@ -63,6 +63,8 @@ When users are authenticated, their data is stored with user-specific keys:
 
 This ensures data isolation between different users and prevents data leakage.
 
+**Important**: User-specific cart and wishlist data is **preserved** on logout. This allows users to access their cart and wishlist when they log back in. Only guest data is cleared on logout.
+
 ## Data Migration
 
 When a guest user logs in:
@@ -75,6 +77,7 @@ When a guest user logs in:
 - No sensitive information should be stored for guest users
 - All guest data is cleared on logout to maintain privacy
 - User-specific data is isolated by user ID
+- User-specific data persists across logout/login sessions for better user experience
 
 ## Debugging
 

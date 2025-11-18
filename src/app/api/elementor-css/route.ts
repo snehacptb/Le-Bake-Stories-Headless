@@ -17,9 +17,20 @@ export async function GET(request: NextRequest) {
 
     // 1. Add Elementor global styles (always needed)
     const globalStyles = [
+      `${wpUrl}/wp-content/plugins/elementor/assets/css/frontend-lite.min.css`,
       `${wpUrl}/wp-content/plugins/elementor/assets/css/frontend.min.css`,
       `${wpUrl}/wp-content/uploads/elementor/css/global.css`,
-      `${wpUrl}/wp-content/uploads/elementor/css/post-${pageId}.css`
+      `${wpUrl}/wp-content/uploads/elementor/css/post-${pageId}.css`,
+
+      // Elementor Pro (if installed)
+      `${wpUrl}/wp-content/plugins/elementor-pro/assets/css/frontend-lite.min.css`,
+      `${wpUrl}/wp-content/plugins/elementor-pro/assets/css/frontend.min.css`,
+
+      // Common widget libraries
+      `${wpUrl}/wp-content/plugins/elementor/assets/lib/swiper/css/swiper.min.css`,
+      `${wpUrl}/wp-content/plugins/elementor/assets/lib/font-awesome/css/all.min.css`,
+      `${wpUrl}/wp-content/plugins/elementor/assets/lib/eicons/css/elementor-icons.min.css`,
+      `${wpUrl}/wp-content/plugins/elementor/assets/lib/animations/animations.min.css`,
     ]
 
     // Try to fetch the page HTML to extract ALL CSS links

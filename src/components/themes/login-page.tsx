@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Eye, EyeOff, Lock, Mail, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -16,7 +16,7 @@ interface LoginPageProps {
 }
 
 export function LoginPage({ className }: LoginPageProps) {
-  const { login, isLoading, error } = useAuth()
+  const { login, isLoading, error, isAuthenticated } = useAuth()
   const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
   const [formData, setFormData] = useState({
@@ -24,12 +24,23 @@ export function LoginPage({ className }: LoginPageProps) {
     password: '',
   })
 
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push('/my-account')
+    }
+  }, [isAuthenticated, router])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
     try {
       await login(formData.email, formData.password)
-      router.push('/my-account')
+      // Wait a bit for session to be fully initialized and contexts to update
+      setTimeout(() => {
+        router.push('/my-account')
+        router.refresh() // Refresh to ensure server-side state is updated
+      }, 500)
     } catch (error) {
       // Error is handled by the auth context
     }

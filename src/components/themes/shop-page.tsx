@@ -15,6 +15,7 @@ import { PremiumProductCard } from '@/components/ui/product-card'
 import { AceternityCard } from '@/components/ui/aceternity-card'
 import { QuickViewModal } from '@/components/ui/quick-view-modal'
 import { useCart } from '@/contexts/cart-context'
+import { useWishlist } from '@/contexts/wishlist-context'
 import { useWooCommerceFeatures } from '@/contexts/woocommerce-context'
 // import { cachedAPI } from '@/lib/cached-api' // replaced by API route fetches
 import { WooCommerceProduct } from '@/types'
@@ -51,6 +52,7 @@ const sortOptions = [
 
 export function ShopPage({ initialProducts = [], className }: ShopPageProps) {
   const { addToCart } = useCart()
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist()
   const { shouldShowShop } = useWooCommerceFeatures()
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -285,9 +287,11 @@ export function ShopPage({ initialProducts = [], className }: ShopPageProps) {
   }
 
   const handleAddToWishlist = (product: WooCommerceProduct) => {
-    // Add wishlist functionality here
-    console.log('Added to wishlist:', product.name)
-    // You can integrate with your wishlist context here
+    if (isInWishlist(product.id)) {
+      removeFromWishlist(product.id)
+    } else {
+      addToWishlist(product)
+    }
   }
 
   const handleFilterChange = (key: string, value: any) => {

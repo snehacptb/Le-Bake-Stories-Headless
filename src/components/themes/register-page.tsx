@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Eye, EyeOff, Lock, Mail, User, UserPlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -17,7 +17,7 @@ interface RegisterPageProps {
 }
 
 export function RegisterPage({ className }: RegisterPageProps) {
-  const { register, isLoading, error } = useAuth()
+  const { register, isLoading, error, isAuthenticated } = useAuth()
   const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -30,6 +30,13 @@ export function RegisterPage({ className }: RegisterPageProps) {
     agreeToTerms: false,
     subscribeNewsletter: false,
   })
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push('/my-account')
+    }
+  }, [isAuthenticated, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -50,7 +57,11 @@ export function RegisterPage({ className }: RegisterPageProps) {
         password: formData.password,
         username: formData.email,
       })
-      router.push('/my-account')
+      // Wait a bit for session to be fully initialized and contexts to update
+      setTimeout(() => {
+        router.push('/my-account')
+        router.refresh() // Refresh to ensure server-side state is updated
+      }, 500)
     } catch (error) {
       // Error is handled by the auth context
     }

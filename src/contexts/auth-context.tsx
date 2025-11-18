@@ -4,6 +4,8 @@ import React, { createContext, useContext, useState, useEffect } from 'react'
 import { Customer } from '@/types'
 import { woocommerceApi } from '@/lib/woocommerce-api'
 import { clearAllGuestData } from '@/lib/clear-guest-data'
+import { cartPersistence } from '@/lib/cart-persistence'
+import { wishlistPersistence } from '@/lib/wishlist-persistence'
 
 interface AuthState {
   user: Customer | null
@@ -63,15 +65,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const userId = localStorage.getItem('wc-user-id')
       
       if (token && userId) {
-        // In a real implementation, you'd validate the token with WordPress
-        // For now, we'll fetch the user data if we have stored credentials
-        const user = await woocommerceApi.getCustomer(parseInt(userId))
-        setState({
-          user,
-          isAuthenticated: true,
-          isLoading: false,
-          error: null,
-        })
+        try {
+          // Validate token by attempting to fetch user data
+          const user = await woocommerceApi.getCustomer(parseInt(userId))
+          setState({
+            user,
+            isAuthenticated: true,
+            isLoading: false,
+            error: null,
+          })
+        } catch (userError: any) {
+          // If user fetch fails, token might be invalid or expired
+          console.warn('Failed to fetch user data, token may be invalid:', userError)
+          
+          // If it's a 401/403, clear invalid session
+          if (userError.response?.status === 401 || userError.response?.status === 403) {
+            console.log('Token appears invalid, clearing session')
+            localStorage.removeItem('wc-auth-token')
+            localStorage.removeItem('wc-user-id')
+            setState({
+              user: null,
+              isAuthenticated: false,
+              isLoading: false,
+              error: null,
+            })
+          } else {
+            // Other errors might be temporary, keep session but mark as unauthenticated
+            setState(prev => ({ ...prev, isLoading: false }))
+          }
+        }
       } else {
         setState(prev => ({ ...prev, isLoading: false }))
       }
@@ -300,9 +322,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const logout = () => {
+    const userId = state.user?.id
+    
+    // Clear authentication tokens
     localStorage.removeItem('wc-auth-token')
     localStorage.removeItem('wc-user-id')
-    localStorage.removeItem('woocommerce-cart')
+    
+    // NOTE: We do NOT clear user-specific cart and wishlist data on logout
+    // This data should persist so users can access their cart/wishlist when they log back in
+    // Only guest data is cleared below
     
     // Clear ALL guest data on logout using utility function
     try {
@@ -325,9 +353,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       })
       
-      console.log('✅ Successfully cleared all guest data on logout')
+      console.log('✅ Successfully cleared guest data on logout (user data preserved)')
     } catch (error) {
-      console.warn('⚠️ Failed to clear some guest data on logout:', error)
+      console.warn('⚠️ Failed to clear some data on logout:', error)
     }
     
     setState({

@@ -1361,3 +1361,5 @@ npm run lint               # Code linting
 *This report provides a comprehensive overview of the Le Bake Stories headless eCommerce project. For specific implementation details, refer to individual documentation files and code comments.*
 
 
+
+

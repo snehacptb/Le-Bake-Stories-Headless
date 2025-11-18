@@ -445,10 +445,13 @@ export function SingleProductPage({ product, relatedProducts = [] }: SingleProdu
                   className="text-gray-700 hover:text-gray-900 flex items-center gap-2"
                   onClick={handleWishlistToggle}
                 >
-                  <Heart className={cn(
-                    "h-4 w-4",
-                    isWishlisted ? "fill-red-500 text-red-500" : "text-gray-600"
-                  )} />
+                  <Heart
+                    className={cn(
+                      "h-4 w-4",
+                      isWishlisted ? "text-red-500" : "text-gray-600"
+                    )}
+                    fill={isWishlisted ? "currentColor" : "none"}
+                  />
                   <span>{isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}</span>
                 </button>
               </div>

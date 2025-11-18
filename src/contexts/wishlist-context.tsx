@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react'
+import React, { createContext, useContext, useReducer, useEffect, useMemo, ReactNode } from 'react'
 import { WooCommerceProduct } from '@/types'
 import { wishlistPersistence } from '@/lib/wishlist-persistence'
 import { useAuth } from './auth-context'
@@ -147,31 +147,83 @@ export function WishlistProvider({ children }: WishlistProviderProps) {
 
   // Handle user authentication changes - migrate wishlist data
   useEffect(() => {
-    const handleAuthChange = () => {
-      const currentUserId = getCurrentUserId()
-      console.log('Handling wishlist auth change:', { 
-        currentUser: currentUserId,
-        isAuthenticated,
-        hasItems: state.items.length > 0
-      })
-      
-      // If we have items in current state and user context changed, migrate them
-      if (state.isHydrated && state.items.length > 0) {
-        // Save current items to the new user context
-        wishlistPersistence.saveWishlistItems(state.items, currentUserId)
-      }
-      
-      // Load wishlist for the new user context
-      setTimeout(() => {
-        const wishlistItems = wishlistPersistence.getWishlistItems(currentUserId)
-        dispatch({ type: 'HYDRATE_WISHLIST', payload: wishlistItems })
-      }, 100) // Small delay to ensure auth state is settled
+    // Skip if wishlist hasn't hydrated yet - initial load is handled separately
+    if (!state.isHydrated) {
+      return
     }
 
-    // Only trigger on authentication state changes after initial hydration
-    if (state.isHydrated) {
-      handleAuthChange()
+    // Track previous user ID using a ref or localStorage check
+    let previousUserWasGuest = false
+    const currentUserId = getCurrentUserId()
+    
+    // Check if we had a guest wishlist before
+    const guestWishlist = wishlistPersistence.getWishlistItems() // Check guest storage
+    previousUserWasGuest = guestWishlist.length > 0 && !currentUserId
+
+    const handleAuthChange = () => {
+      console.log('Handling wishlist auth change:', { 
+        previousUserWasGuest,
+        currentUser: currentUserId,
+        isAuthenticated,
+        hasGuestItems: guestWishlist.length > 0,
+        hasCurrentItems: state.items.length > 0
+      })
+      
+      // If user is logging in (transitioning from guest to authenticated)
+      if (currentUserId && isAuthenticated) {
+        console.log('💝 User logging in, checking for saved wishlist')
+        // Get existing user wishlist from storage
+        const userWishlist = wishlistPersistence.getWishlistItems(currentUserId)
+        
+        // If there's a saved wishlist, restore it
+        if (userWishlist.length > 0) {
+          console.log('💝 Found saved wishlist for user:', userWishlist.length, 'items')
+          dispatch({ type: 'HYDRATE_WISHLIST', payload: userWishlist })
+        }
+        
+        // Also migrate guest wishlist if exists
+        if (guestWishlist.length > 0) {
+          console.log('💝 Migrating guest wishlist to user wishlist on login')
+          // Merge wishlists (avoid duplicates)
+          const mergedWishlist = [...userWishlist]
+          guestWishlist.forEach(item => {
+            if (!mergedWishlist.some(existing => existing.id === item.id)) {
+              mergedWishlist.push(item)
+            }
+          })
+          
+          // Save merged wishlist to user context
+          wishlistPersistence.saveWishlistItems(mergedWishlist, currentUserId)
+          
+          // Clear guest wishlist
+          wishlistPersistence.clearWishlistData()
+          
+          // Update state with merged wishlist
+          dispatch({ type: 'HYDRATE_WISHLIST', payload: mergedWishlist })
+          return
+        }
+        
+        // If no guest wishlist but user wishlist exists, it's already loaded above
+        if (userWishlist.length > 0) {
+          return
+        }
+      }
+      
+      // If user context changed, load wishlist for the new user
+      // Check if current state items match current user storage
+      const storageItems = wishlistPersistence.getWishlistItems(currentUserId)
+      if (storageItems.length !== state.items.length || 
+          storageItems.some((item, idx) => item.id !== state.items[idx]?.id)) {
+        // Load wishlist for the new user context
+        setTimeout(() => {
+          const wishlistItems = wishlistPersistence.getWishlistItems(currentUserId)
+          console.log('💝 Loading wishlist for user context:', wishlistItems.length, 'items')
+          dispatch({ type: 'HYDRATE_WISHLIST', payload: wishlistItems })
+        }, 150) // Small delay to ensure auth state is settled
+      }
     }
+
+    handleAuthChange()
   }, [user?.id, isAuthenticated, state.isHydrated])
 
   // Save wishlist to user-specific storage whenever items change (but only after hydration)
@@ -223,7 +275,9 @@ export function WishlistProvider({ children }: WishlistProviderProps) {
     return state.items
   }
 
-  const contextValue: WishlistContextType = {
+  // Memoize context value - only recreate when state changes
+  // Functions are stable (they just dispatch), so only state matters for reactivity
+  const contextValue: WishlistContextType = useMemo(() => ({
     state,
     addToWishlist,
     removeFromWishlist,
@@ -232,7 +286,7 @@ export function WishlistProvider({ children }: WishlistProviderProps) {
     isInWishlist,
     getWishlistCount,
     getWishlistItems,
-  }
+  }), [state]) // Only depend on state - functions are stable dispatch wrappers
 
   return (
     <WishlistContext.Provider value={contextValue}>

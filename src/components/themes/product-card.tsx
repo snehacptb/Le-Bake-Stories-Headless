@@ -49,9 +49,9 @@ export function ProductCard({
   const [isHovered, setIsHovered] = useState(false)
   const [imageLoading, setImageLoading] = useState(true)
   
-  // Use wishlist context instead of local state
-  const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlist()
-  const isWishlisted = isInWishlist(product.id)
+  // Use wishlist context instead of local state - access state.items directly to trigger re-renders
+  const { state: wishlistState, isInWishlist, addToWishlist, removeFromWishlist } = useWishlist()
+  const isWishlisted = wishlistState.items.some(item => item.id === product.id)
 
   const primaryImage = product.images?.[0]
   const secondaryImage = product.images?.[1]
@@ -233,10 +233,13 @@ export function ProductCard({
                 className="w-10 h-10 bg-white/95 hover:bg-white shadow-lg rounded-full backdrop-blur-sm border border-gray-100 hover:scale-110 transition-all duration-300"
                 onClick={handleAddToWishlist}
               >
-                <Heart className={cn(
-                  "h-4 w-4 transition-colors",
-                  isWishlisted ? "fill-red-500 text-red-500" : "text-gray-600 hover:text-red-500"
-                )} />
+                <Heart
+                  className={cn(
+                    "h-4 w-4 transition-colors",
+                    isWishlisted ? "text-red-500" : "text-gray-600 hover:text-red-500"
+                  )}
+                  fill={isWishlisted ? "currentColor" : "none"}
+                />
               </Button>
             )}
             

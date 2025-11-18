@@ -417,6 +417,34 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
         console.log(`Successfully loaded ${items.length} items and ${appliedCoupons.length} coupons from server cart`)
         
+        // If server cart is empty, check localStorage for saved cart data
+        if (items.length === 0) {
+          const localCartData = cartPersistence.getLocalCartData(getCurrentUserId())
+          if (localCartData.length > 0) {
+            console.log('📦 Server cart is empty, restoring from localStorage:', localCartData.length, 'items')
+            const localTotal = localCartData.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+            dispatch({ 
+              type: 'SET_CART', 
+              payload: { 
+                items: localCartData,
+                cartToken: cartData.cart_token || cartToken,
+                totals: {
+                  subtotal: localTotal,
+                  discountTotal: 0,
+                  taxTotal: 0,
+                  shippingTotal: 0,
+                  total: localTotal
+                },
+                coupons: []
+              } 
+            })
+            // Save the restored cart to server
+            dispatch({ type: 'SET_NEEDS_SYNC', payload: true })
+            dispatch({ type: 'SET_ERROR', payload: null })
+            return true
+          }
+        }
+        
         dispatch({ 
           type: 'SET_CART', 
           payload: { 
@@ -440,6 +468,28 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         return true // Indicate success
       } else {
         console.warn('No cart data or items received from server')
+        // Check localStorage as fallback
+        const localCartData = cartPersistence.getLocalCartData(getCurrentUserId())
+        if (localCartData.length > 0) {
+          console.log('📦 Server returned no cart data, restoring from localStorage:', localCartData.length, 'items')
+          const localTotal = localCartData.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+          dispatch({ 
+            type: 'SET_CART', 
+            payload: { 
+              items: localCartData,
+              totals: {
+                subtotal: localTotal,
+                discountTotal: 0,
+                taxTotal: 0,
+                shippingTotal: 0,
+                total: localTotal
+              }
+            } 
+          })
+          // Save the restored cart to server
+          dispatch({ type: 'SET_NEEDS_SYNC', payload: true })
+          return true
+        }
         return false
       }
     } catch (error: any) {
@@ -476,30 +526,36 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }
 
 
-  // Initialize cart on mount and when user changes
+  // Initialize cart on mount and when user changes (but wait for auth to be ready)
   useEffect(() => {
+    // Don't initialize cart until auth state is ready
+    // This prevents race conditions where cart tries to load before we know if user is authenticated
+    if (isWooCommerceLoading) {
+      return // Wait for WooCommerce status check
+    }
+
     const initializeCart = async () => {
-      // console.log('🔄 Initializing cart...', { 
-      //   userId: getCurrentUserId(), 
-      //   isAuthenticated, 
-      //   retryCount: state.retryCount,
-      //   hasWordPressUrl: !!process.env.NEXT_PUBLIC_WORDPRESS_URL 
-      // })
+      console.log('🔄 Initializing cart...', { 
+        userId: getCurrentUserId(), 
+        isAuthenticated, 
+        retryCount: state.retryCount,
+        hasWordPressUrl: !!process.env.NEXT_PUBLIC_WORDPRESS_URL 
+      })
       
       const success = await loadCartFromServer()
-      // console.log('📦 Cart loading result:', { success })
+      console.log('📦 Cart loading result:', { success })
       
       // Only set hydrated to true if we successfully loaded cart data or if there's no WordPress URL configured
       // This prevents showing "empty cart" message when there's a connection issue
       if (success || !process.env.NEXT_PUBLIC_WORDPRESS_URL) {
-        // console.log('✅ Cart initialized successfully')
+        console.log('✅ Cart initialized successfully')
         dispatch({ type: 'SET_HYDRATED', payload: true })
         dispatch({ type: 'RESET_RETRY_COUNT' })
       } else {
         // If loading failed, try again with exponential backoff (max 3 retries)
         const maxRetries = 3
         if (state.retryCount < maxRetries) {
-          // console.log(`🔄 Retrying cart load (attempt ${state.retryCount + 1}/${maxRetries})`)
+          console.log(`🔄 Retrying cart load (attempt ${state.retryCount + 1}/${maxRetries})`)
           dispatch({ type: 'INCREMENT_RETRY_COUNT' })
           const delay = Math.pow(2, state.retryCount) * 1000 // 1s, 2s, 4s
           setTimeout(() => {
@@ -507,13 +563,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           }, delay)
         } else {
           // After max retries, check if we have any local cart data before showing empty state
-          // console.log('⚠️ Max retries reached, checking for local cart data')
+          console.log('⚠️ Max retries reached, checking for local cart data')
           const localCartData = cartPersistence.getLocalCartData(getCurrentUserId())
-          // console.log('📱 Local cart data:', localCartData)
+          console.log('📱 Local cart data:', localCartData)
           
           if (localCartData.length > 0) {
             // Use local cart data as fallback
-            // console.log('📱 Using local cart data as fallback')
+            console.log('📱 Using local cart data as fallback')
             const localTotal = localCartData.reduce((sum, item) => sum + (item.price * item.quantity), 0)
             const localItemCount = localCartData.reduce((sum, item) => sum + item.quantity, 0)
             
@@ -539,16 +595,66 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
     }
     initializeCart()
-  }, [user?.id, isAuthenticated, state.retryCount])
+  }, [user?.id, isAuthenticated, state.retryCount, isWooCommerceLoading])
 
   // Handle user authentication changes - properly switch cart context
   useEffect(() => {
+    // Skip if auth is still loading
+    if (state.isLoading || !state.isHydrated) {
+      return
+    }
+
     const handleAuthChange = async () => {
-      // console.log('🔄 Handling auth change:', { 
-      //   previousUser: state.cartToken ? cartPersistence.getUserIdFromToken(state.cartToken) : null,
-      //   currentUser: getCurrentUserId(),
-      //   isAuthenticated 
-      // })
+      const currentTokenUserId = state.cartToken ? cartPersistence.getUserIdFromToken(state.cartToken) : null
+      const actualUserId = getCurrentUserId()
+      
+      // If user hasn't changed, don't do anything
+      if (currentTokenUserId === actualUserId && (!!currentTokenUserId) === isAuthenticated) {
+        return
+      }
+
+      console.log('🔄 Handling cart auth change:', { 
+        previousUser: currentTokenUserId,
+        currentUser: actualUserId,
+        isAuthenticated,
+        hasCartToken: !!state.cartToken
+      })
+      
+      // If user is logging in (transitioning from guest to authenticated)
+      if (!currentTokenUserId && actualUserId) {
+        console.log('📦 User logging in, checking for saved cart data')
+        // Check if there's a saved cart for this user
+        const savedUserCart = cartPersistence.getLocalCartData(actualUserId)
+        if (savedUserCart.length > 0) {
+          console.log('📦 Found saved cart for user:', savedUserCart.length, 'items')
+          cartPersistence.saveLocalCartData(savedUserCart, actualUserId) // Ensure it's saved
+        }
+        // Also migrate guest cart if exists
+        if (state.items.length > 0) {
+          console.log('📦 Migrating guest cart to user cart on login')
+          const guestCartData = cartPersistence.getLocalCartData() // Get guest cart
+          if (guestCartData.length > 0) {
+            // Merge guest cart with user cart (avoid duplicates)
+            const mergedCart = [...savedUserCart]
+            guestCartData.forEach(guestItem => {
+              const existingIndex = mergedCart.findIndex(item => item.id === guestItem.id)
+              if (existingIndex >= 0) {
+                mergedCart[existingIndex].quantity += guestItem.quantity
+              } else {
+                mergedCart.push(guestItem)
+              }
+            })
+            cartPersistence.saveLocalCartData(mergedCart, actualUserId) // Save merged cart
+          }
+        }
+      }
+      
+      // If user is logging out (transitioning from authenticated to guest)
+      // Preserve user cart data in localStorage (already done, just clear state)
+      if (currentTokenUserId && !actualUserId) {
+        console.log('📦 User logging out, preserving cart data in localStorage')
+        // Cart data is already saved in localStorage, just clear the state
+      }
       
       // Set loading state and reset hydrated state during auth change
       dispatch({ type: 'SET_LOADING', payload: true })
@@ -559,8 +665,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       
       // Clear any existing cart token for the previous user context
       const prevCartToken = state.cartToken
-      if (prevCartToken && !cartPersistence.isTokenForUser(prevCartToken, getCurrentUserId())) {
+      if (prevCartToken && !cartPersistence.isTokenForUser(prevCartToken, actualUserId)) {
         dispatch({ type: 'SET_CART_TOKEN', payload: null })
+        cartPersistence.setCartToken(null, currentTokenUserId || undefined) // Clear old token
       }
       
       // Load cart for the new user context with proper delay
@@ -570,8 +677,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           dispatch({ type: 'SET_HYDRATED', payload: true })
         } else {
           // If loading failed, check for local cart data
-          const localCartData = cartPersistence.getLocalCartData(getCurrentUserId())
+          const localCartData = cartPersistence.getLocalCartData(actualUserId)
           if (localCartData.length > 0) {
+            console.log('📦 Restoring cart from localStorage after failed server load:', localCartData.length, 'items')
             const localTotal = localCartData.reduce((sum, item) => sum + (item.price * item.quantity), 0)
             dispatch({ 
               type: 'SET_CART', 
@@ -586,19 +694,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 }
               } 
             })
+            // Mark for sync to server
+            dispatch({ type: 'SET_NEEDS_SYNC', payload: true })
           }
           dispatch({ type: 'SET_HYDRATED', payload: true })
         }
-      }, 200) // Longer delay to ensure auth state is fully settled
+      }, 300) // Longer delay to ensure auth state is fully settled
     }
 
-    // Trigger on authentication state changes
-    const currentTokenUserId = state.cartToken ? cartPersistence.getUserIdFromToken(state.cartToken) : null
-    const actualUserId = getCurrentUserId()
-    
-    if (currentTokenUserId !== actualUserId) {
-      handleAuthChange()
-    }
+    handleAuthChange()
   }, [user?.id, isAuthenticated])
 
 
