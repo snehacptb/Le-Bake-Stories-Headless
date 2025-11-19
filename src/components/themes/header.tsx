@@ -377,8 +377,8 @@ export function ThemesHeader({
       isSticky && "sticky top-0",
       isScrolled && "shadow-lg backdrop-blur-md bg-slate-900/95"
     )}>
-      {/* Top Bar - Dark Navy Style */}
-      <div className="bg-slate-900 border-b border-slate-700 text-white text-[10px] sm:text-xs">
+      {/* Top Bar - Dark Navy Style - Hidden on Mobile */}
+      <div className="hidden lg:block bg-slate-900 border-b border-slate-700 text-white text-[10px] sm:text-xs">
         <div className="container mx-auto px-3 sm:px-4">
           <div className="flex items-center justify-between py-1.5 sm:py-2">
             {/* Left Side - Language/Country */}
@@ -436,19 +436,28 @@ export function ThemesHeader({
 
       {/* Main Header - Dark Navy Style */}
       <div className="bg-slate-900 shadow-sm">
-        <div className="container mx-auto px-3 sm:px-4">
-          <div className="flex items-center justify-between py-3 sm:py-4 lg:py-6 gap-2 sm:gap-4">
+        <div className="container mx-auto px-4 sm:px-4">
+          <div className="flex items-center justify-between py-3.5 lg:py-6 gap-2">
+            {/* Mobile Menu Button - Left */}
+            <button
+              onClick={() => setIsMenuOpen(true)}
+              className="lg:hidden p-1.5 text-white hover:text-gray-300 transition-colors tap-target flex-shrink-0"
+              aria-label="Open menu"
+            >
+              <Menu className="h-6 w-6" />
+            </button>
+
             {/* Logo */}
-            <Link href="/" className="flex-shrink-0 z-10">
+            <Link href="/" className="flex-1 lg:flex-shrink-0 flex justify-center lg:justify-start z-10 min-w-0">
               {(siteInfo.logo || siteInfo.siteIcon || (siteInfo.title && siteInfo.title.trim().length > 0)) ? (
-                <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3">
+                <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 min-w-0">
                   {siteInfo.logo ? (
                     <Image
                       src={siteInfo.logo.url}
                       alt={siteInfo.logo.alt}
                       width={160}
                       height={50}
-                      className="h-7 sm:h-9 lg:h-12 w-auto"
+                      className="h-8 lg:h-12 w-auto max-w-[140px] sm:max-w-[160px] lg:max-w-none"
                       priority
                     />
                   ) : siteInfo.siteIcon ? (
@@ -457,12 +466,12 @@ export function ThemesHeader({
                       alt={siteInfo.siteIcon.alt}
                       width={48}
                       height={48}
-                      className="h-7 w-7 sm:h-9 sm:w-9 lg:h-12 lg:w-12 rounded"
+                      className="h-8 w-8 lg:h-12 lg:w-12 rounded flex-shrink-0"
                       priority
                     />
                   ) : null}
                   {siteInfo.title && siteInfo.title.trim().length > 0 && (
-                    <span className="text-base sm:text-lg lg:text-2xl font-bold text-white tracking-tight">{siteInfo.title}</span>
+                    <span className="text-sm sm:text-base lg:text-2xl font-bold text-white tracking-tight truncate">{siteInfo.title}</span>
                   )}
                 </div>
               ) : (
@@ -472,14 +481,14 @@ export function ThemesHeader({
                     alt={logo.alt || 'Logo'}
                     width={160}
                     height={50}
-                    className="h-7 sm:h-9 lg:h-12 w-auto"
+                    className="h-8 lg:h-12 w-auto max-w-[140px] sm:max-w-[160px] lg:max-w-none"
                     priority
                   />
                 )
               )}
             </Link>
-            {/* Search Bar - Dark Navy Style */}
-            <div className="hidden md:flex flex-1 max-w-lg lg:max-w-2xl mx-2 sm:mx-4 lg:mx-8">
+            {/* Search Bar - Desktop Only */}
+            <div className="hidden lg:flex flex-1 max-w-lg lg:max-w-2xl mx-2 sm:mx-4 lg:mx-8">
               <div className="relative w-full">
                 <form onSubmit={handleSearch} className="flex rounded-full border border-gray-300 bg-white overflow-hidden hover:border-gray-400 transition-colors">
                   <select
@@ -514,8 +523,8 @@ export function ThemesHeader({
             </div>
 
             {/* Right Side Actions */}
-            <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-6">
-              {/* Login/Register or My Account */}
+            <div className="flex items-center space-x-2 lg:space-x-6 flex-shrink-0">
+              {/* Login/Register or My Account - Desktop Only */}
               <div className="hidden xl:flex items-center space-x-4 text-white">
                 {isAuthenticated ? (
                   <MyAccountDropdown />
@@ -529,42 +538,30 @@ export function ThemesHeader({
                 )}
               </div>
 
-              {/* Mobile Search Icon */}
-              <div className="md:hidden">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="p-2 text-white hover:text-gray-300 hover:bg-transparent"
-                  onClick={() => router.push('/shop')}
-                >
-                  <Search className="h-4 w-4" />
-                </Button>
-              </div>
-
-              {/* Wishlist */}
+              {/* Wishlist - Desktop Only */}
               {shouldShowWishlist() && (
-                <Link href="/wishlist" className="relative text-white hover:text-gray-300 transition-colors">
-                  <Heart className="h-4 w-4 lg:h-5 lg:w-5" />
+                <Link href="/wishlist" className="hidden lg:flex relative text-white hover:text-gray-300 transition-colors">
+                  <Heart className="h-5 w-5" />
                   {wishlistCount > 0 && (
-                    <Badge className="absolute -top-1 -right-1 h-3 w-3 lg:h-4 lg:w-4 rounded-full p-0 flex items-center justify-center text-xs bg-red-500 text-white">
+                    <Badge className="absolute -top-1 -right-1 h-4 w-4 rounded-full p-0 flex items-center justify-center text-xs bg-red-500 text-white">
                       {wishlistCount}
                     </Badge>
                   )}
                 </Link>
               )}
 
-              {/* Cart */}
+              {/* Cart - Mobile and Desktop */}
               {shouldShowCart() && (
                 <Button
                   variant="ghost"
-                  className="relative p-0 hover:bg-transparent"
+                  className="relative p-1.5 lg:p-0 hover:bg-transparent flex-shrink-0"
                   onClick={() => setIsCartOpen(true)}
                 >
                   <div className="flex items-center space-x-1 lg:space-x-2 text-white hover:text-gray-300 transition-colors">
                     <div className="relative">
-                      <ShoppingCart className="h-4 w-4 lg:h-5 lg:w-5" />
+                      <ShoppingCart className="h-6 w-6 lg:h-5 lg:w-5" />
                       {itemCount > 0 && (
-                        <Badge className="absolute -top-1 -right-1 h-3 w-3 lg:h-4 lg:w-4 rounded-full p-0 flex items-center justify-center text-xs bg-red-500 text-white">
+                        <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-[10px] font-semibold bg-red-500 text-white border-2 border-slate-900">
                           {itemCount}
                         </Badge>
                       )}
@@ -582,8 +579,8 @@ export function ThemesHeader({
       {/* Navigation Bar - White Background Style */}
       <div className="bg-white border-b border-gray-200">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between py-2 lg:py-3">
-            {/* Browse Categories Button */}
+          <div className="flex items-center justify-between py-3 lg:py-3">
+            {/* Browse Categories Button - Desktop Only */}
             <div className="hidden lg:flex items-center relative">
               <Button 
                 variant="ghost" 
@@ -627,49 +624,6 @@ export function ThemesHeader({
               </AnimatePresence>
             </div>
 
-            {/* Mobile Categories Button */}
-            <div className="lg:hidden relative">
-              <Button 
-                variant="ghost" 
-                className="text-gray-800 hover:text-slate-900 hover:bg-transparent p-0 flex items-center space-x-1"
-                onClick={handleBrowseCategories}
-              >
-                <Menu className="h-4 w-4" />
-                <span className="text-xs font-medium uppercase tracking-wide">CATEGORIES</span>
-                <ChevronDown className={cn("h-3 w-3 transition-transform", isCategoriesOpen && "rotate-180")} />
-              </Button>
-              
-              {/* Mobile Categories Dropdown */}
-              <AnimatePresence>
-                {isCategoriesOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="absolute top-full left-0 mt-2 w-48 bg-white shadow-2xl border border-gray-100 rounded-lg z-50"
-                  >
-                    <div className="py-2">
-                      <Link
-                        href="/shop"
-                        className="block px-3 py-2 text-xs text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors"
-                        onClick={() => setIsCategoriesOpen(false)}
-                      >
-                        All Categories
-                      </Link>
-                      {categories.map((category) => (
-                        <button
-                          key={category.id}
-                          onClick={() => handleCategorySelect(category.slug)}
-                          className="w-full text-left block px-3 py-2 text-xs text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors"
-                        >
-                          {category.name} ({category.count})
-                        </button>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
 
             {/* Desktop Navigation - Left Aligned */}
             <nav className="hidden lg:flex items-center flex-1 ml-8">
@@ -706,30 +660,24 @@ export function ThemesHeader({
               </div>
             </nav>
 
-            {/* Mobile Search & Menu */}
-            <div className="flex lg:hidden items-center space-x-2 flex-1 justify-end">
-              <form onSubmit={handleSearch} className="relative flex-1 max-w-xs">
+            {/* Mobile Search Bar - Full Width */}
+            <div className="flex lg:hidden items-center w-full">
+              <form onSubmit={handleSearch} className="relative w-full">
                 <Input
                   type="search"
-                  placeholder="Search..."
+                  placeholder="Search for products"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-3 pr-8 py-1.5 text-xs rounded-full bg-gray-50 border-gray-200"
+                  className="pl-4 pr-12 py-2.5 text-sm rounded-lg bg-white border-gray-300 w-full focus:ring-2 focus:ring-slate-900 focus:border-transparent"
                 />
-                <button type="submit" className="absolute right-2 top-1/2 transform -translate-y-1/2">
-                  <Search className="h-3 w-3 text-gray-400" />
+                <button 
+                  type="submit" 
+                  className="absolute right-0 top-0 h-full px-4 bg-purple-900 hover:bg-purple-800 text-white rounded-r-lg transition-colors flex items-center justify-center"
+                  aria-label="Search"
+                >
+                  <Search className="h-5 w-5" />
                 </button>
               </form>
-              
-              {/* Mobile Menu Toggle */}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="p-1.5 text-gray-700 hover:text-gray-900"
-                onClick={() => setIsMenuOpen(true)}
-              >
-                <Menu className="h-4 w-4" />
-              </Button>
             </div>
           </div>
         </div>

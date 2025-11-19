@@ -1,21 +1,48 @@
 /**
  * WordPress Webhook Endpoint
  * POST /api/webhooks/wordpress
- * 
- * Does not require a secret in query. If you use a plugin that can sign requests,
- * implement header verification here. Otherwise rely on obscured URL and optional IP allowlist.
+ *
+ * Receives webhooks from WordPress when content is updated
+ * Supports signature verification for enhanced security
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { cacheService } from '@/lib/cache-service'
 import { WebhookPayload } from '@/lib/cache-types'
+import crypto from 'crypto'
+
+// Verify webhook signature (optional but recommended)
+function verifyWebhookSignature(payload: string, signature: string, secret: string): boolean {
+  const hmac = crypto.createHmac('sha256', secret)
+  const digest = hmac.update(payload).digest('hex')
+  return signature === digest
+}
 
 export async function POST(request: NextRequest) {
   try {
-    const payload: WebhookPayload = await request.json()
+    // Optional signature verification
+    const signature = request.headers.get('x-wp-signature') || ''
+    const webhookSecret = process.env.WEBHOOK_SECRET
+
+    // Read raw body for signature verification
+    const body = await request.text()
+
+    // Verify signature if both secret and signature are provided
+    if (webhookSecret && signature) {
+      if (!verifyWebhookSignature(body, signature, webhookSecret)) {
+        console.error('❌ [WEBHOOK] Invalid signature')
+        return NextResponse.json(
+          { error: 'Invalid signature' },
+          { status: 401 }
+        )
+      }
+      console.log('✅ [WEBHOOK] Signature verified')
+    }
+
+    const payload: WebhookPayload = JSON.parse(body)
     const { action, type, id, data } = payload
 
-    console.log(`Webhook received: ${action} ${type} ${id}`)
+    console.log(`🔔 [WEBHOOK] Received: ${action} ${type} ${id}`)
 
     // Handle different webhook types
     switch (type) {
@@ -40,18 +67,28 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `Webhook processed: ${action} ${type} ${id}`
+      message: `Webhook processed: ${action} ${type} ${id}`,
+      timestamp: new Date().toISOString()
     })
   } catch (error: any) {
-    console.error('Webhook processing error:', error)
+    console.error('❌ [WEBHOOK] Processing error:', error)
     return NextResponse.json(
-      { 
+      {
         error: 'Webhook processing failed',
-        message: error.message 
+        message: error.message
       },
       { status: 500 }
     )
   }
+}
+
+// Health check endpoint
+export async function GET() {
+  return NextResponse.json({
+    success: true,
+    message: 'WordPress webhook endpoint is active',
+    timestamp: new Date().toISOString()
+  })
 }
 
 async function handleProductWebhook(action: string, id: number, data: any) {

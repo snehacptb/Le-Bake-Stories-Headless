@@ -162,11 +162,11 @@ export interface CacheConfig {
 }
 
 export interface WebhookPayload {
-  action: 'created' | 'updated' | 'deleted'
-  type: 'product' | 'category' | 'page' | 'post' | 'menu'
+  action: 'created' | 'updated' | 'deleted' | 'test'
+  type: 'product' | 'category' | 'page' | 'post' | 'menu' | 'test'
   id: number
   data?: any
-  timestamp: string
+  timestamp?: string
 }
 
 export interface CacheStats {

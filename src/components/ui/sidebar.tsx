@@ -93,36 +93,40 @@ export const PremiumSidebar = ({
       </AnimatePresence>
 
       {/* Sidebar */}
-      <aside
+      <motion.aside
+        initial={className?.includes('lg:hidden') ? { x: '-100%' } : false}
+        animate={className?.includes('lg:hidden') ? { x: isOpen ? 0 : '-100%' } : {}}
+        transition={{ type: 'tween', duration: 0.3 }}
         className={cn(
-          "w-[275px] h-fit",
+          "w-[275px] lg:w-[275px] h-fit bg-white",
           // Desktop sidebar - static positioned, always visible
-          !className?.includes('lg:hidden') && "sticky top-6 block",
+          !className?.includes('lg:hidden') && "sticky top-6 hidden lg:block",
           // Mobile sidebar - fixed overlay
           className?.includes('lg:hidden') && [
-            "fixed inset-y-0 left-0 z-50 lg:hidden",
+            "fixed inset-y-0 left-0 z-50 w-[85vw] max-w-[380px] shadow-2xl overflow-y-auto",
             isOpen ? "block" : "hidden"
           ],
           className
         )}
-        style={{
-          transform: className?.includes('lg:hidden') && !isOpen ? 'translateX(-100%)' : 'translateX(0)'
-        }}
       >
-        <div className="widget-area space-y-0 bg-white lg:bg-transparent p-4 lg:p-0">
-          {/* Mobile Close Button */}
-          <div className="flex justify-between items-center lg:hidden mb-6 pb-4 border-b border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900">
-              Filters
-            </h3>
-            <Button variant="ghost" size="sm" onClick={onClose}>
-              <X className="h-4 w-4" />
-            </Button>
+        <div className="widget-area space-y-0 p-5 lg:p-0 h-full">
+          {/* Mobile Header */}
+          <div className="flex justify-between items-center lg:hidden mb-6 pb-4 border-b-2 border-gray-200 sticky top-0 bg-white z-10 -mx-5 px-5 py-4">
+            <h2 className="text-xl font-bold text-gray-900">
+              Filter Products
+            </h2>
+            <button 
+              onClick={onClose}
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors tap-target"
+              aria-label="Close filters"
+            >
+              <X className="h-6 w-6 text-gray-700" />
+            </button>
           </div>
 
           {/* 1. Filter by Price Widget */}
-          <div className="wd-widget widget sidebar-widget woocommerce widget_price_filter bg-white border-0 mb-8 pb-8 border-b border-gray-200">
-            <h5 className="widget-title text-sm font-medium text-gray-900 mb-4 uppercase tracking-wide">
+          <div className="wd-widget widget sidebar-widget woocommerce widget_price_filter bg-white border-0 mb-6 pb-6 border-b border-gray-200">
+            <h5 className="widget-title text-base font-semibold text-gray-900 mb-5 uppercase tracking-wide">
               Filter by price
             </h5>
             <form className="price-filter-form">
@@ -207,47 +211,57 @@ export const PremiumSidebar = ({
           </div>
 
           {/* 2. Stock Status Widget */}
-          <div className="wd-widget widget sidebar-widget wd-widget-stock-status bg-white border-0 mb-8 pb-8 border-b border-gray-200">
-            <h5 className="widget-title text-sm font-medium text-gray-900 mb-4 uppercase tracking-wide">
+          <div className="wd-widget widget sidebar-widget wd-widget-stock-status bg-white border-0 mb-6 pb-6 border-b border-gray-200">
+            <h5 className="widget-title text-base font-semibold text-gray-900 mb-5 uppercase tracking-wide">
               Stock status
             </h5>
-            <ul className="wd-checkboxes-on space-y-3">
+            <ul className="wd-checkboxes-on space-y-4">
               <li>
-                <a 
-                  href="#"
+                <button 
                   onClick={(e) => {
                     e.preventDefault();
                     onFilterChange('onSale', !filters.onSale);
                   }}
                   className={cn(
-                    "text-sm text-gray-700 hover:text-gray-900 transition-colors flex items-center",
-                    filters.onSale && "text-orange-600 font-medium"
+                    "text-base text-gray-700 hover:text-gray-900 transition-colors flex items-center gap-3 w-full text-left tap-target py-2 px-3 rounded hover:bg-gray-50",
+                    filters.onSale && "text-orange-600 font-medium bg-orange-50"
                   )}
                 >
+                  <div className={cn(
+                    "w-5 h-5 border-2 rounded flex items-center justify-center",
+                    filters.onSale ? "border-orange-600 bg-orange-600" : "border-gray-300"
+                  )}>
+                    {filters.onSale && <span className="text-white text-xs">✓</span>}
+                  </div>
                   On sale
-                </a>
+                </button>
               </li>
               <li>
-                <a 
-                  href="#"
+                <button 
                   onClick={(e) => {
                     e.preventDefault();
                     onFilterChange('inStock', !filters.inStock);
                   }}
                   className={cn(
-                    "text-sm text-gray-700 hover:text-gray-900 transition-colors flex items-center",
-                    filters.inStock && "text-green-600 font-medium"
+                    "text-base text-gray-700 hover:text-gray-900 transition-colors flex items-center gap-3 w-full text-left tap-target py-2 px-3 rounded hover:bg-gray-50",
+                    filters.inStock && "text-green-600 font-medium bg-green-50"
                   )}
                 >
+                  <div className={cn(
+                    "w-5 h-5 border-2 rounded flex items-center justify-center",
+                    filters.inStock ? "border-green-600 bg-green-600" : "border-gray-300"
+                  )}>
+                    {filters.inStock && <span className="text-white text-xs">✓</span>}
+                  </div>
                   In stock
-                </a>
+                </button>
               </li>
             </ul>
           </div>
 
           {/* 3. Top Rated Products Widget */}
-          <div className="wd-widget widget sidebar-widget woocommerce widget_top_rated_products bg-white border-0">
-            <h5 className="widget-title text-sm font-medium text-gray-900 mb-4 uppercase tracking-wide">
+          <div className="wd-widget widget sidebar-widget woocommerce widget_top_rated_products bg-white border-0 mb-6">
+            <h5 className="widget-title text-base font-semibold text-gray-900 mb-5 uppercase tracking-wide">
               Top rated products
             </h5>
 
@@ -325,8 +339,31 @@ export const PremiumSidebar = ({
               <p className="text-sm text-gray-500">No top-rated products available</p>
             )}
           </div>
+
+          {/* Mobile Action Buttons */}
+          <div className="lg:hidden sticky bottom-0 bg-white border-t-2 border-gray-200 -mx-5 px-5 py-4 mt-6 flex gap-3">
+            <Button
+              variant="outline"
+              onClick={() => {
+                // Clear all filters
+                onFilterChange('minPrice', 0);
+                onFilterChange('maxPrice', 0);
+                onFilterChange('onSale', false);
+                onFilterChange('inStock', false);
+              }}
+              className="flex-1 py-3 text-base font-medium border-2"
+            >
+              Clear All
+            </Button>
+            <Button
+              onClick={onClose}
+              className="flex-1 py-3 text-base font-medium bg-gray-900 hover:bg-gray-800 text-white"
+            >
+              Apply Filters
+            </Button>
+          </div>
         </div>
-      </aside>
+      </motion.aside>
     </>
   );
 };

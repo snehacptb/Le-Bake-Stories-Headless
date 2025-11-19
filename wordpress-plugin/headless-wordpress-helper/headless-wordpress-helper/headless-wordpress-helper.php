@@ -2,17 +2,17 @@
 /**
  * Plugin Name: Headless WordPress Helper
  * Plugin URI: https://your-site.com
- * Description: Complete headless WordPress solution with CORS support, contact form handling, and WooCommerce Store API integration for Next.js frontends.
- * Version: 1.2.0
+ * Description: Complete headless WordPress solution with CORS support, contact form handling, webhooks for cache invalidation, and WooCommerce Store API integration for Next.js frontends.
+ * Version: 1.3.0
  * Author: Your Name
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: headless-helper
- * 
+ *
  * Requires at least: 5.0
  * Tested up to: 6.4
  * Requires PHP: 7.4
- * 
+ *
  * WC requires at least: 5.0
  * WC tested up to: 8.0
  */
@@ -23,7 +23,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('HEADLESS_HELPER_VERSION', '1.2.0');
+define('HEADLESS_HELPER_VERSION', '1.3.0');
 define('HEADLESS_HELPER_PLUGIN_FILE', __FILE__);
 define('HEADLESS_HELPER_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('HEADLESS_HELPER_PLUGIN_URL', plugin_dir_url(__FILE__));
@@ -84,13 +84,12 @@ class HeadlessHelperPlugin {
     private function load_dependencies() {
         // Include CORS handler
         require_once HEADLESS_HELPER_PLUGIN_DIR . 'headless-helper-plugin/headless-cors.php';
-        
+
         // Include contact form handler
         require_once HEADLESS_HELPER_PLUGIN_DIR . 'headless-helper-plugin/headless-contact-form.php';
 
-        // Include cache admin handler
-        require_once HEADLESS_HELPER_PLUGIN_DIR . 'headless-helper-plugin/headless-cache-admin.php';
-
+        // Include webhook handler
+        require_once HEADLESS_HELPER_PLUGIN_DIR . 'headless-helper-plugin/headless-webhooks.php';
     }
     
     /**

@@ -25,94 +25,88 @@ interface WordPressPage {
   }
 }
 
-// Component to load Elementor CSS from WordPress
+// Component to load Elementor CSS from WordPress - OPTIMIZED VERSION
 function ElementorStylesLoader({ pageId }: { pageId?: number }) {
-  const [cssUrls, setCssUrls] = useState<string[]>([])
   const [loadedCount, setLoadedCount] = useState(0)
-  const [errorCount, setErrorCount] = useState(0)
+  const wpUrl = process.env.NEXT_PUBLIC_WORDPRESS_URL || 'https://manila.esdemo.in'
 
   useEffect(() => {
     if (!pageId) return
 
-    let mounted = true
+    const linkElements: HTMLLinkElement[] = []
+    let loadCount = 0
 
-    const fetchCssUrls = async () => {
-      try {
-        console.log(`🎨 Loading Elementor CSS for page ${pageId}...`)
+    // Add preconnect hint for faster loading
+    const preconnectId = 'wp-preconnect'
+    if (!document.getElementById(preconnectId)) {
+      const preconnect = document.createElement('link')
+      preconnect.id = preconnectId
+      preconnect.rel = 'preconnect'
+      preconnect.href = wpUrl
+      document.head.appendChild(preconnect)
+      linkElements.push(preconnect)
 
-        // Fetch CSS URLs from API
-        const apiResponse = await fetch(`/api/elementor-css?pageId=${pageId}`, {
-          cache: 'no-store'
-        })
+      const dnsPrefetch = document.createElement('link')
+      dnsPrefetch.id = 'wp-dns-prefetch'
+      dnsPrefetch.rel = 'dns-prefetch'
+      dnsPrefetch.href = wpUrl
+      document.head.appendChild(dnsPrefetch)
+      linkElements.push(dnsPrefetch)
+    }
 
-        if (!mounted) return
+    // IMMEDIATE: Load essential Elementor CSS without waiting for API
+    const essentialCssUrls = [
+      // Core Elementor CSS - load these first for basic styling
+      `${wpUrl}/wp-content/plugins/elementor/assets/css/frontend.min.css`,
+      `${wpUrl}/wp-content/uploads/elementor/css/post-${pageId}.css`,
+      // Essential libraries for common widgets
+      `${wpUrl}/wp-content/plugins/elementor/assets/lib/eicons/css/elementor-icons.min.css`,
+      `${wpUrl}/wp-content/plugins/elementor/assets/lib/animations/animations.min.css`,
+    ]
 
-        if (apiResponse.ok) {
-          const data = await apiResponse.json()
+    console.log(`🎨 Loading essential Elementor CSS for page ${pageId}...`)
 
-          console.log('📦 Elementor CSS API Response:', data)
+    // Inject essential CSS immediately
+    essentialCssUrls.forEach((url, index) => {
+      const linkId = `elementor-css-essential-${pageId}-${index}`
 
-          if (data.success && data.cssUrls && data.cssUrls.length > 0) {
-            console.log(`✅ Found ${data.cssUrls.length} CSS files:`, data.cssUrls)
-            setCssUrls(data.cssUrls)
-          } else {
-            console.warn('⚠️ No CSS URLs returned, using fallback')
-            // Fallback: try direct CSS paths
-            const wpUrl = process.env.NEXT_PUBLIC_WORDPRESS_URL || 'https://manila.esdemo.in'
-            const fallbackUrls = [
-              `${wpUrl}/wp-content/plugins/elementor/assets/css/frontend.min.css`,
-              `${wpUrl}/wp-content/uploads/elementor/css/global.css`,
-              `${wpUrl}/wp-content/uploads/elementor/css/post-${pageId}.css`
-            ]
-            setCssUrls(fallbackUrls)
-          }
-        } else {
-          console.error('❌ API request failed:', apiResponse.status)
-        }
-      } catch (error) {
-        console.error('❌ Error loading Elementor styles:', error)
+      // Skip if already exists
+      if (document.getElementById(linkId)) {
+        return
       }
-    }
 
-    fetchCssUrls()
+      const link = document.createElement('link')
+      link.id = linkId
+      link.rel = 'stylesheet'
+      link.href = url
 
+      link.onload = () => {
+        loadCount++
+        setLoadedCount(loadCount)
+        console.log(`✅ Loaded: ${url.split('/').pop()}`)
+      }
+
+      link.onerror = () => {
+        console.warn(`⚠️ Failed: ${url.split('/').pop()} (may not exist, continuing...)`)
+      }
+
+      document.head.appendChild(link)
+      linkElements.push(link)
+    })
+
+    console.log(`✅ Injected ${essentialCssUrls.length} Elementor CSS files into <head>`)
+
+    // Cleanup function
     return () => {
-      mounted = false
+      linkElements.forEach(link => {
+        if (link.parentNode) {
+          link.parentNode.removeChild(link)
+        }
+      })
     }
-  }, [pageId])
+  }, [pageId, wpUrl])
 
-  // Track CSS loading status
-  const handleCssLoad = (url: string) => {
-    setLoadedCount(prev => prev + 1)
-    console.log(`✅ Loaded CSS: ${url}`)
-  }
-
-  const handleCssError = (url: string) => {
-    setErrorCount(prev => prev + 1)
-    console.warn(`⚠️ Failed to load CSS: ${url}`)
-  }
-
-  return (
-    <>
-      {cssUrls.map((url, index) => (
-        <link
-          key={`elementor-css-${pageId}-${index}`}
-          rel="stylesheet"
-          href={url}
-          onLoad={() => handleCssLoad(url)}
-          onError={() => handleCssError(url)}
-          suppressHydrationWarning
-        />
-      ))}
-      {cssUrls.length > 0 && (
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `console.log('🎨 Elementor CSS Status: ${loadedCount}/${cssUrls.length} loaded, ${errorCount} errors');`
-          }}
-        />
-      )}
-    </>
-  )
+  return null
 }
 
 // Component to load minimal Elementor JS for accordion functionality
@@ -594,7 +588,7 @@ export default function ContactPage() {
         </div>
       </div>
 
-      {/* Simplified Elementor rendering - CSS and minimal JS for accordions */}
+      {/* Optimized Elementor rendering - CSS loads immediately with preconnect, minimal JS for accordions */}
       {page?.id && <ElementorStylesLoader pageId={page.id} />}
       <ElementorAccordionScript />
 

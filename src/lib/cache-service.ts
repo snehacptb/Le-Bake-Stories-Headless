@@ -156,12 +156,32 @@ class CacheService {
 
   async clear(): Promise<void> {
     try {
+      // Check if cache directory exists
+      try {
+        await fs.access(this.cacheDir)
+      } catch {
+        // Directory doesn't exist, nothing to clear
+        console.log('Cache directory does not exist, nothing to clear')
+        return
+      }
+
       const files = await fs.readdir(this.cacheDir)
+      // Filter for JSON files only to avoid deleting other files
+      const jsonFiles = files.filter(file => file.endsWith('.json'))
+      
+      if (jsonFiles.length === 0) {
+        console.log('No cache files to clear')
+        return
+      }
+
       await Promise.all(
-        files.map(file => fs.unlink(path.join(this.cacheDir, file)))
+        jsonFiles.map(file => fs.unlink(path.join(this.cacheDir, file)))
       )
+      
+      console.log(`Cleared ${jsonFiles.length} cache file(s)`)
     } catch (error) {
       console.error('Failed to clear cache:', error)
+      throw error
     }
   }
 
@@ -777,6 +797,16 @@ class CacheService {
     console.log('Starting full cache refresh...')
     
     try {
+      // Invalidate all cache types before refreshing to ensure fresh data
+      await Promise.all([
+        this.invalidate('site-info'),
+        this.invalidate('menus'),
+        this.invalidate('products'),
+        this.invalidate('categories'),
+        this.invalidate('pages'),
+        this.invalidate('posts')
+      ])
+      
       await Promise.all([
         this.cacheSiteInfo(),
         this.cacheMenus(),
@@ -810,6 +840,9 @@ class CacheService {
     console.log(`Refreshing ${type} cache...`)
     
     try {
+      // Invalidate the specific cache type before refreshing to ensure fresh data
+      await this.invalidate(type)
+      
       switch (type) {
         case 'products':
           await this.cacheProducts()
@@ -840,8 +873,12 @@ class CacheService {
         checksum: ''
       }
       
-      metadata.lastPartialRefresh = new Date().toISOString()
+      const refreshTime = new Date().toISOString()
+      metadata.lastPartialRefresh = refreshTime
       await this.set('metadata', metadata)
+      
+      // Update stats to reflect the refresh
+      this.stats.lastRefresh = refreshTime
       
       console.log(`${type} cache refresh completed`)
     } catch (error) {

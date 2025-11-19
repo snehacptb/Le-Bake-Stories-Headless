@@ -45,12 +45,12 @@ export const PremiumProductCard = ({
   if (variant === 'compact') {
     return (
       <div
-        className={cn("group relative bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300 flex", className)}
+        className={cn("group relative bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300 flex flex-col sm:flex-row", className)}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
         {/* Image Container - Left Side */}
-        <div className="relative overflow-hidden bg-white w-64 flex-shrink-0">
+        <div className="relative overflow-hidden bg-white w-full sm:w-64 flex-shrink-0">
           {/* Badges */}
           <div className="absolute top-3 left-3 z-20 flex flex-col gap-2">
             {product.on_sale && discountPercentage > 0 && (
@@ -124,28 +124,28 @@ export const PremiumProductCard = ({
         </div>
 
         {/* Product Info - Right Side */}
-        <div className="p-6 flex-1 flex flex-col justify-center">
+        <div className="p-4 sm:p-6 flex-1 flex flex-col justify-center">
           {/* Category */}
           {product.categories?.[0] && (
-            <p className="text-sm text-gray-500 mb-2">
+            <p className="text-xs sm:text-sm text-gray-500 mb-2">
               {product.categories[0].name}
             </p>
           )}
 
           {/* Product Name */}
-          <h3 className="font-medium text-gray-900 mb-3 text-lg hover:text-gray-700 transition-colors">
+          <h3 className="font-medium text-gray-900 mb-2 sm:mb-3 text-base sm:text-lg hover:text-gray-700 transition-colors line-clamp-2">
             <a href={`/product/${product.slug}`}>{product.name}</a>
           </h3>
 
           {/* Rating */}
           {rating > 0 && (
-            <div className="flex items-center gap-2 mb-4">
+            <div className="flex items-center gap-2 mb-3 sm:mb-4">
               <div className="flex items-center">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <Star
                     key={i}
                     className={cn(
-                      'w-4 h-4',
+                      'w-3.5 h-3.5 sm:w-4 sm:h-4',
                       i < Math.floor(rating)
                         ? 'text-yellow-400 fill-current'
                         : 'text-gray-300'
@@ -154,24 +154,24 @@ export const PremiumProductCard = ({
                 ))}
               </div>
               {reviewCount > 0 && (
-                <span className="text-sm text-gray-500">({reviewCount})</span>
+                <span className="text-xs sm:text-sm text-gray-500">({reviewCount})</span>
               )}
             </div>
           )}
 
           {/* Price */}
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
             {salePrice ? (
               <>
-                <span className="text-xl font-semibold text-gray-900">
+                <span className="text-lg sm:text-xl font-semibold text-gray-900">
                   ${salePrice.toFixed(2)}
                 </span>
-                <span className="text-base text-gray-400 line-through">
+                <span className="text-sm sm:text-base text-gray-400 line-through">
                   ${regularPrice.toFixed(2)}
                 </span>
               </>
             ) : (
-              <span className="text-xl font-semibold text-gray-900">
+              <span className="text-lg sm:text-xl font-semibold text-gray-900">
                 ${price.toFixed(2)}
               </span>
             )}
@@ -180,10 +180,11 @@ export const PremiumProductCard = ({
           {/* Add to Cart Button */}
           <button
             onClick={() => onAddToCart(product)}
-            className="bg-orange-500 hover:bg-orange-600 text-white py-3 px-6 text-sm font-medium rounded transition-colors flex items-center justify-center gap-2 shadow-md w-fit"
+            className="bg-orange-500 hover:bg-orange-600 text-white py-2.5 sm:py-3 px-4 sm:px-6 text-sm font-medium rounded transition-colors flex items-center justify-center gap-2 shadow-md w-full sm:w-fit tap-target"
           >
             <ShoppingCart className="w-4 h-4" />
-            ADD TO BASKET
+            <span className="hidden sm:inline">ADD TO BASKET</span>
+            <span className="sm:hidden">ADD TO CART</span>
           </button>
         </div>
       </div>
@@ -193,40 +194,44 @@ export const PremiumProductCard = ({
   // Grid view layout (card format) - Default
   return (
     <div
-      className={cn("group relative bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300", className)}
+      className={cn("group relative bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300", className)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Image Container */}
       <div className="relative overflow-hidden bg-white">
         {/* Badges */}
-        <div className="absolute top-3 left-3 z-20 flex flex-col gap-2">
+        <div className="absolute top-2 sm:top-3 left-2 sm:left-3 z-20 flex flex-col gap-1.5 sm:gap-2">
           {product.on_sale && discountPercentage > 0 && (
-            <Badge className="bg-red-500 text-white hover:bg-red-600 shadow-md text-xs font-semibold">
+            <Badge className="bg-red-500 text-white hover:bg-red-600 shadow-md text-[10px] sm:text-xs font-semibold px-2 py-0.5">
               -{discountPercentage}%
             </Badge>
           )}
           {product.featured && (
-            <Badge className="bg-red-500 text-white hover:bg-red-600 shadow-md font-semibold text-xs">
+            <Badge className="bg-red-500 text-white hover:bg-red-600 shadow-md font-semibold text-[10px] sm:text-xs px-2 py-0.5">
               HOT
             </Badge>
           )}
         </div>
 
-        {/* Action Buttons */}
-        <div className="absolute top-3 right-3 z-20 flex flex-col gap-2">
+        {/* Action Buttons - Hidden on mobile, shown on hover on desktop */}
+        <div className="absolute top-2 sm:top-3 right-2 sm:right-3 z-20 flex flex-col gap-1.5 sm:gap-2">
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: isHovered ? 1 : 0, x: isHovered ? 0 : 20 }}
             transition={{ duration: 0.2 }}
+            className="hidden sm:block"
           >
             {onAddToWishlist && (
               <button
-                className="w-9 h-9 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center shadow-md transition-colors"
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center shadow-md transition-colors tap-target"
                 onClick={() => onAddToWishlist(product)}
-                aria-label="Add to wishlist"
+                aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
               >
-                <Heart className="w-4 h-4 text-gray-600" />
+                <Heart className={cn(
+                  "w-4 h-4 transition-colors",
+                  isWishlisted ? "text-red-500 fill-current" : "text-gray-600"
+                )} />
               </button>
             )}
           </motion.div>
@@ -234,9 +239,10 @@ export const PremiumProductCard = ({
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: isHovered ? 1 : 0, x: isHovered ? 0 : 20 }}
             transition={{ duration: 0.2, delay: 0.05 }}
+            className="hidden sm:block"
           >
             <button
-              className="w-9 h-9 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center shadow-md transition-colors"
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center shadow-md transition-colors tap-target"
               onClick={() => onQuickView(product)}
               aria-label="Quick view"
             >
@@ -266,18 +272,18 @@ export const PremiumProductCard = ({
             </>
           )}
 
-          {/* Overlay with Add to Cart */}
+          {/* Overlay with Add to Cart - Desktop only */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: isHovered ? 1 : 0, y: isHovered ? 0 : 10 }}
             transition={{ duration: 0.2 }}
-            className="absolute inset-x-0 bottom-0 p-3"
+            className="absolute inset-x-0 bottom-0 p-2 sm:p-3 hidden sm:block"
           >
             <button
               onClick={() => onAddToCart(product)}
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2.5 px-4 text-sm font-medium rounded transition-colors flex items-center justify-center gap-2 shadow-md"
+              className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 sm:py-2.5 px-3 sm:px-4 text-xs sm:text-sm font-medium rounded transition-colors flex items-center justify-center gap-2 shadow-md tap-target"
             >
-              <ShoppingCart className="w-4 h-4" />
+              <ShoppingCart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               ADD TO BASKET
             </button>
           </motion.div>
@@ -285,28 +291,28 @@ export const PremiumProductCard = ({
       </div>
 
       {/* Product Info */}
-      <div className="p-4">
+      <div className="p-3 sm:p-4">
         {/* Category */}
         {product.categories?.[0] && (
-          <p className="text-xs text-gray-500 mb-1.5">
+          <p className="text-[10px] sm:text-xs text-gray-500 mb-1 sm:mb-1.5">
             {product.categories[0].name}
           </p>
         )}
 
         {/* Product Name */}
-        <h3 className="font-medium text-gray-900 mb-2 line-clamp-2 text-sm hover:text-gray-700 transition-colors">
+        <h3 className="font-medium text-gray-900 mb-1.5 sm:mb-2 line-clamp-2 text-sm sm:text-base hover:text-gray-700 transition-colors min-h-[2.5rem] sm:min-h-[3rem]">
           <a href={`/product/${product.slug}`}>{product.name}</a>
         </h3>
 
         {/* Rating */}
         {rating > 0 && (
-          <div className="flex items-center gap-1.5 mb-2.5">
+          <div className="flex items-center gap-1 sm:gap-1.5 mb-2 sm:mb-2.5">
             <div className="flex items-center">
               {Array.from({ length: 5 }).map((_, i) => (
                 <Star
                   key={i}
                   className={cn(
-                    'w-3.5 h-3.5',
+                    'w-3 h-3 sm:w-3.5 sm:h-3.5',
                     i < Math.floor(rating)
                       ? 'text-yellow-400 fill-current'
                       : 'text-gray-300'
@@ -315,28 +321,42 @@ export const PremiumProductCard = ({
               ))}
             </div>
             {reviewCount > 0 && (
-              <span className="text-xs text-gray-500">({reviewCount})</span>
+              <span className="text-[10px] sm:text-xs text-gray-500">({reviewCount})</span>
             )}
           </div>
         )}
 
         {/* Price */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 mb-2 sm:mb-0">
           {salePrice ? (
             <>
-              <span className="text-base font-semibold text-gray-900">
+              <span className="text-base sm:text-lg font-semibold text-gray-900">
                 ${salePrice.toFixed(2)}
               </span>
-              <span className="text-sm text-gray-400 line-through">
+              <span className="text-xs sm:text-sm text-gray-400 line-through">
                 ${regularPrice.toFixed(2)}
               </span>
             </>
           ) : (
-            <span className="text-base font-semibold text-gray-900">
+            <span className="text-base sm:text-lg font-semibold text-gray-900">
               ${price.toFixed(2)}
             </span>
           )}
         </div>
+
+        {/* Mobile Wishlist Icon */}
+        {onAddToWishlist && (
+          <button
+            onClick={() => onAddToWishlist(product)}
+            className="sm:hidden absolute bottom-3 right-3 w-9 h-9 rounded-full bg-white border border-gray-200 hover:bg-gray-50 flex items-center justify-center shadow-sm transition-colors tap-target"
+            aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+          >
+            <Heart className={cn(
+              "w-4 h-4 transition-colors",
+              isWishlisted ? "text-red-500 fill-current" : "text-gray-600"
+            )} />
+          </button>
+        )}
       </div>
     </div>
   );
