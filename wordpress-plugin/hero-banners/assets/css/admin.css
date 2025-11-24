@@ -91,3 +91,45 @@
     font-family: 'Monaco', 'Courier New', monospace;
     font-size: 13px;
 }
+
+/* Page selection styles */
+.banner-pages-list {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 8px;
+    background: #f9f9f9;
+    border-radius: 4px;
+    margin-top: 8px;
+}
+
+.banner-pages-list label {
+    display: block;
+    margin-bottom: 5px;
+    padding: 4px 6px;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: background-color 0.2s;
+}
+
+.banner-pages-list label:hover {
+    background: #fff;
+}
+
+.banner-pages-list input[type="checkbox"] {
+    margin-right: 8px;
+    cursor: pointer;
+}
+
+.banner-pages-list strong {
+    color: #2271b1;
+}
+
+/* Pages column in admin list */
+.column-pages {
+    max-width: 250px;
+}
+
+.column-pages strong {
+    color: #2271b1;
+}

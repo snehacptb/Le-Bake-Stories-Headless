@@ -910,6 +910,31 @@ class WordPressAPI {
   async getAllBanners(): Promise<Banner[]> {
     return this.getBanners(false)
   }
+
+  async getBannersByPage(pageIdentifier: string): Promise<Banner[]> {
+    try {
+      console.log(`🔍 Fetching banners for page: ${pageIdentifier}`)
+
+      const rootUrl = this.getMenuRootUrl()
+      const endpoint = `${rootUrl}/wp-json/hero-banners/v1/page/${pageIdentifier}`
+
+      console.log(`🔗 Fetching banners from: ${endpoint}`)
+
+      const response = await axios.get(endpoint, {
+        timeout: 10000,
+        httpsAgent: new https.Agent({
+          rejectUnauthorized: process.env.NODE_ENV === 'production'
+        })
+      })
+
+      console.log(`✅ Banners fetched successfully for page ${pageIdentifier}:`, response.data)
+
+      return response.data || []
+    } catch (error: any) {
+      console.error(`❌ Error fetching banners for page ${pageIdentifier}:`, error.response?.data || error.message)
+      return []
+    }
+  }
 }
 
 // WooCommerce API Client

@@ -18,24 +18,13 @@ import { useCart } from '@/contexts/cart-context'
 import { useWishlist } from '@/contexts/wishlist-context'
 import { useWooCommerceFeatures } from '@/contexts/woocommerce-context'
 // import { cachedAPI } from '@/lib/cached-api' // replaced by API route fetches
-import { WooCommerceProduct } from '@/types'
+import { WooCommerceProduct, Banner } from '@/types'
 import { cn } from '@/lib/utils'
-
-interface WordPressPage {
-  id: number
-  title: {
-    rendered: string
-  }
-  content: {
-    rendered: string
-  }
-  slug?: string
-  status?: string
-}
+import { ShopBanner } from './shop-banner'
 
 interface ShopPageProps {
   initialProducts?: WooCommerceProduct[]
-  shopBanner?: WordPressPage | null
+  shopBanners?: Banner[]
   className?: string
 }
 
@@ -63,171 +52,7 @@ const sortOptions = [
   { value: 'title' as SortOption, label: 'Sort by name: A to Z' },
 ]
 
-// Component to load Elementor CSS for shop banner
-function ElementorStylesLoader({ pageId }: { pageId?: number }) {
-  const wpUrl = process.env.NEXT_PUBLIC_WORDPRESS_URL || 'https://manila.esdemo.in'
-
-  useEffect(() => {
-    if (!pageId) return
-
-    const linkElements: HTMLLinkElement[] = []
-
-    // Essential Elementor CSS
-    const essentialCssUrls = [
-      `${wpUrl}/wp-content/plugins/elementor/assets/css/frontend.min.css`,
-      `${wpUrl}/wp-content/uploads/elementor/css/post-${pageId}.css`,
-      `${wpUrl}/wp-content/plugins/elementor/assets/lib/eicons/css/elementor-icons.min.css`,
-      `${wpUrl}/wp-content/plugins/elementor/assets/lib/animations/animations.min.css`,
-    ]
-
-    console.log(`🎨 Loading Elementor CSS for shop banner (page ${pageId})...`)
-
-    essentialCssUrls.forEach((url, index) => {
-      const linkId = `elementor-shop-css-${pageId}-${index}`
-
-      if (document.getElementById(linkId)) {
-        return
-      }
-
-      const link = document.createElement('link')
-      link.id = linkId
-      link.rel = 'stylesheet'
-      link.href = url
-
-      link.onload = () => {
-        console.log(`✅ Loaded: ${url.split('/').pop()}`)
-      }
-
-      link.onerror = () => {
-        console.warn(`⚠️ Failed: ${url.split('/').pop()} (may not exist, continuing...)`)
-      }
-
-      document.head.appendChild(link)
-      linkElements.push(link)
-    })
-
-    return () => {
-      linkElements.forEach(link => {
-        if (link.parentNode) {
-          link.parentNode.removeChild(link)
-        }
-      })
-    }
-  }, [pageId, wpUrl])
-
-  return null
-}
-
-// Component to render Elementor banner content
-function ShopBannerRenderer({ content, pageId }: { content: string; pageId?: number }) {
-  const contentRef = React.useRef<HTMLDivElement>(null)
-  const [isMounted, setIsMounted] = useState(false)
-  const [processedContent, setProcessedContent] = useState<string>('')
-
-  useEffect(() => {
-    setIsMounted(true)
-  }, [])
-
-  // Process and sanitize content
-  useEffect(() => {
-    if (content) {
-      try {
-        let processed = content
-        const wpUrl = process.env.NEXT_PUBLIC_WORDPRESS_URL || 'https://manila.esdemo.in'
-        
-        // Remove script tags
-        processed = processed.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-        processed = processed.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-        
-        // Fix image URLs
-        processed = processed.replace(
-          /<img([^>]*?)src=["']([^"']+)["']([^>]*?)>/gi,
-          (match, before, src, after) => {
-            let imageUrl = src
-            if (imageUrl.startsWith('/') && !imageUrl.startsWith('//')) {
-              imageUrl = `${wpUrl.replace(/\/$/, '')}${imageUrl}`
-            } else if (!imageUrl.startsWith('http') && !imageUrl.startsWith('//') && !imageUrl.startsWith('data:')) {
-              imageUrl = `${wpUrl.replace(/\/$/, '')}/${imageUrl.replace(/^\//, '')}`
-            }
-            const hasLoading = before.includes('loading=') || after.includes('loading=')
-            const loadingAttr = hasLoading ? '' : ' loading="lazy"'
-            return `<img${before}src="${imageUrl}"${after}${loadingAttr}>`
-          }
-        )
-        
-        // Fix background-image URLs
-        processed = processed.replace(
-          /style=["']([^"']*background-image:\s*url\(["']?)([^"')]+)(["']?\)[^"']*)["']/gi,
-          (match, prefix, url, suffix) => {
-            let imageUrl = url
-            if (imageUrl.startsWith('/') && !imageUrl.startsWith('//')) {
-              imageUrl = `${wpUrl.replace(/\/$/, '')}${imageUrl}`
-            } else if (!imageUrl.startsWith('http') && !imageUrl.startsWith('//') && !imageUrl.startsWith('data:')) {
-              imageUrl = `${wpUrl.replace(/\/$/, '')}/${imageUrl.replace(/^\//, '')}`
-            }
-            return `style="${prefix}${imageUrl}${suffix}"`
-          }
-        )
-        
-        setProcessedContent(processed)
-      } catch (error) {
-        console.error('Error processing shop banner content:', error)
-        setProcessedContent(content)
-      }
-    }
-  }, [content])
-
-  // Render content
-  useEffect(() => {
-    if (!isMounted || !processedContent || !contentRef.current) return
-
-    let isMountedRef = true
-    let rafId: number | null = null
-
-    rafId = requestAnimationFrame(() => {
-      if (!isMountedRef || !contentRef.current) return
-
-      try {
-        contentRef.current.innerHTML = processedContent
-      } catch (error) {
-        console.error('Error rendering shop banner:', error)
-      }
-    })
-
-    return () => {
-      isMountedRef = false
-      if (rafId !== null) {
-        cancelAnimationFrame(rafId)
-      }
-      if (contentRef.current) {
-        try {
-          contentRef.current.textContent = ''
-        } catch (cleanupError) {
-          console.warn('Cleanup warning (safe to ignore):', cleanupError)
-        }
-      }
-    }
-  }, [processedContent, isMounted])
-
-  if (!isMounted) {
-    return (
-      <div className="w-full h-64 bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800 animate-pulse" />
-    )
-  }
-
-  return (
-    <>
-      {pageId && <ElementorStylesLoader pageId={pageId} />}
-      <div
-        ref={contentRef}
-        className="shop-elementor-banner elementor-content"
-        suppressHydrationWarning
-      />
-    </>
-  )
-}
-
-export function ShopPage({ initialProducts = [], shopBanner, className }: ShopPageProps) {
+export function ShopPage({ initialProducts = [], shopBanners = [], className }: ShopPageProps) {
   const { addToCart, itemCount } = useCart()
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist()
   const { shouldShowShop } = useWooCommerceFeatures()
@@ -503,21 +328,16 @@ export function ShopPage({ initialProducts = [], shopBanner, className }: ShopPa
 
   return (
     <div className={cn('min-h-screen bg-gray-50 shop-page', className)}>
-      {/* Shop Banner - Elementor or Fallback */}
-      {shopBanner?.content?.rendered ? (
-        <div className="shop-banner-wrapper">
-          <ShopBannerRenderer 
-            content={shopBanner.content.rendered} 
-            pageId={shopBanner.id}
-          />
-        </div>
+      {/* Shop Banner - Hero Banners Plugin */}
+      {shopBanners && shopBanners.length > 0 ? (
+        <ShopBanner banners={shopBanners} />
       ) : (
         /* Fallback Mobile Hero Section */
         <div className="lg:hidden bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800 relative" style={{ minHeight: '200px' }}>
           <div className="absolute inset-0 bg-black/20"></div>
           <div className="relative z-10 h-full min-h-[200px] flex flex-col items-center justify-center text-white px-4">
             <h1 className="text-4xl font-bold mb-4 tracking-tight">Shop</h1>
-            <button 
+            <button
               onClick={handleBrowseCategories}
               className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-6 py-2.5 rounded-full border border-white/30 hover:bg-white/30 transition-all tap-target"
             >
@@ -954,95 +774,6 @@ export function ShopPage({ initialProducts = [], shopBanner, className }: ShopPa
           </button>
         </div>
       </div>
-
-      {/* Elementor Banner Styles */}
-      <style jsx global>{`
-        /* Shop banner wrapper - full width */
-        .shop-banner-wrapper {
-          width: 100%;
-          margin: 0;
-          padding: 0;
-        }
-
-        /* Elementor content styling for shop banner */
-        .shop-elementor-banner {
-          width: 100%;
-          max-width: 100%;
-          margin: 0;
-          padding: 0;
-        }
-
-        .shop-elementor-banner .elementor-section {
-          width: 100%;
-          position: relative;
-          margin: 0;
-          padding: 0;
-        }
-
-        .shop-elementor-banner .elementor-container {
-          max-width: 100%;
-          margin: 0 auto;
-          padding-left: 0;
-          padding-right: 0;
-        }
-
-        .shop-elementor-banner .elementor-row {
-          display: flex;
-          flex-wrap: wrap;
-          margin-left: 0;
-          margin-right: 0;
-        }
-
-        .shop-elementor-banner .elementor-column {
-          position: relative;
-          min-height: 1px;
-        }
-
-        /* Image fixes */
-        .shop-elementor-banner img {
-          max-width: 100%;
-          height: auto;
-          display: block;
-        }
-
-        .shop-elementor-banner img[src=""],
-        .shop-elementor-banner img:not([src]) {
-          display: none;
-        }
-
-        /* Ensure all Elementor elements use border-box */
-        .shop-elementor-banner *,
-        .shop-elementor-banner *::before,
-        .shop-elementor-banner *::after {
-          box-sizing: border-box;
-        }
-
-        /* Prevent any global styles from interfering */
-        .shop-banner-wrapper {
-          isolation: isolate;
-        }
-
-        /* Ensure Elementor widgets are not constrained */
-        .shop-elementor-banner .elementor-widget {
-          width: 100%;
-        }
-
-        /* Remove any prose or typography overrides */
-        .shop-elementor-banner .prose,
-        .shop-elementor-banner .prose * {
-          max-width: none;
-          color: inherit;
-          font-size: inherit;
-          line-height: inherit;
-        }
-
-        /* Responsive text for shop banner */
-        @media (max-width: 768px) {
-          .shop-elementor-banner .elementor-heading-title {
-            font-size: clamp(1.5rem, 5vw, 3rem) !important;
-          }
-        }
-      `}</style>
     </div>
   )
 }

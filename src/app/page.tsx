@@ -165,136 +165,79 @@ export default async function HomePage() {
       {/* Featured Products */}
       <BestSellersSection products={featuredProducts} />
 
-      {/* Categories Section - WoodMart Style */}
+      {/* Categories Section - Manila Theme Style */}
       {productCategories.length > 0 && (
-        <section className="py-16 lg:py-20 bg-gradient-to-b from-gray-50 to-white">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <div className="inline-flex items-center justify-center mb-6">
-                <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent w-16"></div>
-                <Badge variant="secondary" className="mx-4 px-6 py-2 bg-purple-100 text-purple-800 border-purple-200 font-medium uppercase tracking-wide">
-                  Categories
-                </Badge>
-                <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent w-16"></div>
-              </div>
-              
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-                <span className="bg-gradient-to-r from-purple-900 via-purple-800 to-purple-900 bg-clip-text text-transparent">
-                  Shop by Category
-                </span>
+        <section className="py-12 lg:py-16 bg-white">
+          <div className="container mx-auto px-4" style={{ maxWidth: '1200px' }}>
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-normal text-black mb-4" style={{ fontWeight: 400 }}>
+                TOP CATEGORIES
               </h2>
-              
-              <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                Explore our carefully curated collection of premium baked goods.
-                <span className="block mt-2 text-base text-gray-500">
-                  From artisanal breads to decadent desserts, find exactly what you're craving.
-                </span>
-              </p>
             </div>
 
             <CategoriesCarousel categories={productCategories} />
 
             {productCategories.length > 6 && (
-              <div className="text-center mt-16">
-                <div className="inline-flex flex-col items-center">
-                  <Link href="/categories">
-                    <Button 
-                      size="lg" 
-                      className="px-12 py-4 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
-                    >
-                      View All Categories
-                      <ArrowRight className="ml-3 h-5 w-5" />
-                    </Button>
-                  </Link>
-                  <p className="text-sm text-gray-500 mt-3">
-                    {productCategories.length}+ categories to explore
-                  </p>
-                </div>
+              <div className="text-center mt-12">
+                <Link href="/categories">
+                  <Button
+                    className="text-white font-medium transition-all duration-300"
+                    style={{
+                      backgroundColor: '#32373c',
+                      padding: 'calc(0.667em + 2px) calc(1.333em + 2px)',
+                    }}
+                  >
+                    View All Categories
+                  </Button>
+                </Link>
               </div>
             )}
           </div>
         </section>
       )}
 
-      {/* Testimonials - WoodMart Style */}
+      {/* Testimonials - Manila Theme Style */}
       {testimonials.length > 0 && (
-        <section className="py-16 lg:py-20 bg-gradient-to-b from-white to-gray-50">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <div className="inline-flex items-center justify-center mb-6">
-                <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent w-16"></div>
-                <Badge variant="secondary" className="mx-4 px-6 py-2 bg-blue-100 text-blue-800 border-blue-200 font-medium uppercase tracking-wide">
-                  Customer Reviews
-                </Badge>
-                <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent w-16"></div>
-              </div>
-              
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-                <span className="bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 bg-clip-text text-transparent">
-                  What People Say
-                </span>
+        <section className="py-12 lg:py-16 bg-gray-50">
+          <div className="container mx-auto px-4" style={{ maxWidth: '1200px' }}>
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-normal text-black mb-4" style={{ fontWeight: 400 }}>
+                CUSTOMER REVIEWS
               </h2>
-              
-              <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                Real stories from our satisfied customers who love our baked goods.
-                <span className="block mt-2 text-base text-gray-500">
-                  Join thousands of happy customers who trust Le Bake Stories for quality.
-                </span>
-              </p>
             </div>
 
             <TestimonialsCarousel testimonials={testimonials} />
 
             {testimonials.length > 6 && (
-              <div className="text-center mt-16">
-                <div className="inline-flex flex-col items-center">
-                  <Link href="/testimonials">
-                    <Button 
-                      size="lg" 
-                      className="px-12 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
-                    >
-                      View All Testimonials
-                      <ArrowRight className="ml-3 h-5 w-5" />
-                    </Button>
-                  </Link>
-                  <p className="text-sm text-gray-500 mt-3">
-                    Read {testimonials.length}+ customer reviews
-                  </p>
-                </div>
+              <div className="text-center mt-12">
+                <Link href="/testimonials">
+                  <Button
+                    className="text-white font-medium transition-all duration-300"
+                    style={{
+                      backgroundColor: '#32373c',
+                      padding: 'calc(0.667em + 2px) calc(1.333em + 2px)',
+                    }}
+                  >
+                    View All Reviews
+                  </Button>
+                </Link>
               </div>
             )}
           </div>
         </section>
       )}
 
-      {/* Latest Blog Posts - WoodMart Style */}
+      {/* Latest Blog Posts - Manila Theme Style */}
       {latestPosts.length > 0 && (
-        <section className="py-16 lg:py-20 bg-gradient-to-b from-gray-50 to-white">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <div className="inline-flex items-center justify-center mb-6">
-                <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent w-16"></div>
-                <Badge variant="secondary" className="mx-4 px-6 py-2 bg-green-100 text-green-800 border-green-200 font-medium uppercase tracking-wide">
-                  From Our Blog
-                </Badge>
-                <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent w-16"></div>
-              </div>
-              
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-                <span className="bg-gradient-to-r from-green-900 via-green-800 to-green-900 bg-clip-text text-transparent">
-                  Latest Articles
-                </span>
+        <section className="py-12 lg:py-16 bg-white">
+          <div className="container mx-auto px-4" style={{ maxWidth: '1200px' }}>
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-normal text-black mb-4" style={{ fontWeight: 400 }}>
+                OUR BLOG
               </h2>
-              
-              <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                Stay updated with baking tips, recipes, and behind-the-scenes stories.
-                <span className="block mt-2 text-base text-gray-500">
-                  Expert insights and delicious inspiration from our master bakers.
-                </span>
-              </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
               <Suspense fallback={
                 <>
                   <BlogCardSkeleton />
@@ -308,21 +251,18 @@ export default async function HomePage() {
               </Suspense>
             </div>
 
-            <div className="text-center mt-16">
-              <div className="inline-flex flex-col items-center">
-                <Link href="/blog">
-                  <Button 
-                    size="lg" 
-                    className="px-12 py-4 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
-                  >
-                    View All Articles
-                    <ArrowRight className="ml-3 h-5 w-5" />
-                  </Button>
-                </Link>
-                <p className="text-sm text-gray-500 mt-3">
-                  Discover more baking insights and recipes
-                </p>
-              </div>
+            <div className="text-center mt-12">
+              <Link href="/blog">
+                <Button
+                  className="text-white font-medium transition-all duration-300"
+                  style={{
+                    backgroundColor: '#32373c',
+                    padding: 'calc(0.667em + 2px) calc(1.333em + 2px)',
+                  }}
+                >
+                  View All Posts
+                </Button>
+              </Link>
             </div>
           </div>
         </section>

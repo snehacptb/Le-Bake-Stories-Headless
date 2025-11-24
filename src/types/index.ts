@@ -510,25 +510,26 @@ export interface ProductFilters {
 
 // Banner Types
 export interface BannerButton {
-  text: string
-  link: string
+  text?: string
+  link?: string
 }
 
 export interface BannerImage {
-  full: string
-  large: string
-  medium: string
-  thumbnail: string
-  alt: string
+  full?: string
+  large?: string
+  medium?: string
+  thumbnail?: string
+  alt?: string
 }
 
 export interface Banner {
   id: number
-  subtitle: string
-  title: string
-  button1: BannerButton
-  button2: BannerButton
+  subtitle?: string
+  title?: string
+  button1?: BannerButton
+  button2?: BannerButton
   image: BannerImage
   order: number
   status: 'active' | 'inactive'
+  pages?: string[]
 }

@@ -36,6 +36,7 @@ class Banner_Admin {
         $new_columns['image'] = __('Image', 'hero-banners');
         $new_columns['title'] = __('Title', 'hero-banners');
         $new_columns['subtitle'] = __('Subtitle', 'hero-banners');
+        $new_columns['pages'] = __('Display On', 'hero-banners');
         $new_columns['order'] = __('Order', 'hero-banners');
         $new_columns['status'] = __('Status', 'hero-banners');
         $new_columns['date'] = $columns['date'];
@@ -59,6 +60,34 @@ class Banner_Admin {
             case 'subtitle':
                 $subtitle = get_post_meta($post_id, '_banner_subtitle', true);
                 echo $subtitle ? esc_html($subtitle) : '<span style="color: #999;">—</span>';
+                break;
+                
+            case 'pages':
+                $pages = get_post_meta($post_id, '_banner_pages', true);
+                $pages = $pages ? $pages : array();
+                
+                if (empty($pages)) {
+                    echo '<span style="color: #999;">' . __('No pages selected', 'hero-banners') . '</span>';
+                } elseif (in_array('all', $pages)) {
+                    echo '<strong>' . __('All Pages', 'hero-banners') . '</strong>';
+                } else {
+                    $page_titles = array();
+                    foreach ($pages as $page_id) {
+                        if ($page_id === 'home') {
+                            $page_titles[] = __('Home Page', 'hero-banners');
+                        } elseif (is_numeric($page_id)) {
+                            $page = get_post($page_id);
+                            if ($page) {
+                                $page_titles[] = $page->post_title;
+                            }
+                        }
+                    }
+                    if (!empty($page_titles)) {
+                        echo esc_html(implode(', ', $page_titles));
+                    } else {
+                        echo '<span style="color: #999;">—</span>';
+                    }
+                }
                 break;
                 
             case 'order':
@@ -101,8 +130,10 @@ class Banner_Admin {
                 <p><strong><?php _e('Hero Banners is active!', 'hero-banners'); ?></strong></p>
                 <p><?php _e('API Endpoints:', 'hero-banners'); ?></p>
                 <ul style="list-style: disc; margin-left: 20px;">
-                    <li><code><?php echo esc_url(rest_url('hero-banners/v1/active')); ?></code> - <?php _e('Active banners only', 'hero-banners'); ?></li>
+                    <li><code><?php echo esc_url(rest_url('hero-banners/v1/active')); ?></code> - <?php _e('All active banners', 'hero-banners'); ?></li>
                     <li><code><?php echo esc_url(rest_url('hero-banners/v1/all')); ?></code> - <?php _e('All published banners', 'hero-banners'); ?></li>
+                    <li><code><?php echo esc_url(rest_url('hero-banners/v1/page/{page_id_or_slug}')); ?></code> - <?php _e('Banners for specific page', 'hero-banners'); ?></li>
+                    <li><code><?php echo esc_url(rest_url('hero-banners/v1/page/home')); ?></code> - <?php _e('Banners for home page', 'hero-banners'); ?></li>
                     <li><code><?php echo esc_url(rest_url('wp/v2/banners')); ?></code> - <?php _e('WordPress REST API', 'hero-banners'); ?></li>
                 </ul>
             </div>

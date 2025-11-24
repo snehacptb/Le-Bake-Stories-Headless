@@ -1,6 +1,8 @@
 import { Metadata } from 'next'
 import { ClientLayout } from '@/components/themes/client-layout'
 import { ShopPage } from '@/components/themes/shop-page'
+import { wordpressAPI } from '@/lib/api'
+import { Banner } from '@/types'
 
 export const metadata: Metadata = {
   title: 'Shop - Premium Products',
@@ -12,69 +14,30 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic'
 export const revalidate = 3600 // Revalidate every hour
 
-interface WordPressPage {
-  id: number
-  title: {
-    rendered: string
-  }
-  content: {
-    rendered: string
-  }
-  slug: string
-  status: string
-}
-
-// Fetch shop page banner from WordPress
-async function getShopBanner(): Promise<WordPressPage | null> {
+// Fetch shop page banners from hero-banners plugin
+async function getShopBanners(): Promise<Banner[]> {
   try {
-    console.log('🔍 Fetching shop page banner from WordPress...')
-    
-    const wpApiUrl = process.env.NEXT_PUBLIC_WORDPRESS_API_URL || 'https://manila.esdemo.in/wp-json/wp/v2'
-    
-    // Try multiple slug variations for shop page
-    const slugs = ['shop', 'shop-page', 'shop-banner']
-    
-    for (const slug of slugs) {
-      try {
-        const response = await fetch(`${wpApiUrl}/pages?slug=${slug}&_embed`, {
-          cache: 'no-store',
-          headers: {
-            'Content-Type': 'application/json',
-          }
-        })
-        
-        if (!response.ok) {
-          console.log(`⚠️ Failed to fetch shop page with slug "${slug}": ${response.status}`)
-          continue
-        }
-        
-        const pages = await response.json()
-        
-        if (pages && pages.length > 0 && pages[0].status === 'publish') {
-          console.log(`✅ Found shop banner page with slug: ${slug}`)
-          return pages[0]
-        }
-      } catch (err) {
-        console.log(`⚠️ Error fetching slug "${slug}":`, err)
-        continue
-      }
-    }
-    
-    console.log('⚠️ No shop banner page found in WordPress')
-    return null
+    console.log('🔍 Fetching shop page banners from hero-banners plugin...')
+
+    // Fetch banners for the shop page using the hero-banners API
+    const banners = await wordpressAPI.getBannersByPage('shop')
+
+    console.log(`✅ Successfully fetched ${banners.length} banners for shop page`)
+
+    return banners
   } catch (error) {
-    console.error('❌ Error fetching shop banner:', error)
-    return null
+    console.error('❌ Error fetching shop banners:', error)
+    return []
   }
 }
 
 export default async function Shop() {
-  // Fetch shop banner from WordPress
-  const shopBanner = await getShopBanner()
-  
+  // Fetch shop banners from hero-banners plugin
+  const shopBanners = await getShopBanners()
+
   return (
     <ClientLayout>
-      <ShopPage shopBanner={shopBanner} />
+      <ShopPage shopBanners={shopBanners} />
     </ClientLayout>
   )
 }

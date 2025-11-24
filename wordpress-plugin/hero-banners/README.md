@@ -1,11 +1,13 @@
 # Hero Banners
 
-A professional banner management system for headless WordPress with REST API support.
+A professional banner management system for headless WordPress with REST API support and page-specific banner assignments.
 
 ## Features
 
 - ✅ Custom Post Type for Banners
 - ✅ Easy-to-use Admin Interface
+- ✅ **Page-Specific Banner Display** (NEW)
+- ✅ **Multiple Banners Per Page Support** (NEW)
 - ✅ Multiple Banner Support with Ordering
 - ✅ Active/Inactive Status Control
 - ✅ RESTful API Endpoints
@@ -32,13 +34,32 @@ A professional banner management system for headless WordPress with REST API sup
    - Main Title (e.g., "Discover timeless luxury...")
    - Button 1 Text & Link
    - Button 2 Text & Link
-   - Display Order (1 = first)
+   - **Display on Pages** (Select which pages should show this banner)
+     - ✅ All Pages
+     - ✅ Home Page
+     - ✅ Specific Pages (Select from list)
+   - Display Order (1 = first, for ordering multiple banners on same page)
    - Status (Active/Inactive)
 5. Click **Publish**
 
 ### API Endpoints
 
-**Active Banners Only:**
+**Get Banners for a Specific Page (by ID):**
+```
+GET https://your-site.com/wp-json/hero-banners/v1/page/123
+```
+
+**Get Banners for a Specific Page (by slug):**
+```
+GET https://your-site.com/wp-json/hero-banners/v1/page/about-us
+```
+
+**Get Banners for Home Page:**
+```
+GET https://your-site.com/wp-json/hero-banners/v1/page/home
+```
+
+**All Active Banners (regardless of page):**
 ```
 GET https://your-site.com/wp-json/hero-banners/v1/active
 ```
@@ -77,10 +98,16 @@ GET https://your-site.com/wp-json/wp/v2/banners
       "alt": "Banner Image"
     },
     "order": 1,
-    "status": "active"
+    "status": "active",
+    "pages": ["home", "123", "456"]
   }
 ]
 ```
+
+**Note:** The `pages` array contains:
+- `"all"` - if banner is set to display on all pages
+- `"home"` - if banner is set for home page
+- Page IDs as strings (e.g., `"123"`) - for specific pages
 
 ## Next.js Integration
 
@@ -93,24 +120,68 @@ npm install
 ```typescript
 const API_URL = process.env.NEXT_PUBLIC_WORDPRESS_API_URL;
 
+// Get all active banners
 export async function getBanners() {
   const response = await fetch(`${API_URL}/hero-banners/v1/active`, {
     next: { revalidate: 3600 }
   });
   return response.json();
 }
+
+// Get banners for a specific page
+export async function getBannersByPage(pageIdentifier: string) {
+  const response = await fetch(`${API_URL}/hero-banners/v1/page/${pageIdentifier}`, {
+    next: { revalidate: 3600 }
+  });
+  return response.json();
+}
+
+// Get banners for home page
+export async function getHomeBanners() {
+  return getBannersByPage('home');
+}
 ```
 
-### Use in Page
+### Use in Home Page
 ```typescript
-import { getBanners } from '@/lib/api/banners';
+import { getHomeBanners } from '@/lib/api/banners';
 import BannerComponent from '@/components/Banner';
 
 export default async function HomePage() {
-  const banners = await getBanners();
+  const banners = await getHomeBanners();
   
   return <BannerComponent banners={banners} />;
 }
+```
+
+### Use in Dynamic Page (by slug)
+```typescript
+import { getBannersByPage } from '@/lib/api/banners';
+import BannerComponent from '@/components/Banner';
+
+interface PageProps {
+  params: { slug: string }
+}
+
+export default async function Page({ params }: PageProps) {
+  const banners = await getBannersByPage(params.slug);
+  
+  return (
+    <div>
+      {banners.length > 0 && <BannerComponent banners={banners} />}
+      {/* Rest of your page content */}
+    </div>
+  );
+}
+```
+
+### Use in Dynamic Page (by ID)
+```typescript
+import { getBannersByPage } from '@/lib/api/banners';
+
+// If you have the WordPress page ID
+const pageId = '123';
+const banners = await getBannersByPage(pageId);
 ```
 
 ### Environment Variables (`.env.local`)
@@ -134,6 +205,15 @@ For issues or questions:
 GPL v2 or later
 
 ## Changelog
+
+### 1.1.0
+- ✨ **NEW:** Page-specific banner assignments
+- ✨ **NEW:** Support for multiple banners per page
+- ✨ **NEW:** REST API endpoint to fetch banners by page ID or slug
+- ✨ **NEW:** "All Pages" and "Home Page" options
+- ✨ **IMPROVED:** Admin interface with page selection checkboxes
+- ✨ **IMPROVED:** Admin columns now show which pages banners are assigned to
+- ✨ **IMPROVED:** Enhanced API response with page assignment data
 
 ### 1.0.0
 - Initial release

@@ -51,6 +51,15 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Manila theme color palette
+        manila: {
+          primary: '#092143', // Deep navy blue
+          'primary-dark': '#061629',
+          secondary: '#32373c', // Dark gray for buttons
+          accent: '#818181', // Neutral gray
+          border: 'rgba(129, 129, 129, 0.2)',
+          overlay: 'rgba(0, 0, 0, 0.3)',
+        },
         // Themes-inspired color palette with dark mode support
         themes: {
           pink: {

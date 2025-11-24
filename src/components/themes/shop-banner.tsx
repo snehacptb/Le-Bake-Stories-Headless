@@ -7,11 +7,11 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 
-interface HeroBannerProps {
+interface ShopBannerProps {
   banners: Banner[]
 }
 
-export function HeroBanner({ banners }: HeroBannerProps) {
+export function ShopBanner({ banners }: ShopBannerProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
 
   // Auto-advance slides
@@ -19,10 +19,10 @@ export function HeroBanner({ banners }: HeroBannerProps) {
     if (banners.length <= 1) return
 
     const timer = setInterval(() => {
-      setCurrentIndex((prevIndex) => 
+      setCurrentIndex((prevIndex) =>
         prevIndex === banners.length - 1 ? 0 : prevIndex + 1
       )
-    }, 7000) // Change slide every 7 seconds
+    }, 7000)
 
     return () => clearInterval(timer)
   }, [banners.length])
@@ -41,21 +41,17 @@ export function HeroBanner({ banners }: HeroBannerProps) {
 
   const currentBanner = banners[currentIndex]
 
-  // Debug logging
-  useEffect(() => {
-    console.log('Current Banner Data:', currentBanner)
-    console.log('Button 1:', currentBanner.button1)
-    console.log('Button 2:', currentBanner.button2)
-  }, [currentBanner])
-
   return (
-    <section className="relative h-[500px] md:h-[600px] lg:h-[700px] overflow-hidden" style={{ backgroundColor: 'rgb(53,55,52)' }}>
+    <section
+      className="relative h-[300px] md:h-[350px] lg:h-[400px] overflow-hidden"
+      style={{ backgroundColor: 'rgb(53,55,52)' }}
+    >
       {/* Background Image */}
       <div className="absolute inset-0">
         {currentBanner.image?.full && (
           <Image
             src={currentBanner.image.full}
-            alt={currentBanner.image?.alt || currentBanner.title || 'Hero Banner'}
+            alt={currentBanner.image?.alt || currentBanner.title || 'Shop Banner'}
             fill
             className="object-cover"
             style={{ backgroundPosition: 'center center', backgroundSize: 'cover' }}
@@ -70,10 +66,10 @@ export function HeroBanner({ banners }: HeroBannerProps) {
       {/* Content - Manila Theme Centered Layout */}
       <div className="relative z-10 h-full flex items-center justify-center">
         <div className="container mx-auto px-4" style={{ maxWidth: '1200px' }}>
-          <div className="max-w-4xl mx-auto text-center text-white">
+          <div className="max-w-3xl mx-auto text-center text-white">
             {currentBanner.subtitle && (
-              <div className="mb-4 md:mb-6">
-                <span className="text-base md:text-lg font-semibold text-white">
+              <div className="mb-3 md:mb-4">
+                <span className="text-sm md:text-base font-semibold text-white">
                   {currentBanner.subtitle}
                 </span>
               </div>
@@ -81,9 +77,9 @@ export function HeroBanner({ banners }: HeroBannerProps) {
 
             {currentBanner.title && (
               <h1
-                className="font-normal mb-6 md:mb-8 leading-tight"
+                className="font-normal mb-4 md:mb-6 leading-tight"
                 style={{
-                  fontSize: 'clamp(26px, 5vw, 50px)',
+                  fontSize: 'clamp(24px, 4vw, 42px)',
                   fontWeight: 400,
                   color: '#FFFFFF'
                 }}
@@ -92,7 +88,7 @@ export function HeroBanner({ banners }: HeroBannerProps) {
               </h1>
             )}
 
-            <div className="flex flex-col sm:flex-row gap-4 md:gap-5 mt-6 md:mt-8 justify-center items-center">
+            <div className="flex flex-col sm:flex-row gap-3 md:gap-4 mt-4 md:mt-6 justify-center items-center">
               {(currentBanner.button1?.text || currentBanner.button1?.link) && (
                 <Link href={currentBanner.button1?.link || '#'}>
                   <Button
@@ -133,32 +129,32 @@ export function HeroBanner({ banners }: HeroBannerProps) {
         <>
           <button
             onClick={goToPrevious}
-            className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-all duration-300 rounded-full flex items-center justify-center"
+            className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 z-20 w-9 h-9 md:w-10 md:h-10 bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-all duration-300 rounded-full flex items-center justify-center"
             aria-label="Previous banner"
           >
-            <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
+            <ChevronLeft className="h-5 w-5" />
           </button>
 
           <button
             onClick={goToNext}
-            className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-all duration-300 rounded-full flex items-center justify-center"
+            className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 z-20 w-9 h-9 md:w-10 md:h-10 bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-all duration-300 rounded-full flex items-center justify-center"
             aria-label="Next banner"
           >
-            <ChevronRight className="h-5 w-5 md:h-6 md:w-6" />
+            <ChevronRight className="h-5 w-5" />
           </button>
         </>
       )}
 
       {/* Dots Indicator - Manila Theme Style */}
       {banners.length > 1 && (
-        <div className="absolute bottom-8 md:bottom-10 left-1/2 -translate-x-1/2 z-20 flex space-x-3">
+        <div className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 z-20 flex space-x-2">
           {banners.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentIndex(index)}
               className={`transition-all duration-300 rounded-full ${
                 index === currentIndex
-                  ? 'w-8 h-2 bg-white'
+                  ? 'w-6 h-2 bg-white'
                   : 'w-2 h-2 bg-white/50 hover:bg-white/70'
               }`}
               aria-label={`Go to banner ${index + 1}`}

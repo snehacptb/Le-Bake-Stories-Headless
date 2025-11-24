@@ -22,6 +22,7 @@ class Banner_Meta {
         '_banner_button2_link',
         '_banner_order',
         '_banner_status',
+        '_banner_pages',
     );
     
     public static function get_instance() {
@@ -159,6 +160,14 @@ class Banner_Meta {
     public function render_settings_box($post) {
         $order = get_post_meta($post->ID, '_banner_order', true);
         $status = get_post_meta($post->ID, '_banner_status', true);
+        $selected_pages = get_post_meta($post->ID, '_banner_pages', true);
+        $selected_pages = $selected_pages ? $selected_pages : array();
+        
+        // Get all pages
+        $pages = get_pages(array(
+            'sort_column' => 'post_title',
+            'sort_order' => 'ASC',
+        ));
         ?>
         <div class="banner-settings-box">
             <p>
@@ -180,7 +189,44 @@ class Banner_Meta {
                 </select>
             </p>
             
-            <div class="banner-info">
+            <p>
+                <label><strong><?php _e('Display on Pages', 'hero-banners'); ?></strong></label><br>
+                <span class="description"><?php _e('Select pages where this banner should appear', 'hero-banners'); ?></span>
+            </p>
+            
+            <div class="banner-pages-list" style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 8px; background: #f9f9f9;">
+                <label style="display: block; margin-bottom: 5px;">
+                    <input type="checkbox" 
+                           name="banner_pages[]" 
+                           value="all" 
+                           <?php checked(in_array('all', $selected_pages)); ?> />
+                    <strong><?php _e('All Pages', 'hero-banners'); ?></strong>
+                </label>
+                
+                <label style="display: block; margin-bottom: 5px;">
+                    <input type="checkbox" 
+                           name="banner_pages[]" 
+                           value="home" 
+                           <?php checked(in_array('home', $selected_pages)); ?> />
+                    <strong><?php _e('Home Page', 'hero-banners'); ?></strong>
+                </label>
+                
+                <?php foreach ($pages as $page) : ?>
+                    <label style="display: block; margin-bottom: 5px;">
+                        <input type="checkbox" 
+                               name="banner_pages[]" 
+                               value="<?php echo esc_attr($page->ID); ?>" 
+                               <?php checked(in_array((string)$page->ID, $selected_pages)); ?> />
+                        <?php echo esc_html($page->post_title); ?>
+                    </label>
+                <?php endforeach; ?>
+                
+                <?php if (empty($pages)) : ?>
+                    <p class="description"><?php _e('No pages found. Create pages to assign banners to them.', 'hero-banners'); ?></p>
+                <?php endif; ?>
+            </div>
+            
+            <div class="banner-info" style="margin-top: 15px;">
                 <h4><?php _e('Featured Image', 'hero-banners'); ?></h4>
                 <p class="description"><?php _e('Set the featured image as the banner background. Recommended size: 1920x1080px', 'hero-banners'); ?></p>
             </div>
@@ -225,6 +271,15 @@ class Banner_Meta {
                 $value = $sanitize_callback($_POST[$key]);
                 update_post_meta($post_id, $field, $value);
             }
+        }
+        
+        // Save pages (array field)
+        if (isset($_POST['banner_pages']) && is_array($_POST['banner_pages'])) {
+            $pages = array_map('sanitize_text_field', $_POST['banner_pages']);
+            update_post_meta($post_id, '_banner_pages', $pages);
+        } else {
+            // If no pages selected, save empty array
+            update_post_meta($post_id, '_banner_pages', array());
         }
     }
     

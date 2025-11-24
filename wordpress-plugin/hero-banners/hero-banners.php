@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Hero Banners
  * Plugin URI: https://finditq.com
- * Description: Professional banner management system for headless WordPress with REST API support
- * Version: 1.0.0
+ * Description: Professional banner management system for headless WordPress with REST API support and page-specific banner assignments
+ * Version: 1.1.0
  * Author: Rashidavc
  * Author URI: https://finditq.com
  * License: GPL v2 or later
@@ -20,7 +20,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('HERO_BANNERS_VERSION', '1.0.0');
+define('HERO_BANNERS_VERSION', '1.1.0');
 define('HERO_BANNERS_PATH', plugin_dir_path(__FILE__));
 define('HERO_BANNERS_URL', plugin_dir_url(__FILE__));
 define('HERO_BANNERS_BASENAME', plugin_basename(__FILE__));
