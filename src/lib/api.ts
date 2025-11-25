@@ -225,9 +225,10 @@ class WordPressAPI {
     search?: string
     orderby?: string
     order?: 'asc' | 'desc'
+    _embed?: boolean
   }): Promise<PaginatedResponse<WordPressPost>> {
     const response = await this.client.get('/posts', { params })
-    
+
     return {
       data: response.data,
       total: parseInt(response.headers['x-wp-total'] || '0'),

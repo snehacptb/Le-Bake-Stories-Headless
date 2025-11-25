@@ -159,14 +159,14 @@ export function ProductCard({
       className={cn("group cursor-pointer", className)}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
-      whileHover={{ y: -8 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
+      whileHover={{ y: -3 }}
+      transition={{ duration: 0.2 }}
     >
-      <Card className="overflow-hidden bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-500 border-0">
+      <div className="overflow-hidden bg-white transition-all duration-300" style={{ border: 'none', borderRadius: '0', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
         <Link href={`/product/${product.slug}`}>
           <div className="relative">
             {/* Product Image */}
-            <div className="block relative aspect-square overflow-hidden rounded-t-2xl bg-gray-50">
+            <div className="block relative aspect-square overflow-hidden bg-gray-50">
             {primaryImage && (
               <>
                 <Image
@@ -198,101 +198,103 @@ export function ProductCard({
             )}
             
             {imageLoading && (
-              <div className="absolute inset-0 bg-gray-100 animate-pulse rounded-t-2xl" />
+              <div className="absolute inset-0 bg-gray-100 animate-pulse" />
             )}
           </div>
 
-          {/* Badges - WoodMart Style */}
-          <div className="absolute top-4 left-4 flex flex-col space-y-2 z-10">
+          {/* Badges - Manila Style */}
+          <div className="absolute top-3 left-3 flex flex-col space-y-1 z-10">
             {product.on_sale && discountPercentage > 0 && (
-              <div className="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+              <div style={{
+                backgroundColor: '#e74c3c',
+                color: '#ffffff',
+                padding: '4px 10px',
+                fontSize: '11px',
+                fontWeight: '600',
+                borderRadius: '2px'
+              }}>
                 -{discountPercentage}%
               </div>
             )}
-            {product.featured && (
-              <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-medium shadow-lg">
-                ⭐ Featured
-              </div>
-            )}
             {product.stock_status === 'outofstock' && (
-              <div className="bg-gray-800 text-white px-3 py-1 rounded-full text-xs font-medium shadow-lg">
+              <div style={{
+                backgroundColor: '#000000',
+                color: '#ffffff',
+                padding: '4px 10px',
+                fontSize: '11px',
+                fontWeight: '600',
+                borderRadius: '2px'
+              }}>
                 Out of Stock
               </div>
             )}
           </div>
 
-          {/* Action Buttons - WoodMart Style */}
+          {/* Action Buttons - Manila Style */}
           <div className={cn(
-            "absolute top-4 right-4 flex flex-col space-y-2 transition-all duration-500 z-10",
-            isHovered ? "opacity-100 translate-x-0" : "opacity-0 translate-x-6"
+            "absolute top-3 right-3 flex flex-col space-y-1 transition-all duration-300 z-10",
+            isHovered ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4"
           )}>
             {showWishlist && (
-              <Button
-                size="icon"
-                variant="ghost"
-                className="w-10 h-10 bg-white/95 hover:bg-white shadow-lg rounded-full backdrop-blur-sm border border-gray-100 hover:scale-110 transition-all duration-300"
+              <button
+                className="w-9 h-9 bg-white hover:bg-gray-100 transition-colors flex items-center justify-center"
+                style={{ borderRadius: '0', border: '1px solid #e5e5e5' }}
                 onClick={handleAddToWishlist}
               >
                 <Heart
-                  className={cn(
-                    "h-4 w-4 transition-colors",
-                    isWishlisted ? "text-red-500" : "text-gray-600 hover:text-red-500"
-                  )}
+                  className={cn("h-4 w-4", isWishlisted ? "text-red-500" : "text-gray-700")}
                   fill={isWishlisted ? "currentColor" : "none"}
                 />
-              </Button>
+              </button>
             )}
-            
+
             {showQuickView && (
-              <Button
-                size="icon"
-                variant="ghost"
-                className="w-10 h-10 bg-white/95 hover:bg-white shadow-lg rounded-full backdrop-blur-sm border border-gray-100 hover:scale-110 transition-all duration-300"
+              <button
+                className="w-9 h-9 bg-white hover:bg-gray-100 transition-colors flex items-center justify-center"
+                style={{ borderRadius: '0', border: '1px solid #e5e5e5' }}
                 onClick={handleQuickView}
               >
-                <Eye className="h-4 w-4 text-gray-600 hover:text-blue-600 transition-colors" />
-              </Button>
-            )}
-            
-            {showCompare && (
-              <Button
-                size="icon"
-                variant="ghost"
-                className="w-10 h-10 bg-white/95 hover:bg-white shadow-lg rounded-full backdrop-blur-sm border border-gray-100 hover:scale-110 transition-all duration-300"
-              >
-                <BarChart3 className="h-4 w-4 text-gray-600 hover:text-green-600 transition-colors" />
-              </Button>
+                <Eye className="h-4 w-4 text-gray-700" />
+              </button>
             )}
           </div>
 
-          {/* Quick Add to Cart - WoodMart Style */}
+          {/* Quick Add to Cart - Manila Style */}
           <div className={cn(
-            "absolute bottom-4 left-4 right-4 transition-all duration-500 z-10",
-            isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+            "absolute bottom-0 left-0 right-0 transition-all duration-300 z-10",
+            isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-full"
           )}>
-            <Button
-              className="w-full bg-gray-900 hover:bg-gray-800 text-white rounded-full py-3 font-medium shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
+            <button
+              className="w-full hover:opacity-90 transition-opacity font-medium"
+              style={{
+                backgroundColor: '#32373c',
+                color: '#ffffff',
+                padding: '12px',
+                border: 'none',
+                borderRadius: '0',
+                fontSize: '13px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em'
+              }}
               onClick={handleAddToCart}
               disabled={product.stock_status === 'outofstock'}
             >
-              {product.stock_status === 'outofstock' ? (
-                <span>Out of Stock</span>
-              ) : (
-                <>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add to Cart
-                </>
-              )}
-            </Button>
+              {product.stock_status === 'outofstock' ? 'Out of Stock' : 'Add to Cart'}
+            </button>
           </div>
         </div>
         </Link>
 
-        <CardContent className="p-6 space-y-3">
+        <div style={{ padding: '20px' }}>
           {/* Product Category */}
           {product.categories && product.categories.length > 0 && (
-            <div className="flex items-center space-x-2">
-              <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+            <div className="mb-2">
+              <span style={{
+                fontSize: '11px',
+                color: '#999999',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em'
+              }}>
                 {product.categories[0].name}
               </span>
             </div>
@@ -300,66 +302,63 @@ export function ProductCard({
 
           {/* Product Name */}
           <Link href={`/product/${product.slug}`}>
-            <h3 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-gray-700 transition-colors leading-tight">
+            <h3 className="line-clamp-2 group-hover:opacity-70 transition-opacity" style={{
+              fontSize: '15px',
+              fontWeight: '400',
+              lineHeight: '1.4',
+              color: '#000000',
+              marginBottom: '8px'
+            }}>
               {product.name}
             </h3>
           </Link>
 
           {/* Rating */}
           {parseFloat(product.average_rating) > 0 && (
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center mb-2" style={{ gap: '6px' }}>
               <div className="flex">
                 {renderStars(parseFloat(product.average_rating))}
               </div>
-              <span className="text-xs text-gray-500 font-medium">
-                ({product.rating_count} reviews)
+              <span style={{
+                fontSize: '11px',
+                color: '#999999'
+              }}>
+                ({product.rating_count})
               </span>
             </div>
           )}
 
           {/* Price */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              {product.on_sale && product.sale_price ? (
-                <>
-                  <span className="text-xl font-bold text-gray-900">
-                    {formatPrice(product.sale_price)}
-                  </span>
-                  <span className="text-sm text-gray-400 line-through">
-                    {formatPrice(product.regular_price)}
-                  </span>
-                </>
-              ) : (
-                <span className="text-xl font-bold text-gray-900">
-                  {formatPrice(product.price)}
+          <div className="flex items-center" style={{ gap: '8px' }}>
+            {product.on_sale && product.sale_price ? (
+              <>
+                <span style={{
+                  fontSize: '18px',
+                  fontWeight: '600',
+                  color: '#000000'
+                }}>
+                  {formatPrice(product.sale_price)}
                 </span>
-              )}
-            </div>
-            
-            {/* Mobile Add to Cart */}
-            <Button
-              size="icon"
-              className="lg:hidden w-10 h-10 bg-gray-900 hover:bg-gray-800 text-white rounded-full shadow-lg"
-              onClick={handleAddToCart}
-              disabled={product.stock_status === 'outofstock'}
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
+                <span style={{
+                  fontSize: '14px',
+                  color: '#999999',
+                  textDecoration: 'line-through'
+                }}>
+                  {formatPrice(product.regular_price)}
+                </span>
+              </>
+            ) : (
+              <span style={{
+                fontSize: '18px',
+                fontWeight: '600',
+                color: '#000000'
+              }}>
+                {formatPrice(product.price)}
+              </span>
+            )}
           </div>
-
-          {/* Stock Status */}
-          {product.manage_stock && product.stock_quantity !== null && (
-            <div className="">
-              {product.stock_quantity <= 5 && product.stock_quantity > 0 && (
-                <div className="flex items-center space-x-2 text-orange-600 bg-orange-50 px-3 py-2 rounded-full">
-                  <Zap className="h-3 w-3" />
-                  <span className="text-xs font-medium">Only {product.stock_quantity} left!</span>
-                </div>
-              )}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </motion.div>
   )
 }

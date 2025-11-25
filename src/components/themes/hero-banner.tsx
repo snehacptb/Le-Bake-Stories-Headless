@@ -95,32 +95,43 @@ export function HeroBanner({ banners }: HeroBannerProps) {
             <div className="flex flex-col sm:flex-row gap-4 md:gap-5 mt-6 md:mt-8 justify-center items-center">
               {(currentBanner.button1?.text || currentBanner.button1?.link) && (
                 <Link href={currentBanner.button1?.link || '#'}>
-                  <Button
-                    className="w-full sm:w-auto text-white font-medium transition-all duration-300 hover:opacity-90"
+                  <button
+                    className="font-medium transition-all duration-300 hover:opacity-80 uppercase tracking-wider"
                     style={{
-                      backgroundColor: '#32373c',
-                      padding: 'calc(0.667em + 2px) calc(1.333em + 2px)',
-                      marginRight: '0px'
+                      backgroundColor: '#c71585',
+                      color: '#ffffff',
+                      padding: '12px 30px',
+                      border: 'none',
+                      borderRadius: '30px',
+                      fontSize: '12px',
+                      fontWeight: '600',
+                      letterSpacing: '0.1em',
+                      cursor: 'pointer'
                     }}
                   >
-                    {currentBanner.button1?.text || 'Shop Now'}
-                  </Button>
+                    {currentBanner.button1?.text || 'SHOP NOW'}
+                  </button>
                 </Link>
               )}
 
               {(currentBanner.button2?.text || currentBanner.button2?.link) && (
                 <Link href={currentBanner.button2?.link || '#'}>
-                  <Button
-                    variant="outline"
-                    className="w-full sm:w-auto border-2 text-white font-medium hover:bg-white/10 transition-all duration-300"
+                  <button
+                    className="font-medium transition-all duration-300 hover:bg-white hover:text-black uppercase tracking-wider"
                     style={{
-                      borderColor: '#fff',
-                      padding: 'calc(0.667em + 2px) calc(1.333em + 2px)',
-                      marginLeft: '20px'
+                      backgroundColor: 'transparent',
+                      color: '#ffffff',
+                      padding: '12px 30px',
+                      border: '2px solid #ffffff',
+                      borderRadius: '30px',
+                      fontSize: '12px',
+                      fontWeight: '600',
+                      letterSpacing: '0.1em',
+                      cursor: 'pointer'
                     }}
                   >
-                    {currentBanner.button2?.text || 'Learn More'}
-                  </Button>
+                    {currentBanner.button2?.text || 'LEARN MORE'}
+                  </button>
                 </Link>
               )}
             </div>

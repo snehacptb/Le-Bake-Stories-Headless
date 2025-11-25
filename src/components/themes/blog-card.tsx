@@ -32,18 +32,8 @@ export function BlogCard({
   showReadMore = true,
   className
 }: BlogCardProps) {
-  const [imageLoading, setImageLoading] = React.useState(true)
-  const [featuredImage, setFeaturedImage] = React.useState<string | null>(null)
-
-  // Extract featured image (you'll need to fetch this from WordPress media API)
-  React.useEffect(() => {
-    if (post.featured_media) {
-      // TODO: fetch and set actual media URL from WordPress media API
-      setFeaturedImage(null)
-    } else {
-      setFeaturedImage(null)
-    }
-  }, [post.featured_media])
+  // Extract featured image from embedded data
+  const featuredImage = post._embedded?.['wp:featuredmedia']?.[0]?.source_url || null
 
   const cleanExcerpt = post.excerpt.rendered
     .replace(/<[^>]*>/g, '') // Remove HTML tags
@@ -63,11 +53,7 @@ export function BlogCard({
                     fill
                     sizes="80px"
                     className="object-cover rounded-md"
-                    onLoad={() => setImageLoading(false)}
                   />
-                  {imageLoading && (
-                    <div className="absolute inset-0 bg-gray-200 animate-pulse rounded-md" />
-                  )}
                 </div>
               )}
               <div className="flex-1 min-w-0">
@@ -106,11 +92,7 @@ export function BlogCard({
                     fill
                     sizes="(max-width: 768px) 100vw, 33vw"
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    onLoad={() => setImageLoading(false)}
                   />
-                  {imageLoading && (
-                    <div className="absolute inset-0 bg-gray-200 animate-pulse" />
-                  )}
                 </Link>
               </div>
             )}
@@ -166,93 +148,80 @@ export function BlogCard({
   return (
     <motion.div
       className={cn("group", className)}
-      whileHover={{ y: -5 }}
+      whileHover={{ y: -3 }}
       transition={{ duration: 0.2 }}
     >
-      <Card className="overflow-hidden hover:shadow-xl transition-shadow duration-300">
+      <div className="overflow-hidden" style={{ backgroundColor: '#ffffff', borderRadius: '0', border: 'none', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
         {featuredImage && (
-          <div className="relative aspect-[16/10] overflow-hidden">
+          <div className="relative overflow-hidden" style={{ aspectRatio: '16/9' }}>
             <Link href={`/blog/${post.slug}`}>
               <Image
                 src={featuredImage}
                 alt={post.title.rendered}
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                className="object-cover group-hover:scale-105 transition-transform duration-300"
-                onLoad={() => setImageLoading(false)}
+                className="object-cover group-hover:scale-105 transition-transform duration-500"
               />
-              {imageLoading && (
-                <div className="absolute inset-0 bg-gray-200 animate-pulse" />
-              )}
             </Link>
-            
-            {variant === 'featured' && (
-              <div className="absolute top-4 left-4">
-                <Badge variant="featured" className="text-xs">
-                  Featured
-                </Badge>
+
+            {/* Date Badge - Manila Style */}
+            {showDate && (
+              <div className="absolute top-4 left-4" style={{
+                backgroundColor: 'rgba(9, 33, 67, 0.9)',
+                color: '#ffffff',
+                padding: '6px 12px',
+                fontSize: '12px',
+                fontWeight: '500',
+                borderRadius: '2px'
+              }}>
+                {new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
               </div>
             )}
           </div>
         )}
 
-        <CardContent className="p-6">
-          {/* Meta Information */}
-          <div className="flex items-center space-x-4 text-sm text-gray-500 mb-3">
-            {showDate && (
-              <div className="flex items-center">
-                <Calendar className="h-4 w-4 mr-1" />
-                {formatDate(post.date)}
-              </div>
-            )}
-            {showAuthor && (
-              <div className="flex items-center">
-                <User className="h-4 w-4 mr-1" />
-                Author
-              </div>
-            )}
-            {showComments && (
-              <div className="flex items-center">
-                <MessageCircle className="h-4 w-4 mr-1" />
-                0 Comments
-              </div>
-            )}
-          </div>
-
+        <div style={{ padding: '30px 20px' }}>
           {/* Title */}
           <Link href={`/blog/${post.slug}`}>
-            <h3 className={cn(
-              "font-semibold mb-3 group-hover:text-themes-pink-600 transition-colors line-clamp-2",
-              variant === 'featured' ? "text-2xl" : "text-xl"
-            )}>
+            <h3 className="group-hover:opacity-70 transition-opacity line-clamp-2" style={{
+              fontSize: '18px',
+              fontWeight: '400',
+              lineHeight: '1.4',
+              marginBottom: '12px',
+              color: '#000000'
+            }}>
               {post.title.rendered}
             </h3>
           </Link>
 
           {/* Excerpt */}
           {showExcerpt && (
-            <p className="text-gray-600 mb-4 line-clamp-3">
-              {truncateText(cleanExcerpt, variant === 'featured' ? 200 : 150)}
+            <p className="line-clamp-3" style={{
+              fontSize: '14px',
+              lineHeight: '1.6',
+              color: '#777777',
+              marginBottom: '20px'
+            }}>
+              {truncateText(cleanExcerpt, 120)}
             </p>
           )}
 
           {/* Read More */}
           {showReadMore && (
-            <div className="flex items-center justify-between">
-              <Link href={`/blog/${post.slug}`}>
-                <Button variant="themes-ghost" className="p-0 h-auto">
-                  Read More <ArrowRight className="h-4 w-4 ml-1" />
-                </Button>
-              </Link>
-              
-              <div className="flex items-center text-sm text-gray-500">
-                <Clock className="h-4 w-4 mr-1" />
-                5 min read
-              </div>
-            </div>
+            <Link href={`/blog/${post.slug}`}>
+              <span className="inline-flex items-center hover:opacity-70 transition-opacity" style={{
+                fontSize: '13px',
+                fontWeight: '600',
+                color: '#000000',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em'
+              }}>
+                Read More <ArrowRight className="h-3 w-3 ml-1" />
+              </span>
+            </Link>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </motion.div>
   )
 }

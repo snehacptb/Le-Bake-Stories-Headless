@@ -52,6 +52,17 @@ export interface WordPressPost {
   tags: number[]
   acf?: any
   _links: any
+  _embedded?: {
+    'wp:featuredmedia'?: Array<{
+      id: number
+      source_url: string
+      alt_text: string
+      media_details: {
+        width: number
+        height: number
+      }
+    }>
+  }
 }
 
 export interface WordPressPage {

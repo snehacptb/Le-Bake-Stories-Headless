@@ -15,31 +15,48 @@ export function CategoriesCarousel({ categories }: CategoriesCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isAutoPlaying, setIsAutoPlaying] = useState(true)
 
-  // Show 5 categories at a time (Manila theme 5-column layout)
-  const categoriesPerPage = 5
-  const totalPages = Math.ceil(categories.length / categoriesPerPage)
+  // Show 4 categories at a time (Manila theme reference)
+  const categoriesPerPage = 4
 
-  // Filter categories that have images
-  const categoriesWithImages = categories.filter(cat => cat.image?.src)
+  // Filter categories that have images and products
+  const categoriesWithImages = categories.filter(cat => cat.image?.src && cat.count > 0)
 
-  // Auto-play functionality
+  // Calculate max slides - slide one category at a time
+  const maxSlides = Math.max(0, categoriesWithImages.length - categoriesPerPage)
+
+  // Auto-play functionality - slide one at a time
   useEffect(() => {
-    if (!isAutoPlaying || totalPages <= 1) return
+    if (!isAutoPlaying || maxSlides === 0) return
 
     const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % totalPages)
+      setCurrentIndex((prevIndex) => {
+        if (prevIndex >= maxSlides) {
+          return 0 // Loop back to start
+        }
+        return prevIndex + 1
+      })
     }, 6000) // Change every 6 seconds
 
     return () => clearInterval(interval)
-  }, [isAutoPlaying, totalPages])
+  }, [isAutoPlaying, maxSlides])
 
   const nextSlide = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % totalPages)
+    setCurrentIndex((prevIndex) => {
+      if (prevIndex >= maxSlides) {
+        return 0 // Loop back to start
+      }
+      return prevIndex + 1
+    })
     setIsAutoPlaying(false) // Stop auto-play when user interacts
   }
 
   const prevSlide = () => {
-    setCurrentIndex((prevIndex) => (prevIndex - 1 + totalPages) % totalPages)
+    setCurrentIndex((prevIndex) => {
+      if (prevIndex <= 0) {
+        return maxSlides // Loop to end
+      }
+      return prevIndex - 1
+    })
     setIsAutoPlaying(false) // Stop auto-play when user interacts
   }
 
@@ -48,11 +65,9 @@ export function CategoriesCarousel({ categories }: CategoriesCarouselProps) {
     setIsAutoPlaying(false) // Stop auto-play when user interacts
   }
 
-  // Get categories for current page
+  // Get categories for current slide - sliding window of 4
   const getCurrentCategories = () => {
-    const startIndex = currentIndex * categoriesPerPage
-    const endIndex = startIndex + categoriesPerPage
-    return categoriesWithImages.slice(startIndex, endIndex)
+    return categoriesWithImages.slice(currentIndex, currentIndex + categoriesPerPage)
   }
 
   // If no categories with images, don't render anything
@@ -60,10 +75,10 @@ export function CategoriesCarousel({ categories }: CategoriesCarouselProps) {
     return null
   }
 
-  // If 5 or fewer categories, show them all without carousel
-  if (categoriesWithImages.length <= 5) {
+  // If 4 or fewer categories, show them all without carousel
+  if (categoriesWithImages.length <= 4) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4" style={{ gap: '30px' }}>
         {categoriesWithImages.map((category) => (
           <CategoryCard
             key={category.id}
@@ -101,9 +116,9 @@ export function CategoriesCarousel({ categories }: CategoriesCarouselProps) {
         </Button>
       </div>
 
-      {/* Categories Container - Manila 5-column grid */}
+      {/* Categories Container - Manila 4-column grid */}
       <div className="overflow-hidden">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4" style={{ gap: '30px' }}>
           {getCurrentCategories().map((category, index) => (
             <div
               key={`${currentIndex}-${category.id}`}
@@ -127,7 +142,6 @@ export function CategoriesCarousel({ categories }: CategoriesCarouselProps) {
           variant="outline"
           size="sm"
           onClick={prevSlide}
-          disabled={currentIndex === 0}
           style={{ borderColor: 'rgba(129, 129, 129, 0.2)' }}
         >
           <ChevronLeft className="h-4 w-4 mr-1" />
@@ -137,7 +151,6 @@ export function CategoriesCarousel({ categories }: CategoriesCarouselProps) {
           variant="outline"
           size="sm"
           onClick={nextSlide}
-          disabled={currentIndex === totalPages - 1}
           style={{ borderColor: 'rgba(129, 129, 129, 0.2)' }}
         >
           Next
@@ -146,9 +159,9 @@ export function CategoriesCarousel({ categories }: CategoriesCarouselProps) {
       </div>
 
       {/* Pagination Dots - Manila Theme */}
-      {totalPages > 1 && (
+      {maxSlides > 0 && (
         <div className="flex justify-center mt-8 space-x-2">
-          {Array.from({ length: totalPages }).map((_, index) => (
+          {Array.from({ length: maxSlides + 1 }).map((_, index) => (
             <button
               key={index}
               onClick={() => goToSlide(index)}
@@ -179,7 +192,7 @@ export function CategoriesCarousel({ categories }: CategoriesCarouselProps) {
   )
 }
 
-// Category Card Component - Manila Theme
+// Category Card Component - Manila Theme Reference Design
 function CategoryCard({
   category,
 }: {
@@ -189,20 +202,38 @@ function CategoryCard({
 
   return (
     <Link href={`/shop?category=${category.slug}`}>
-      <div className="group cursor-pointer transition-all duration-300 overflow-hidden">
-        <div className="relative aspect-square overflow-hidden rounded-sm">
+      <div className="group cursor-pointer">
+        {/* Category Image - No overlay */}
+        <div className="relative overflow-hidden mb-4" style={{ aspectRatio: '4/3' }}>
           <div
-            className="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-300"
+            className="absolute inset-0 bg-cover bg-center transition-transform duration-300 group-hover:scale-105"
             style={{ backgroundImage: `url(${category.image.src})` }}
           />
-          <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors" />
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
-            <h3 className="text-lg md:text-xl font-normal text-white mb-1" style={{ fontWeight: 400 }}>
-              {category.name}
-            </h3>
-            <p className="text-sm text-white/80">{category.count} {category.count === 1 ? 'Product' : 'Products'}</p>
-          </div>
         </div>
+
+        {/* Category Name */}
+        <h3
+          className="text-center uppercase mb-2"
+          style={{
+            fontSize: '14px',
+            fontWeight: 600,
+            letterSpacing: '0.05em',
+            color: '#000000'
+          }}
+        >
+          {category.name}
+        </h3>
+
+        {/* Product Count */}
+        <p
+          className="text-center"
+          style={{
+            fontSize: '12px',
+            color: '#999999'
+          }}
+        >
+          {category.count} {category.count === 1 ? 'product' : 'products'}
+        </p>
       </div>
     </Link>
   )
