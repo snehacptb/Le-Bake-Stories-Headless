@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { ClientLayout } from '@/components/themes/client-layout'
+import { SEODebugPanel } from '@/components/seo-debug-panel'
 
 export default function BlogPostPage() {
   const params = useParams()
@@ -401,6 +402,9 @@ export default function BlogPostPage() {
 
       </div>
     </div>
+    
+    {/* SEO Debug Panel - Only visible in development */}
+    <SEODebugPanel slug={slug} type="post" />
     </ClientLayout>
   )
 }
