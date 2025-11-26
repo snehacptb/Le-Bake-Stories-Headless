@@ -1,113 +1,171 @@
 'use client'
 
 /**
- * Floating SEO Panel Component
- * Admin-only panel for editing SEO metadata directly from the frontend
- * Similar to the WordPress admin bar in traditional WordPress sites
+ * Floating SEO Panel - WordPress Style
+ * Complete SEOPress metabox with all fields
+ * Simple WordPress admin interface (no fancy styling)
  */
 
 import { useState, useEffect } from 'react'
-import { X, Edit, Save, ChevronDown, ChevronUp, Loader2, Check, AlertCircle } from 'lucide-react'
+import { X, Edit, ExternalLink, Loader2, Save } from 'lucide-react'
 import { useAdminAuth } from '@/hooks/use-admin-auth'
-import { usePathname } from 'next/navigation'
-
-interface SEOData {
-  title: string
-  description: string
-  canonical: string
-  robots: {
-    noindex: boolean
-    nofollow: boolean
-    noarchive: boolean
-    nosnippet: boolean
-    noimageindex: boolean
-  }
-  og_title: string
-  og_description: string
-  og_image: string
-  twitter_title: string
-  twitter_description: string
-  twitter_image: string
-}
 
 interface FloatingSEOPanelProps {
   postId?: number
   postSlug?: string
   postType?: 'post' | 'page' | 'product'
-  initialSeoData?: SEOData
+  mode?: 'new-tab' | 'modal'
+}
+
+interface SEOFormData {
+  // Titles & Metas
+  title: string
+  description: string
+
+  // Advanced
+  canonical: string
+  robots: {
+    noindex: boolean
+    nofollow: boolean
+    noimageindex: boolean
+    noarchive: boolean
+    nosnippet: boolean
+  }
+
+  // Social - Facebook/OpenGraph
+  og_title: string
+  og_description: string
+  og_image: string
+
+  // Social - Twitter
+  twitter_title: string
+  twitter_description: string
+  twitter_image: string
+
+  // Redirections
+  redirect_enabled: boolean
+  redirect_type: string
+  redirect_url: string
 }
 
 export function FloatingSEOPanel({
   postId,
   postSlug,
   postType = 'post',
-  initialSeoData
+  mode = 'modal',
 }: FloatingSEOPanelProps) {
   const { isAdmin, canEditPosts, isLoading: isAuthLoading } = useAdminAuth()
-  const pathname = usePathname()
-  
-  const [isMounted, setIsMounted] = useState(false)
-  const [isOpen, setIsOpen] = useState(false)
-  const [isExpanded, setIsExpanded] = useState(false)
-  const [isEditing, setIsEditing] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
-  const [saveSuccess, setSaveSuccess] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  
-  const [seoData, setSeoData] = useState<SEOData | null>(initialSeoData || null)
-  const [editedData, setEditedData] = useState<Partial<SEOData>>({})
-  const [isLoadingSeo, setIsLoadingSeo] = useState(false)
 
-  // Ensure component only renders on client
+  const [isMounted, setIsMounted] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isLoadingData, setIsLoadingData] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState<'titles' | 'social' | 'advanced'>('titles')
+
+  const [seoData, setSeoData] = useState<SEOFormData>({
+    title: '',
+    description: '',
+    canonical: '',
+    robots: {
+      noindex: false,
+      nofollow: false,
+      noimageindex: false,
+      noarchive: false,
+      nosnippet: false,
+    },
+    og_title: '',
+    og_description: '',
+    og_image: '',
+    twitter_title: '',
+    twitter_description: '',
+    twitter_image: '',
+    redirect_enabled: false,
+    redirect_type: '301',
+    redirect_url: '',
+  })
+
   useEffect(() => {
     setIsMounted(true)
   }, [])
 
-  // Fetch SEO data if not provided
-  useEffect(() => {
-    if (isMounted && !seoData && postSlug) {
-      fetchSeoData()
-    }
-  }, [postSlug, isMounted])
+  const buildEditUrl = () => {
+    if (!postId) return null
+    const wpUrl = process.env.NEXT_PUBLIC_WORDPRESS_API_URL || ''
+    const baseUrl = wpUrl.replace('/wp-json/wp/v2', '').replace('/wp/v2', '')
+    return `${baseUrl}/wp-admin/post.php?post=${postId}&action=edit`
+  }
 
-  const fetchSeoData = async () => {
-    if (!postSlug) return
-    
-    setIsLoadingSeo(true)
+  const fetchSEOData = async () => {
+    setIsLoadingData(true)
     setError(null)
-    
+
     try {
-      const response = await fetch(`/api/seo/get?slug=${postSlug}&type=${postType}`)
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch SEO data')
+      // Build API URL with postId (preferred) or slug (fallback)
+      let apiUrl = '/api/seo/get?'
+      if (postId) {
+        apiUrl += `postId=${postId}&type=${postType}`
+      } else if (postSlug) {
+        apiUrl += `slug=${postSlug}&type=${postType}`
+      } else {
+        throw new Error('No post ID or slug available')
       }
-      
-      const result = await response.json()
-      setSeoData(result.data)
+
+      const response = await fetch(apiUrl)
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.details || errorData.error || 'Failed to fetch SEO data')
+      }
+
+      const data = await response.json()
+
+      if (data.success && data.data) {
+        setSeoData({
+          title: data.data.title || '',
+          description: data.data.description || '',
+          canonical: data.data.canonical || '',
+          robots: {
+            noindex: data.data.robots?.noindex || false,
+            nofollow: data.data.robots?.nofollow || false,
+            noimageindex: data.data.robots?.noimageindex || false,
+            noarchive: data.data.robots?.noarchive || false,
+            nosnippet: data.data.robots?.nosnippet || false,
+          },
+          og_title: data.data.og_title || '',
+          og_description: data.data.og_description || '',
+          og_image: data.data.og_image || '',
+          twitter_title: data.data.twitter_title || '',
+          twitter_description: data.data.twitter_description || '',
+          twitter_image: data.data.twitter_image || '',
+          redirect_enabled: data.data.redirect_enabled || false,
+          redirect_type: data.data.redirect_type || '301',
+          redirect_url: data.data.redirect_url || '',
+        })
+      } else {
+        throw new Error('Invalid response format')
+      }
     } catch (err: any) {
       console.error('Error fetching SEO data:', err)
       setError(err.message)
     } finally {
-      setIsLoadingSeo(false)
+      setIsLoadingData(false)
     }
   }
 
-  const handleSave = async () => {
-    if (!postId) {
-      setError('Post ID is required to update SEO data')
-      return
-    }
+  const saveSEOData = async () => {
+    if (!postId) return
 
     setIsSaving(true)
     setError(null)
-    setSaveSuccess(false)
+    setSuccessMessage(null)
 
     try {
       const token = localStorage.getItem('wc-auth-token')
-      
+
       if (!token) {
-        throw new Error('Authentication token not found')
+        throw new Error('Not authenticated')
       }
 
       const response = await fetch('/api/seo/update', {
@@ -118,314 +176,462 @@ export function FloatingSEOPanel({
         },
         body: JSON.stringify({
           post_id: postId,
-          ...editedData,
+          ...seoData,
         }),
       })
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to update SEO data')
+        throw new Error(errorData.message || 'Failed to update SEO data')
       }
 
       const result = await response.json()
-      
-      // Update local state with returned data
-      if (result.seo_data) {
-        setSeoData(result.seo_data)
+
+      if (result.success) {
+        setSuccessMessage('SEO updated successfully!')
+
+        setTimeout(() => {
+          setIsModalOpen(false)
+          window.location.reload()
+        }, 1500)
+      } else {
+        throw new Error(result.message || 'Update failed')
       }
-      
-      setEditedData({})
-      setIsEditing(false)
-      setSaveSuccess(true)
-      
-      // Hide success message after 3 seconds
-      setTimeout(() => setSaveSuccess(false), 3000)
     } catch (err: any) {
-      console.error('Error updating SEO data:', err)
+      console.error('Error saving SEO data:', err)
       setError(err.message)
     } finally {
       setIsSaving(false)
     }
   }
 
-  const handleInputChange = (field: string, value: any) => {
-    setEditedData(prev => ({
-      ...prev,
-      [field]: value
-    }))
-  }
-
-  const getCurrentValue = (field: keyof SEOData): string => {
-    if (field in editedData) {
-      const value = editedData[field]
-      return typeof value === 'string' ? value : ''
+  const handleOpenModal = () => {
+    if (!postId) {
+      setError('No post available for editing')
+      return
     }
-    const value = seoData?.[field]
-    return typeof value === 'string' ? value : ''
+
+    if (mode === 'new-tab') {
+      const url = buildEditUrl()
+      if (url) {
+        window.open(url, '_blank')
+      }
+    } else {
+      setIsModalOpen(true)
+      fetchSEOData()
+    }
   }
 
-  const handleCancel = () => {
-    setEditedData({})
-    setIsEditing(false)
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
     setError(null)
+    setSuccessMessage(null)
   }
 
-  // Don't render on server or if not mounted
+  const handleOpenInWordPress = () => {
+    const url = buildEditUrl()
+    if (url) {
+      window.open(url, '_blank')
+    }
+  }
+
   if (!isMounted) {
     return null
   }
 
-  // Don't render if not admin or still loading
   if (isAuthLoading || (!isAdmin && !canEditPosts)) {
+    return null
+  }
+
+  // Need postId to edit SEO (required for save functionality)
+  if (!postId) {
     return null
   }
 
   return (
     <>
-      {/* Floating Button */}
-      <div className="fixed bottom-6 right-6 z-50">
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full p-4 shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-200 flex items-center gap-2"
-          title="Edit SEO"
-        >
-          <Edit className="w-5 h-5" />
-          {!isOpen && <span className="text-sm font-medium">SEO</span>}
-        </button>
-      </div>
+      {/* Floating Button - WordPress Admin Style */}
+      <button
+        onClick={handleOpenModal}
+        className="fixed bottom-6 right-6 z-50 bg-[#2271b1] hover:bg-[#135e96] text-white rounded shadow-lg px-4 py-3 flex items-center gap-2 transition-colors"
+        title="Edit SEO"
+      >
+        <Edit className="w-4 h-4" />
+        <span className="text-sm font-medium">SEO</span>
+      </button>
 
-      {/* Panel */}
-      {isOpen && (
-        <div className="fixed bottom-24 right-6 z-50 bg-white rounded-lg shadow-2xl border border-gray-200 w-[400px] max-h-[600px] overflow-hidden flex flex-col">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Edit className="w-5 h-5" />
-              <h3 className="font-semibold">SEO Settings</h3>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setIsExpanded(!isExpanded)}
-                className="hover:bg-white/10 p-1 rounded transition-colors"
-                title={isExpanded ? 'Collapse' : 'Expand'}
-              >
-                {isExpanded ? <ChevronDown className="w-5 h-5" /> : <ChevronUp className="w-5 h-5" />}
-              </button>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="hover:bg-white/10 p-1 rounded transition-colors"
-                title="Close"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Status Messages */}
-          {saveSuccess && (
-            <div className="bg-green-50 border-b border-green-200 p-3 flex items-center gap-2 text-green-800">
-              <Check className="w-4 h-4" />
-              <span className="text-sm">SEO data saved successfully!</span>
-            </div>
-          )}
-          
-          {error && (
-            <div className="bg-red-50 border-b border-red-200 p-3 flex items-center gap-2 text-red-800">
-              <AlertCircle className="w-4 h-4" />
-              <span className="text-sm">{error}</span>
-            </div>
-          )}
-
-          {/* Content */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {isLoadingSeo ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+      {/* Modal - WordPress Admin Style */}
+      {mode === 'modal' && isModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+            {/* Header - WordPress Style */}
+            <div className="bg-[#f0f0f1] border-b border-[#c3c4c7] p-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Edit className="w-5 h-5 text-[#2271b1]" />
+                <h2 className="text-lg font-semibold text-[#1d2327]">SEOPress</h2>
               </div>
-            ) : !seoData && postSlug ? (
-              <div className="text-center py-8">
-                <p className="text-gray-600 mb-4">No SEO data found</p>
+              <div className="flex items-center gap-2">
                 <button
-                  onClick={fetchSeoData}
-                  className="text-blue-600 hover:text-blue-700 font-medium"
+                  onClick={handleOpenInWordPress}
+                  className="text-[#2271b1] hover:text-[#135e96] p-1"
+                  title="Open in WordPress"
                 >
-                  Retry
+                  <ExternalLink className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={handleCloseModal}
+                  className="text-[#50575e] hover:text-[#1d2327] p-1"
+                  title="Close"
+                >
+                  <X className="w-5 h-5" />
                 </button>
               </div>
-            ) : seoData ? (
-              <>
-                {/* Meta Title */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Meta Title
-                  </label>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      value={getCurrentValue('title')}
-                      onChange={(e) => handleInputChange('title', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Enter meta title"
-                    />
-                  ) : (
-                    <p className="text-sm text-gray-600 bg-gray-50 p-2 rounded">{seoData.title || 'Not set'}</p>
-                  )}
-                </div>
+            </div>
 
-                {/* Meta Description */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Meta Description
-                  </label>
-                  {isEditing ? (
-                    <textarea
-                      value={getCurrentValue('description')}
-                      onChange={(e) => handleInputChange('description', e.target.value)}
-                      rows={3}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Enter meta description"
-                    />
-                  ) : (
-                    <p className="text-sm text-gray-600 bg-gray-50 p-2 rounded">{seoData.description || 'Not set'}</p>
-                  )}
-                </div>
+            {/* Tabs - WordPress Style */}
+            <div className="bg-[#f0f0f1] border-b border-[#c3c4c7]">
+              <div className="flex">
+                <button
+                  onClick={() => setActiveTab('titles')}
+                  className={`px-4 py-2 text-sm font-medium border-b-2 ${
+                    activeTab === 'titles'
+                      ? 'border-[#2271b1] text-[#2271b1] bg-white'
+                      : 'border-transparent text-[#50575e] hover:text-[#1d2327]'
+                  }`}
+                >
+                  Titles & Metas
+                </button>
+                <button
+                  onClick={() => setActiveTab('social')}
+                  className={`px-4 py-2 text-sm font-medium border-b-2 ${
+                    activeTab === 'social'
+                      ? 'border-[#2271b1] text-[#2271b1] bg-white'
+                      : 'border-transparent text-[#50575e] hover:text-[#1d2327]'
+                  }`}
+                >
+                  Social Networks
+                </button>
+                <button
+                  onClick={() => setActiveTab('advanced')}
+                  className={`px-4 py-2 text-sm font-medium border-b-2 ${
+                    activeTab === 'advanced'
+                      ? 'border-[#2271b1] text-[#2271b1] bg-white'
+                      : 'border-transparent text-[#50575e] hover:text-[#1d2327]'
+                  }`}
+                >
+                  Advanced
+                </button>
+              </div>
+            </div>
 
-                {/* Canonical URL */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Canonical URL
-                  </label>
-                  {isEditing ? (
-                    <input
-                      type="url"
-                      value={getCurrentValue('canonical')}
-                      onChange={(e) => handleInputChange('canonical', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="https://example.com/page"
-                    />
-                  ) : (
-                    <p className="text-sm text-gray-600 bg-gray-50 p-2 rounded break-all">{seoData.canonical || 'Not set'}</p>
-                  )}
-                </div>
-
-                {/* Expanded Section */}
-                {isExpanded && (
-                  <>
-                    {/* Robots Meta */}
-                    {isEditing && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Robots Meta
-                        </label>
-                        <div className="space-y-2">
-                          {['noindex', 'nofollow', 'noarchive', 'nosnippet', 'noimageindex'].map((robot) => (
-                            <label key={robot} className="flex items-center gap-2">
-                              <input
-                                type="checkbox"
-                                checked={editedData.robots?.[robot as keyof typeof seoData.robots] ?? seoData.robots?.[robot as keyof typeof seoData.robots] ?? false}
-                                onChange={(e) => handleInputChange('robots', {
-                                  ...(editedData.robots || seoData.robots),
-                                  [robot]: e.target.checked
-                                })}
-                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                              />
-                              <span className="text-sm text-gray-700 capitalize">{robot}</span>
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Open Graph Title */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        OG Title
-                      </label>
-                      {isEditing ? (
-                        <input
-                          type="text"
-                          value={getCurrentValue('og_title')}
-                          onChange={(e) => handleInputChange('og_title', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="Open Graph title"
-                        />
-                      ) : (
-                        <p className="text-sm text-gray-600 bg-gray-50 p-2 rounded">{seoData.og_title || 'Not set'}</p>
-                      )}
-                    </div>
-
-                    {/* Open Graph Description */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        OG Description
-                      </label>
-                      {isEditing ? (
-                        <textarea
-                          value={getCurrentValue('og_description')}
-                          onChange={(e) => handleInputChange('og_description', e.target.value)}
-                          rows={2}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="Open Graph description"
-                        />
-                      ) : (
-                        <p className="text-sm text-gray-600 bg-gray-50 p-2 rounded">{seoData.og_description || 'Not set'}</p>
-                      )}
-                    </div>
-                  </>
-                )}
-              </>
-            ) : (
-              <div className="text-center py-8 text-gray-500">
-                <p>No post selected for SEO editing</p>
-                <p className="text-sm mt-2">Navigate to a post, page, or product to edit SEO</p>
+            {/* Messages */}
+            {error && (
+              <div className="mx-4 mt-4 p-3 bg-[#fcf0f1] border border-[#c3393a] text-[#1d2327] text-sm">
+                <strong>Error:</strong> {error}
               </div>
             )}
-          </div>
 
-          {/* Footer Actions */}
-          {seoData && (
-            <div className="border-t border-gray-200 p-4 bg-gray-50 flex gap-2">
-              {isEditing ? (
-                <>
-                  <button
-                    onClick={handleSave}
-                    disabled={isSaving}
-                    className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
-                  >
-                    {isSaving ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Saving...
-                      </>
-                    ) : (
-                      <>
-                        <Save className="w-4 h-4" />
-                        Save Changes
-                      </>
-                    )}
-                  </button>
-                  <button
-                    onClick={handleCancel}
-                    disabled={isSaving}
-                    className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </>
+            {successMessage && (
+              <div className="mx-4 mt-4 p-3 bg-[#f0f6fc] border border-[#2271b1] text-[#1d2327] text-sm">
+                {successMessage}
+              </div>
+            )}
+
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto p-6">
+              {isLoadingData ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="w-6 h-6 animate-spin text-[#2271b1]" />
+                </div>
               ) : (
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center justify-center gap-2 transition-colors"
-                >
-                  <Edit className="w-4 h-4" />
-                  Edit SEO
-                </button>
+                <>
+                  {/* Titles & Metas Tab */}
+                  {activeTab === 'titles' && (
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-[#1d2327] mb-1">
+                          Title
+                        </label>
+                        <input
+                          type="text"
+                          value={seoData.title}
+                          onChange={(e) => setSeoData({ ...seoData, title: e.target.value })}
+                          className="w-full px-3 py-2 border border-[#8c8f94] rounded text-sm focus:border-[#2271b1] focus:outline-none focus:ring-1 focus:ring-[#2271b1]"
+                        />
+                        <p className="text-xs text-[#646970] mt-1">
+                          {seoData.title.length} characters - 60 recommended
+                        </p>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-[#1d2327] mb-1">
+                          Meta description
+                        </label>
+                        <textarea
+                          value={seoData.description}
+                          onChange={(e) => setSeoData({ ...seoData, description: e.target.value })}
+                          rows={3}
+                          className="w-full px-3 py-2 border border-[#8c8f94] rounded text-sm focus:border-[#2271b1] focus:outline-none focus:ring-1 focus:ring-[#2271b1]"
+                        />
+                        <p className="text-xs text-[#646970] mt-1">
+                          {seoData.description.length} characters - 160 recommended
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Social Networks Tab */}
+                  {activeTab === 'social' && (
+                    <div className="space-y-6">
+                      <div>
+                        <h3 className="text-sm font-semibold text-[#1d2327] mb-3">Facebook (Open Graph)</h3>
+                        <div className="space-y-3">
+                          <div>
+                            <label className="block text-sm text-[#1d2327] mb-1">
+                              OG Title
+                            </label>
+                            <input
+                              type="text"
+                              value={seoData.og_title}
+                              onChange={(e) => setSeoData({ ...seoData, og_title: e.target.value })}
+                              className="w-full px-3 py-2 border border-[#8c8f94] rounded text-sm focus:border-[#2271b1] focus:outline-none focus:ring-1 focus:ring-[#2271b1]"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm text-[#1d2327] mb-1">
+                              OG Description
+                            </label>
+                            <textarea
+                              value={seoData.og_description}
+                              onChange={(e) => setSeoData({ ...seoData, og_description: e.target.value })}
+                              rows={2}
+                              className="w-full px-3 py-2 border border-[#8c8f94] rounded text-sm focus:border-[#2271b1] focus:outline-none focus:ring-1 focus:ring-[#2271b1]"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm text-[#1d2327] mb-1">
+                              OG Image URL
+                            </label>
+                            <input
+                              type="url"
+                              value={seoData.og_image}
+                              onChange={(e) => setSeoData({ ...seoData, og_image: e.target.value })}
+                              className="w-full px-3 py-2 border border-[#8c8f94] rounded text-sm focus:border-[#2271b1] focus:outline-none focus:ring-1 focus:ring-[#2271b1]"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h3 className="text-sm font-semibold text-[#1d2327] mb-3">Twitter</h3>
+                        <div className="space-y-3">
+                          <div>
+                            <label className="block text-sm text-[#1d2327] mb-1">
+                              Twitter Title
+                            </label>
+                            <input
+                              type="text"
+                              value={seoData.twitter_title}
+                              onChange={(e) => setSeoData({ ...seoData, twitter_title: e.target.value })}
+                              className="w-full px-3 py-2 border border-[#8c8f94] rounded text-sm focus:border-[#2271b1] focus:outline-none focus:ring-1 focus:ring-[#2271b1]"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm text-[#1d2327] mb-1">
+                              Twitter Description
+                            </label>
+                            <textarea
+                              value={seoData.twitter_description}
+                              onChange={(e) => setSeoData({ ...seoData, twitter_description: e.target.value })}
+                              rows={2}
+                              className="w-full px-3 py-2 border border-[#8c8f94] rounded text-sm focus:border-[#2271b1] focus:outline-none focus:ring-1 focus:ring-[#2271b1]"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm text-[#1d2327] mb-1">
+                              Twitter Image URL
+                            </label>
+                            <input
+                              type="url"
+                              value={seoData.twitter_image}
+                              onChange={(e) => setSeoData({ ...seoData, twitter_image: e.target.value })}
+                              className="w-full px-3 py-2 border border-[#8c8f94] rounded text-sm focus:border-[#2271b1] focus:outline-none focus:ring-1 focus:ring-[#2271b1]"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Advanced Tab */}
+                  {activeTab === 'advanced' && (
+                    <div className="space-y-6">
+                      <div>
+                        <h3 className="text-sm font-semibold text-[#1d2327] mb-3">Canonical URL</h3>
+                        <input
+                          type="url"
+                          value={seoData.canonical}
+                          onChange={(e) => setSeoData({ ...seoData, canonical: e.target.value })}
+                          className="w-full px-3 py-2 border border-[#8c8f94] rounded text-sm focus:border-[#2271b1] focus:outline-none focus:ring-1 focus:ring-[#2271b1]"
+                          placeholder="https://example.com/page"
+                        />
+                      </div>
+
+                      <div>
+                        <h3 className="text-sm font-semibold text-[#1d2327] mb-3">Robots Meta</h3>
+                        <div className="space-y-2">
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={seoData.robots.noindex}
+                              onChange={(e) => setSeoData({
+                                ...seoData,
+                                robots: { ...seoData.robots, noindex: e.target.checked }
+                              })}
+                              className="rounded border-[#8c8f94]"
+                            />
+                            <span className="text-sm text-[#1d2327]">Do not display this page in search engines results (noindex)</span>
+                          </label>
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={seoData.robots.nofollow}
+                              onChange={(e) => setSeoData({
+                                ...seoData,
+                                robots: { ...seoData.robots, nofollow: e.target.checked }
+                              })}
+                              className="rounded border-[#8c8f94]"
+                            />
+                            <span className="text-sm text-[#1d2327]">Do not follow links from this page (nofollow)</span>
+                          </label>
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={seoData.robots.noimageindex}
+                              onChange={(e) => setSeoData({
+                                ...seoData,
+                                robots: { ...seoData.robots, noimageindex: e.target.checked }
+                              })}
+                              className="rounded border-[#8c8f94]"
+                            />
+                            <span className="text-sm text-[#1d2327]">Do not index images from this page (noimageindex)</span>
+                          </label>
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={seoData.robots.noarchive}
+                              onChange={(e) => setSeoData({
+                                ...seoData,
+                                robots: { ...seoData.robots, noarchive: e.target.checked }
+                              })}
+                              className="rounded border-[#8c8f94]"
+                            />
+                            <span className="text-sm text-[#1d2327]">Do not display a "Cached" link in search results (noarchive)</span>
+                          </label>
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={seoData.robots.nosnippet}
+                              onChange={(e) => setSeoData({
+                                ...seoData,
+                                robots: { ...seoData.robots, nosnippet: e.target.checked }
+                              })}
+                              className="rounded border-[#8c8f94]"
+                            />
+                            <span className="text-sm text-[#1d2327]">Do not display a description in search results (nosnippet)</span>
+                          </label>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h3 className="text-sm font-semibold text-[#1d2327] mb-3">Redirections</h3>
+                        <div className="space-y-3">
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={seoData.redirect_enabled}
+                              onChange={(e) => setSeoData({ ...seoData, redirect_enabled: e.target.checked })}
+                              className="rounded border-[#8c8f94]"
+                            />
+                            <span className="text-sm text-[#1d2327]">Enable redirection</span>
+                          </label>
+                          {seoData.redirect_enabled && (
+                            <>
+                              <div>
+                                <label className="block text-sm text-[#1d2327] mb-1">
+                                  Redirect type
+                                </label>
+                                <select
+                                  value={seoData.redirect_type}
+                                  onChange={(e) => setSeoData({ ...seoData, redirect_type: e.target.value })}
+                                  className="w-full px-3 py-2 border border-[#8c8f94] rounded text-sm focus:border-[#2271b1] focus:outline-none focus:ring-1 focus:ring-[#2271b1]"
+                                >
+                                  <option value="301">301 Moved Permanently</option>
+                                  <option value="302">302 Found</option>
+                                  <option value="307">307 Temporary Redirect</option>
+                                </select>
+                              </div>
+                              <div>
+                                <label className="block text-sm text-[#1d2327] mb-1">
+                                  Redirect URL
+                                </label>
+                                <input
+                                  type="url"
+                                  value={seoData.redirect_url}
+                                  onChange={(e) => setSeoData({ ...seoData, redirect_url: e.target.value })}
+                                  className="w-full px-3 py-2 border border-[#8c8f94] rounded text-sm focus:border-[#2271b1] focus:outline-none focus:ring-1 focus:ring-[#2271b1]"
+                                  placeholder="https://example.com/new-page"
+                                />
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </div>
-          )}
+
+            {/* Footer */}
+            <div className="bg-[#f0f0f1] border-t border-[#c3c4c7] p-4 flex items-center justify-between">
+              <button
+                onClick={handleOpenInWordPress}
+                className="text-sm text-[#2271b1] hover:text-[#135e96] flex items-center gap-1"
+              >
+                <ExternalLink className="w-3 h-3" />
+                Edit in WordPress
+              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleCloseModal}
+                  className="px-4 py-2 text-sm text-[#2c3338] border border-[#2c3338] rounded hover:bg-[#f6f7f7]"
+                  disabled={isSaving}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={saveSEOData}
+                  disabled={isSaving || isLoadingData}
+                  className="px-4 py-2 text-sm text-white bg-[#2271b1] rounded hover:bg-[#135e96] disabled:opacity-50 flex items-center gap-2"
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4" />
+                      Save changes
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </>
   )
 }
-

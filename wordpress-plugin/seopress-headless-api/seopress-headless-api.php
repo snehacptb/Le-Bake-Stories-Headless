@@ -38,6 +38,9 @@ class SEOPress_Headless_API {
         
         // Add SEO update endpoint (for admins only)
         add_action('rest_api_init', array($this, 'register_seo_update_endpoint'));
+        
+        // Add edit URL endpoint (for iframe-based editing)
+        add_action('rest_api_init', array($this, 'register_edit_url_endpoint'));
     }
     
     /**
@@ -80,7 +83,7 @@ class SEOPress_Headless_API {
      */
     public function get_seopress_meta($object) {
         $post_id = $object['id'];
-        
+
         $seo_data = array(
             'title' => $this->get_meta_title($post_id),
             'description' => $this->get_meta_description($post_id),
@@ -94,8 +97,11 @@ class SEOPress_Headless_API {
             'twitter_image' => $this->get_twitter_image($post_id),
             'breadcrumbs' => $this->get_breadcrumbs($post_id),
             'schema' => $this->get_schema_data($post_id),
+            'redirect_enabled' => get_post_meta($post_id, '_seopress_redirections_enabled', true) === 'yes',
+            'redirect_type' => get_post_meta($post_id, '_seopress_redirections_type', true) ?: '301',
+            'redirect_url' => get_post_meta($post_id, '_seopress_redirections_value', true) ?: '',
         );
-        
+
         return $seo_data;
     }
     
@@ -554,7 +560,23 @@ class SEOPress_Headless_API {
             update_post_meta($post_id, '_seopress_social_twitter_img', esc_url_raw($seo_data['twitter_image']));
             $updated_fields[] = 'twitter_image';
         }
-        
+
+        // Redirections
+        if (isset($seo_data['redirect_enabled'])) {
+            update_post_meta($post_id, '_seopress_redirections_enabled', $seo_data['redirect_enabled'] ? 'yes' : '');
+            $updated_fields[] = 'redirect_enabled';
+        }
+
+        if (isset($seo_data['redirect_type'])) {
+            update_post_meta($post_id, '_seopress_redirections_type', sanitize_text_field($seo_data['redirect_type']));
+            $updated_fields[] = 'redirect_type';
+        }
+
+        if (isset($seo_data['redirect_url'])) {
+            update_post_meta($post_id, '_seopress_redirections_value', esc_url_raw($seo_data['redirect_url']));
+            $updated_fields[] = 'redirect_url';
+        }
+
         // Get updated SEO data
         $updated_seo_data = $this->get_seopress_meta(array('id' => $post_id));
         
@@ -564,6 +586,53 @@ class SEOPress_Headless_API {
             'updated_fields' => $updated_fields,
             'post_id' => $post_id,
             'seo_data' => $updated_seo_data,
+        ));
+    }
+    
+    /**
+     * Register edit URL endpoint
+     */
+    public function register_edit_url_endpoint() {
+        register_rest_route('seopress/v1', '/edit-url/(?P<post_id>\d+)', array(
+            'methods' => 'GET',
+            'callback' => array($this, 'get_edit_url'),
+            'permission_callback' => array($this, 'check_admin_permission'),
+            'args' => array(
+                'post_id' => array(
+                    'validate_callback' => function($param, $request, $key) {
+                        return is_numeric($param);
+                    }
+                ),
+            ),
+        ));
+    }
+    
+    /**
+     * Get WordPress admin edit URL for a post
+     */
+    public function get_edit_url($request) {
+        $post_id = $request->get_param('post_id');
+        
+        if (!$post_id) {
+            return new WP_Error('invalid_post_id', 'Invalid post ID.', array('status' => 400));
+        }
+        
+        // Verify post exists
+        $post = get_post($post_id);
+        if (!$post) {
+            return new WP_Error('post_not_found', 'Post not found.', array('status' => 404));
+        }
+        
+        // Build edit URL
+        $edit_url = admin_url('post.php?post=' . $post_id . '&action=edit');
+        
+        return rest_ensure_response(array(
+            'success' => true,
+            'post_id' => $post_id,
+            'post_type' => $post->post_type,
+            'post_title' => get_the_title($post_id),
+            'edit_url' => $edit_url,
+            'admin_url' => admin_url(),
         ));
     }
 }

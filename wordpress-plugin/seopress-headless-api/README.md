@@ -19,6 +19,17 @@ Exposes SEOPress metadata via WordPress REST API for headless implementations.
 - ✅ Custom endpoint for fetching SEO data by slug
 - ✅ **NEW:** Admin verification endpoint for headless admin panel
 - ✅ **NEW:** SEO data update endpoint (admin only) with JWT authentication
+- ✅ **NEW:** Edit URL endpoint for iframe-based WordPress editor integration
+
+## Features for Headless Admin
+
+This plugin enables a **floating "Edit SEO" button** on your headless frontend that:
+- ✅ Shows only for authenticated WordPress admins
+- ✅ Opens WordPress post editor in an iframe modal
+- ✅ Allows editing SEO directly in WordPress with SEOPress
+- ✅ Works exactly like traditional WordPress admin experience
+
+See the Next.js integration documentation for implementation details.
 
 ## API Endpoints
 
@@ -80,7 +91,30 @@ Returns admin status and user information for authenticated users.
 }
 ```
 
-### 5. Update SEO Data (Admin Only)
+### 5. Get Edit URL (Admin Only)
+
+```
+GET /wp-json/seopress/v1/edit-url/{post_id}
+Authorization: Bearer {jwt_token}
+```
+
+Returns the WordPress admin edit URL for the specified post. Used by the headless frontend to open the WordPress editor in an iframe.
+
+**Response:**
+```json
+{
+  "success": true,
+  "post_id": 123,
+  "post_type": "post",
+  "post_title": "My Blog Post",
+  "edit_url": "https://example.com/wp-admin/post.php?post=123&action=edit",
+  "admin_url": "https://example.com/wp-admin/"
+}
+```
+
+**Permissions:** Requires `edit_posts` or `manage_options` capability.
+
+### 6. Update SEO Data (Admin Only) - Programmatic API
 
 ```
 POST /wp-json/seopress/v1/update/{post_id}
@@ -106,6 +140,8 @@ Content-Type: application/json
   "twitter_image": "https://example.com/twitter-image.jpg"
 }
 ```
+
+**Note:** This endpoint is available for programmatic updates but is not used by the default floating SEO button implementation (which uses iframe-based editing instead).
 
 **Permissions:** Requires `edit_posts` or `manage_options` capability.
 

@@ -1,38 +1,79 @@
+import { NextRequest, NextResponse } from 'next/server'
+
 /**
- * SEOPress Health Check Endpoint
+ * SEOPress Health Check API
  * Checks if SEOPress plugin is active and working
  */
-
-import { NextResponse } from 'next/server'
-import { seopressService } from '@/lib/seopress-service'
-
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const health = await seopressService.checkHealth()
+    const wpUrl = process.env.WORDPRESS_API_URL || process.env.NEXT_PUBLIC_WORDPRESS_API_URL
+
+    if (!wpUrl) {
+      return NextResponse.json({
+        success: false,
+        health: {
+          active: false,
+          message: 'WordPress API URL not configured',
+          restAPI: false,
+          customEndpoints: false,
+        }
+      }, { status: 500 })
+    }
+
+    const baseUrl = wpUrl.replace('/wp-json/wp/v2', '').replace('/wp/v2', '')
+
+    // Check custom SEOPress endpoint
+    let customEndpointsActive = false
+    try {
+      const customResponse = await fetch(`${baseUrl}/wp-json/seopress/v1/settings`, {
+        next: { revalidate: 60 } // Cache for 1 minute
+      })
+      customEndpointsActive = customResponse.ok
+    } catch (error) {
+      customEndpointsActive = false
+    }
+
+    // Check REST API for seopress_meta field
+    let restAPIActive = false
+    try {
+      const restResponse = await fetch(`${wpUrl}/posts?per_page=1`, {
+        next: { revalidate: 60 }
+      })
+
+      if (restResponse.ok) {
+        const posts = await restResponse.json()
+        if (posts && posts.length > 0) {
+          restAPIActive = 'seopress_meta' in posts[0]
+        }
+      }
+    } catch (error) {
+      restAPIActive = false
+    }
+
+    const isActive = customEndpointsActive || restAPIActive
 
     return NextResponse.json({
       success: true,
-      health,
-      timestamp: new Date().toISOString()
-    }, {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-cache, no-store, must-revalidate'
+      health: {
+        active: isActive,
+        message: isActive
+          ? 'SEOPress is active and working'
+          : 'SEOPress plugin may not be active or configured correctly',
+        restAPI: restAPIActive,
+        customEndpoints: customEndpointsActive,
       }
     })
   } catch (error: any) {
-    console.error('❌ Health check error:', error)
+    console.error('SEOPress health check error:', error)
+
     return NextResponse.json({
       success: false,
-      error: error.message,
       health: {
         active: false,
-        customEndpoints: false,
+        message: `Health check failed: ${error.message}`,
         restAPI: false,
-        message: '❌ Health check failed'
+        customEndpoints: false,
       }
     }, { status: 500 })
   }
 }
-
