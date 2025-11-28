@@ -64,7 +64,7 @@ class WooCommerceAPI {
         username: this.consumerKey,
         password: this.consumerSecret,
       },
-      timeout: 8000, // Reduced timeout for faster cart operations
+      timeout: 20000, // Increased timeout for better reliability under load
       // Handle self-signed certificates and SSL issues in development
       ...(typeof window === 'undefined' ? {
         // Server-side configuration (Node.js)

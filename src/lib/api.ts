@@ -58,7 +58,7 @@ class WordPressAPI {
     
     this.client = axios.create({
       baseURL: wordpressUrl,
-      timeout: 15000, // Increased timeout for better reliability
+      timeout: 20000, // Increased timeout for better reliability under load
       headers: {
         'Content-Type': 'application/json',
       },

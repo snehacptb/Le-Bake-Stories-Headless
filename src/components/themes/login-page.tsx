@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Eye, EyeOff, Lock, Mail, User } from 'lucide-react'
+import { Eye, EyeOff, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -22,6 +22,7 @@ export function LoginPage({ className }: LoginPageProps) {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
+    rememberMe: false,
   })
 
   // Redirect if already authenticated
@@ -46,131 +47,122 @@ export function LoginPage({ className }: LoginPageProps) {
     }
   }
 
-  const handleInputChange = (field: keyof typeof formData, value: string) => {
+  const handleInputChange = (field: keyof typeof formData, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
+  const handleClose = () => {
+    router.back()
+  }
+
   return (
-    <div className={cn('container mx-auto px-4 py-8', className)}>
-      <div className="max-w-md mx-auto">
+    <div className={cn('min-h-screen flex items-center justify-center px-4 py-8 bg-gray-50', className)}>
+      <div className="max-w-lg w-full">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-lg border border-gray-200 p-8"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-white rounded-lg shadow-xl relative"
         >
           {/* Header */}
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <User className="h-8 w-8 text-blue-600" />
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome Back</h1>
-            <p className="text-gray-600">Sign in to your account to continue</p>
+          <div className="flex items-center justify-between p-6 border-b border-gray-200">
+            <h1 className="text-2xl font-semibold text-gray-900">Sign in</h1>
+            <button
+              onClick={handleClose}
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label="Close"
+            >
+              <X className="h-6 w-6" />
+            </button>
           </div>
 
-          {/* Error Message */}
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-              <p className="text-red-600 text-sm">{error}</p>
-            </div>
-          )}
+          <div className="p-8">
+            {/* Error Message */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                <p className="text-red-600 text-sm">{error}</p>
+              </div>
+            )}
 
-          {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <Label htmlFor="email">Email Address</Label>
-              <div className="relative mt-2">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            {/* Login Form */}
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <Label htmlFor="email" className="text-sm text-gray-700">
+                  Username or email address <span className="text-red-500">*</span>
+                </Label>
                 <Input
                   id="email"
-                  type="email"
+                  type="text"
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  className="pl-10"
-                  placeholder="Enter your email"
+                  className="mt-2 h-12 border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                  placeholder=""
                   required
                 />
               </div>
-            </div>
 
-            <div>
-              <Label htmlFor="password">Password</Label>
-              <div className="relative mt-2">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={formData.password}
-                  onChange={(e) => handleInputChange('password', e.target.value)}
-                  className="pl-10 pr-10"
-                  placeholder="Enter your password"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-                  Remember me
-                </label>
+              <div>
+                <Label htmlFor="password" className="text-sm text-gray-700">
+                  Password <span className="text-red-500">*</span>
+                </Label>
+                <div className="relative mt-2">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={formData.password}
+                    onChange={(e) => handleInputChange('password', e.target.value)}
+                    className="h-12 pr-10 border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                    placeholder=""
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
               </div>
 
-              <div className="text-sm">
-                <Link href="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">
-                  Forgot your password?
+              <Button
+                type="submit"
+                className="w-full h-12 bg-gradient-to-r from-orange-400 to-yellow-400 hover:from-orange-500 hover:to-yellow-500 text-white font-semibold text-base shadow-md transition-all duration-200"
+                disabled={isLoading}
+              >
+                {isLoading ? 'LOGGING IN...' : 'LOG IN'}
+              </Button>
+
+              <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center">
+                  <input
+                    id="remember-me"
+                    name="remember-me"
+                    type="checkbox"
+                    checked={formData.rememberMe}
+                    onChange={(e) => handleInputChange('rememberMe', e.target.checked)}
+                    className="h-4 w-4 text-orange-500 focus:ring-orange-500 border-gray-300 rounded cursor-pointer"
+                  />
+                  <label htmlFor="remember-me" className="ml-2 text-gray-700 cursor-pointer">
+                    Remember me
+                  </label>
+                </div>
+
+                <Link href="/forgot-password" className="text-gray-600 hover:text-orange-500 transition-colors">
+                  Lost your password?
                 </Link>
               </div>
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full"
-              size="lg"
-              disabled={isLoading}
-            >
-              {isLoading ? 'Signing in...' : 'Sign In'}
-            </Button>
-          </form>
-
-          {/* Divider */}
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Don't have an account?</span>
-              </div>
-            </div>
+            </form>
           </div>
 
-          {/* Register Link */}
-          <div className="mt-6 text-center">
-            <Link href="/register">
-              <Button variant="outline" className="w-full">
-                Create New Account
-              </Button>
-            </Link>
-          </div>
-
-          {/* Guest Checkout */}
-          <div className="mt-4 text-center">
-            <Link href="/checkout" className="text-sm text-gray-600 hover:text-gray-900">
-              Continue as guest
-            </Link>
+          {/* Footer */}
+          <div className="px-8 pb-8 pt-4">
+            <div className="text-center text-sm">
+              <span className="text-gray-600">No account yet?</span>
+              {' '}
+              <Link href="/register" className="text-gray-900 font-semibold underline hover:text-orange-500 transition-colors">
+                CREATE AN ACCOUNT
+              </Link>
+            </div>
           </div>
         </motion.div>
       </div>

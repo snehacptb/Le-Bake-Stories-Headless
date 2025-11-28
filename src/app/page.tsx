@@ -11,153 +11,175 @@ import { woocommerceApi } from '@/lib/woocommerce-api'
 import { wordpressAPI } from '@/lib/api'
 import { WooCommerceProduct, WordPressPost, Testimonial, Banner } from '@/types'
 import { CachedProductCategory } from '@/lib/cache-types'
+import { withRetry } from '@/lib/api-utils'
 import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 
+// Helper function to wrap API calls with retry logic and timeout
+async function fetchWithRetry<T>(
+  fetchFn: () => Promise<T>,
+  fallback: T,
+  operationName: string,
+  maxRetries: number = 2
+): Promise<T> {
+  try {
+    return await withRetry(fetchFn, maxRetries, 1000)
+  } catch (error) {
+    console.error(`❌ Failed to fetch ${operationName} after ${maxRetries + 1} attempts:`, error)
+    return fallback
+  }
+}
+
 // Fetch different product types
 async function getSaleProducts(): Promise<WooCommerceProduct[]> {
-  try {
-    const products = await woocommerceApi.getProducts({
-      on_sale: true,
-      per_page: 10,
-      status: 'publish',
-      orderby: 'date',
-      order: 'desc'
-    })
-    console.log(`✅ Fetched ${products.length} sale products`)
-    return products
-  } catch (error) {
-    console.error('Error fetching sale products:', error)
-    return []
-  }
+  return fetchWithRetry(
+    async () => {
+      const products = await woocommerceApi.getProducts({
+        on_sale: true,
+        per_page: 10,
+        status: 'publish',
+        orderby: 'date',
+        order: 'desc'
+      })
+      console.log(`✅ Fetched ${products.length} sale products`)
+      return products
+    },
+    [],
+    'sale products'
+  )
 }
 
 async function getNewProducts(): Promise<WooCommerceProduct[]> {
-  try {
-    const products = await woocommerceApi.getProducts({
-      orderby: 'date',
-      order: 'desc',
-      per_page: 6,
-      status: 'publish'
-    })
-    console.log(`✅ Fetched ${products.length} new products`)
-    return products
-  } catch (error) {
-    console.error('Error fetching new products:', error)
-    return []
-  }
+  return fetchWithRetry(
+    async () => {
+      const products = await woocommerceApi.getProducts({
+        orderby: 'date',
+        order: 'desc',
+        per_page: 6,
+        status: 'publish'
+      })
+      console.log(`✅ Fetched ${products.length} new products`)
+      return products
+    },
+    [],
+    'new products'
+  )
 }
 
 async function getFeaturedProducts(): Promise<WooCommerceProduct[]> {
-  try {
-    const products = await woocommerceApi.getFeaturedProducts(6)
-    console.log(`✅ Fetched ${products.length} featured products`)
-    return products
-  } catch (error) {
-    console.error('Error fetching featured products:', error)
-    return []
-  }
+  return fetchWithRetry(
+    async () => {
+      const products = await woocommerceApi.getFeaturedProducts(6)
+      console.log(`✅ Fetched ${products.length} featured products`)
+      return products
+    },
+    [],
+    'featured products'
+  )
 }
 
 async function getTopSellers(): Promise<WooCommerceProduct[]> {
-  try {
-    const products = await woocommerceApi.getProducts({
-      orderby: 'popularity',
-      order: 'desc',
-      per_page: 6,
-      status: 'publish'
-    })
-    console.log(`✅ Fetched ${products.length} top seller products`)
-    return products
-  } catch (error) {
-    console.error('Error fetching top sellers:', error)
-    return []
-  }
+  return fetchWithRetry(
+    async () => {
+      const products = await woocommerceApi.getProducts({
+        orderby: 'popularity',
+        order: 'desc',
+        per_page: 6,
+        status: 'publish'
+      })
+      console.log(`✅ Fetched ${products.length} top seller products`)
+      return products
+    },
+    [],
+    'top sellers'
+  )
 }
 
 async function getLatestPosts(): Promise<WordPressPost[]> {
-  try {
-    const response = await wordpressAPI.getPosts({ per_page: 3, _embed: true })
-    return response.data
-  } catch (error) {
-    console.error('Error fetching latest posts:', error)
-    return []
-  }
+  return fetchWithRetry(
+    async () => {
+      const response = await wordpressAPI.getPosts({ per_page: 3, _embed: true })
+      console.log(`✅ Fetched ${response.data.length} latest posts`)
+      return response.data
+    },
+    [],
+    'latest posts'
+  )
 }
 
 async function getProductCategories(): Promise<CachedProductCategory[]> {
-  try {
-    console.log('🔍 Fetching product categories for home page...')
-    // During build time, directly use the cached API instead of making HTTP requests
-    if (typeof window === 'undefined') {
-      // Server-side: use cached API directly
-      try {
+  return fetchWithRetry(
+    async () => {
+      console.log('🔍 Fetching product categories for home page...')
+      // During build time, directly use the cached API instead of making HTTP requests
+      if (typeof window === 'undefined') {
+        // Server-side: use cached API directly
         const { cachedAPI } = await import('@/lib/cached-api')
         const categories = await cachedAPI.getProductCategories()
         // Ensure we return an array
         const result = Array.isArray(categories) ? categories : []
         console.log(`✅ Fetched ${result.length} product categories from cached API`)
         return result
-      } catch (importError) {
-        console.error('❌ Error importing or calling cached API:', importError)
-        return []
       }
-    }
 
-    // Client-side: use API route
-    const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/product-categories`)
+      // Client-side: use API route
+      const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/product-categories`)
 
-    // Check if response is HTML (error page) instead of JSON
-    const contentType = response.headers.get('content-type')
-    if (!contentType?.includes('application/json')) {
-      console.warn('⚠️ Received non-JSON response for product categories, likely an error page')
-      return []
-    }
+      // Check if response is HTML (error page) instead of JSON
+      const contentType = response.headers.get('content-type')
+      if (!contentType?.includes('application/json')) {
+        console.warn('⚠️ Received non-JSON response for product categories, likely an error page')
+        throw new Error('Received non-JSON response for product categories')
+      }
 
-    const result = await response.json()
-    const categories = result.success && Array.isArray(result.data) ? result.data : []
-    console.log(`✅ Fetched ${categories.length} product categories from API route`)
-    return categories
-  } catch (error) {
-    console.error('❌ Error fetching product categories:', error)
-    return []
-  }
+      const result = await response.json()
+      const categories = result.success && Array.isArray(result.data) ? result.data : []
+      console.log(`✅ Fetched ${categories.length} product categories from API route`)
+      return categories
+    },
+    [],
+    'product categories',
+    3 // More retries for critical content
+  )
 }
 
 async function getTestimonials(): Promise<Testimonial[]> {
-  try {
-    console.log('🔍 Fetching testimonials for shop home page...')
-    const response = await wordpressAPI.getTestimonials({ per_page: 6, orderby: 'date', order: 'desc' })
-    console.log(`✅ Successfully fetched ${response.data.length} testimonials for shop home page`)
-    
-    // Log each testimonial for debugging
-    response.data.forEach((testimonial, index) => {
-      console.log(`🛍️ Testimonial ${index + 1}: ${testimonial.name} (${testimonial.role}) - ${testimonial.comment?.substring(0, 50)}...`)
-    })
-    
-    return response.data
-  } catch (error) {
-    console.error('❌ Error fetching testimonials for shop home page:', error)
-    return []
-  }
+  return fetchWithRetry(
+    async () => {
+      console.log('🔍 Fetching testimonials for shop home page...')
+      const response = await wordpressAPI.getTestimonials({ per_page: 6, orderby: 'date', order: 'desc' })
+      console.log(`✅ Successfully fetched ${response.data.length} testimonials for shop home page`)
+      
+      // Log each testimonial for debugging
+      response.data.forEach((testimonial, index) => {
+        console.log(`🛍️ Testimonial ${index + 1}: ${testimonial.name} (${testimonial.role}) - ${testimonial.comment?.substring(0, 50)}...`)
+      })
+      
+      return response.data
+    },
+    [],
+    'testimonials'
+  )
 }
 
 async function getBanners(): Promise<Banner[]> {
-  try {
-    console.log('🔍 Fetching banners for home page...')
-    const banners = await wordpressAPI.getBannersByPage('home')
-    console.log(`✅ Successfully fetched ${banners.length} banners for home page`)
-    
-    // Log each banner for debugging
-    banners.forEach((banner, index) => {
-      console.log(`🎯 Banner ${index + 1}: ${banner.title} (Order: ${banner.order})`)
-    })
-    
-    return banners
-  } catch (error) {
-    console.error('❌ Error fetching banners for home page:', error)
-    return []
-  }
+  return fetchWithRetry(
+    async () => {
+      console.log('🔍 Fetching banners for home page...')
+      const banners = await wordpressAPI.getBannersByPage('home')
+      console.log(`✅ Successfully fetched ${banners.length} banners for home page`)
+      
+      // Log each banner for debugging
+      banners.forEach((banner, index) => {
+        console.log(`🎯 Banner ${index + 1}: ${banner.title} (Order: ${banner.order})`)
+      })
+      
+      return banners
+    },
+    [],
+    'banners',
+    3 // More retries for critical hero content
+  )
 }
 
 // Loading components
@@ -178,10 +200,15 @@ function BlogCardSkeleton() {
 
 
 
+// Configure page revalidation - regenerate every 60 seconds for fresh content
+export const revalidate = 60
+
 export default async function HomePage() {
+  const startTime = Date.now()
   console.log('🏠 Rendering Le Bake Stories ecommerce home page')
 
   // Use Promise.allSettled to prevent one failure from crashing the entire page
+  // Fetch all data in parallel with retry logic
   const results = await Promise.allSettled([
     getSaleProducts(),
     getNewProducts(),
@@ -203,15 +230,16 @@ export default async function HomePage() {
   const testimonials = results[6].status === 'fulfilled' ? results[6].value : []
   const banners = results[7].status === 'fulfilled' ? results[7].value : []
 
-  // Log any failures
+  // Log any failures with detailed error information
+  const names = ['saleProducts', 'newProducts', 'featuredProducts', 'topSellers', 'productCategories', 'latestPosts', 'testimonials', 'banners']
   results.forEach((result, index) => {
     if (result.status === 'rejected') {
-      const names = ['featuredProducts', 'productCategories', 'latestPosts', 'testimonials', 'banners']
-      console.error(`❌ Failed to fetch ${names[index]}:`, result.reason)
+      console.error(`❌ Failed to fetch ${names[index]} after retries:`, result.reason)
     }
   })
   
-  console.log('🛍️ Home page data loaded:', {
+  const loadTime = Date.now() - startTime
+  const dataStatus = {
     saleProducts: saleProducts.length,
     newProducts: newProducts.length,
     featuredProducts: featuredProducts.length,
@@ -219,8 +247,22 @@ export default async function HomePage() {
     productCategories: productCategories.length,
     latestPosts: latestPosts.length,
     testimonials: testimonials.length,
-    banners: banners.length
-  })
+    banners: banners.length,
+    loadTime: `${loadTime}ms`
+  }
+  
+  console.log('🛍️ Home page data loaded:', dataStatus)
+  
+  // Warn if critical sections are missing
+  if (productCategories.length === 0) console.warn('⚠️ No product categories loaded - section will not display')
+  if (banners.length === 0) console.warn('⚠️ No banners loaded - hero section will not display')
+  if (latestPosts.length === 0) console.warn('⚠️ No blog posts loaded - blog section will not display')
+  
+  // Check if we have at least some product data
+  const hasProducts = saleProducts.length > 0 || newProducts.length > 0 || featuredProducts.length > 0 || topSellers.length > 0
+  if (!hasProducts) console.error('❌ No products loaded - product sections will be empty!')
+  
+  console.log(`✅ Home page ready to render (${loadTime}ms)`)
 
   return (
     <ClientLayout>
